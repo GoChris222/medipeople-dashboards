@@ -716,7 +716,7 @@ async function loadPlacements() {
   const { data, error } = await db
     .from('locum_placements')
     .select('*')
-    .order('created_at', { ascending: true });
+    .order('date_available', { ascending: true });
   if (error) { showToast('Error loading data'); console.error(error); return; }
   placements = (data || []).map(fromDb);
   applyFilters();
