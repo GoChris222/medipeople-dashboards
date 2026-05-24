@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTD Placements</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f5f0;--surface:#fff;--raised:#f9f9f7;--border:#e8e8e4;
+  --border-med:#d8d8d4;--text:#1a1a18;--muted:#6b6b66;--hint:#aaa;
+  --accent:#1a7a4a;--accent-hover:#155f3a;--danger:#c0392b;
+  --warn:#b85c00;--info:#2563a8;--purple:#6d3ab5;--radius:10px;
+}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);min-height:100vh}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.25rem 1rem;display:flex;flex-direction:column;gap:.75rem;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{font-size:13px;font-weight:600;color:var(--text);padding-bottom:.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.sidebar-logo span{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block}
+.sidebar-section{font-size:10px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.08em;margin-top:.5rem}
+.stat-card{background:var(--raised);border-radius:var(--radius);padding:.75rem;border:1px solid var(--border)}
+.stat-card .stat-val{font-size:22px;font-weight:500;color:var(--text);margin-bottom:2px}
+.stat-card .stat-val.green{color:var(--accent)}
+.stat-card .stat-val.purple{color:var(--purple)}
+.stat-card .stat-val.blue{color:var(--info)}
+.stat-card .stat-label{font-size:11px;color:var(--muted)}
+.fee-card{background:var(--raised);border-radius:var(--radius);padding:.75rem;border:1px solid var(--border)}
+.fee-card .fee-val{font-size:18px;font-weight:500;color:var(--accent)}
+.fee-card .fee-label{font-size:11px;color:var(--muted);margin-bottom:2px}
+.fee-total{background:#eef8f2;border-radius:var(--radius);padding:.75rem;border:1px solid #b0dcc0}
+.fee-total .fee-val{font-size:20px;font-weight:600;color:var(--accent)}
+.fee-total .fee-label{font-size:11px;color:var(--muted);margin-bottom:2px}
+.month-row{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:6px;font-size:12px}
+.month-row:hover{background:var(--raised)}
+.month-row .m-label{color:var(--muted)}
+.month-row .m-val{font-weight:500;color:var(--accent)}
+.month-row .m-val.zero{color:var(--hint);font-weight:400}
+.month-row.current-month{background:#eef8f2;border:1px solid #b0dcc0}
+.month-row.current-month .m-label{color:var(--accent);font-weight:600}
+
+/* MAIN */
+.main{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.topbar h1{font-size:20px;font-weight:500}
+.topbar .date{font-size:13px;color:var(--muted);margin-top:2px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:5px;font-size:13px;padding:6px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border-med);background:var(--surface);color:var(--muted);transition:all .15s;font-family:inherit;white-space:nowrap}
+.btn:hover{background:var(--bg);color:var(--text)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:var(--accent-hover);color:#fff}
+.btn.sm{font-size:12px;padding:4px 10px}
+
+/* CONFIG BANNER */
+.config-banner{background:#fff8e6;border:1px solid #f0d890;border-radius:var(--radius);padding:.75rem 1rem;font-size:13px;color:#9a6700;display:none;align-items:center;gap:8px}
+.config-banner.visible{display:flex}
+
+/* FILTERS */
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search-box{font-size:13px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--text);font-family:inherit;outline:none;min-width:200px}
+.search-box:focus{border-color:#999}
+.filter-select{font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--muted);font-family:inherit;outline:none;cursor:pointer}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-size:11px;color:var(--hint);font-weight:500;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.status-filters{display:flex;gap:6px;flex-wrap:wrap}
+.status-btn{font-size:11px;padding:3px 12px;border-radius:20px;border:1px solid var(--border-med);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;font-family:inherit}
+.status-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.clear-btn{font-size:12px;color:var(--hint);cursor:pointer;padding:4px 8px;border-radius:6px;border:none;background:none;font-family:inherit}
+.clear-btn:hover{color:var(--text)}
+
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.25rem;border-bottom:1px solid var(--border)}
+.panel-title{font-size:14px;font-weight:500}
+.result-count{font-size:12px;color:var(--hint)}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border);background:var(--raised)}
+thead th{font-size:11px;font-weight:500;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;padding:.65rem 1rem;text-align:left;white-space:nowrap}
+tbody tr.place-row{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer}
+tbody tr.place-row:last-of-type{border-bottom:none}
+tbody tr.place-row:hover{background:#fafaf8}
+tbody tr.place-row.active-row{background:#f4faf7}
+td{padding:.7rem 1rem;vertical-align:middle}
+.doc-name{font-size:14px;font-weight:500;color:var(--text)}
+.doc-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.chevron{font-size:13px;color:var(--hint);transition:transform .2s;display:inline-block}
+.chevron.open{transform:rotate(90deg)}
+.row-actions{display:flex;gap:4px;justify-content:flex-end;opacity:0;transition:opacity .15s}
+tbody tr.place-row:hover .row-actions{opacity:1}
+.row-actions button{background:none;border:none;cursor:pointer;color:var(--hint);padding:4px;border-radius:6px;font-size:14px;transition:color .12s}
+.row-actions button:hover{color:var(--text)}
+
+/* BADGES */
+.badge{font-size:11px;padding:2px 9px;border-radius:10px;font-weight:500;white-space:nowrap;display:inline-block}
+.b-started{background:#eef8f2;color:#1a7a4a;border:1px solid #b0dcc0}
+.b-placed{background:#eef4fd;color:#2563a8;border:1px solid #c0d4f0}
+.b-invoiced{background:#fef6ec;color:#b85c00;border:1px solid #f5d9b0}
+.b-paid{background:#1a7a4a;color:#fff;border:1px solid #1a7a4a}
+
+/* DETAIL ROW */
+tr.detail-row td{padding:0;border-bottom:1px solid var(--border)}
+.detail-inner{background:#f4faf7;border-top:1px solid #d4ead9;padding:1.25rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.detail-section{display:flex;flex-direction:column;gap:5px}
+.detail-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.detail-field{display:flex;flex-direction:column;gap:2px}
+.detail-field label{font-size:11px;color:var(--hint)}
+.detail-value{font-size:13px;color:var(--text);line-height:1.5}
+.detail-value.empty{color:var(--hint);font-style:italic}
+.detail-notes{font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.detail-notes.empty{color:var(--hint);font-style:italic}
+.detail-row-actions{display:flex;gap:8px;padding-top:.75rem;border-top:1px solid #d4ead9;grid-column:1/-1;margin-top:.25rem}
+
+.empty-msg{padding:2.5rem;text-align:center;color:var(--hint);font-size:13px}
+.loading-msg{padding:2.5rem;text-align:center;color:var(--muted);font-size:13px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:100;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.75rem;width:95%;max-width:600px;box-shadow:0 8px 32px rgba(0,0,0,0.12);margin-bottom:60px}
+.modal h2{font-size:16px;font-weight:500;margin-bottom:1.25rem}
+.modal-section-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .6rem;padding-top:.75rem;border-top:1px solid var(--border)}
+.modal-section-title:first-of-type{margin-top:0;padding-top:0;border-top:none}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-grid .full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--text);font-family:inherit;outline:none;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#999}
+.field input::placeholder,.field textarea::placeholder{color:var(--hint)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto}
+  .detail-inner{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo"><span></span> OTD Placements</div>
+
+  <div class="sidebar-section">Overview</div>
+  <div class="stat-card"><div class="stat-val" id="s-total">—</div><div class="stat-label">Total placements</div></div>
+  <div class="stat-card"><div class="stat-val green" id="s-started">—</div><div class="stat-label">Started</div></div>
+  <div class="stat-card"><div class="stat-val blue" id="s-placed">—</div><div class="stat-label">Placed — not yet started</div></div>
+
+  <div class="sidebar-section">Commission (MP net)</div>
+  <div class="fee-card"><div class="fee-label">Total pipeline</div><div class="fee-val" id="f-total">—</div></div>
+  <div class="fee-total"><div class="fee-label">Confirmed started</div><div class="fee-val" id="f-started">—</div></div>
+
+  <div class="sidebar-section" style="margin-top:.5rem">Monthly forecast (MP net)</div>
+  <div id="monthly-breakdown" style="display:flex;flex-direction:column;gap:4px"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>OTD Placements</h1>
+      <div class="date" id="today-date"></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" onclick="backupData()">&#8681; Backup</button>
+      <button class="btn primary" onclick="openAddModal()">+ Add placement</button>
+    </div>
+  </div>
+
+  <div class="config-banner" id="config-banner">
+    ⚠ Supabase credentials not configured — open this file and fill in SUPABASE_URL and SUPABASE_ANON_KEY at the top of the script.
+  </div>
+
+  <div class="filter-bar">
+    <input class="search-box" type="text" id="search-input" placeholder="&#128269; Search by name, practice, client, state..." oninput="render()" />
+    <div class="filter-group">
+      <span class="filter-label">State</span>
+      <select class="filter-select" id="f-state" onchange="render()">
+        <option value="">All</option>
+        <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
+        <option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
+        <option>NZ</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Client</span>
+      <select class="filter-select" id="f-client" onchange="render()">
+        <option value="">All</option>
+        <option>IPN</option><option>Partnered Health</option><option>Trans-Ax</option>
+        <option>Family Doctor</option><option>Ochre</option><option>Other</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Source</span>
+      <select class="filter-select" id="f-source" onchange="render()">
+        <option value="">All</option>
+        <option>Website</option><option>LinkedIn</option><option>Dedicare</option><option>Referral</option>
+      </select>
+    </div>
+    <button class="clear-btn" onclick="clearFilters()">&#10005; Clear</button>
+  </div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <button class="status-btn active" onclick="setStatus('',this)">All</button>
+    <button class="status-btn" onclick="setStatus('Started',this)">Started</button>
+    <button class="status-btn" onclick="setStatus('Placed',this)">Placed</button>
+    <button class="status-btn" onclick="setStatus('Invoice Sent',this)">Invoice Sent</button>
+    <button class="status-btn" onclick="setStatus('Paid',this)">Paid</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Placements</span>
+      <span class="result-count" id="result-count"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table id="place-table">
+        <thead>
+          <tr>
+            <th style="width:18%">Doctor</th>
+            <th style="width:10%">Specialty</th>
+            <th style="width:14%">Practice</th>
+            <th style="width:8%">Client</th>
+            <th style="width:6%">State/Country</th>
+            <th style="width:10%">Start date</th>
+            <th style="width:9%">Status</th>
+            <th style="width:9%">Est. fee</th>
+            <th style="width:9%">MP net</th>
+            <th style="width:5%"></th>
+            <th style="width:28px"></th>
+          </tr>
+        </thead>
+        <tbody id="place-list"></tbody>
+      </table>
+    </div>
+    <div class="loading-msg" id="loading-msg">Loading placements…</div>
+    <div class="empty-msg" id="empty-msg" style="display:none">No placements yet. Add one above!</div>
+  </div>
+</div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="place-modal">
+  <div class="modal">
+    <h2 id="modal-title">Add placement</h2>
+
+    <div class="modal-section-title">Doctor details</div>
+    <div class="modal-grid">
+      <div class="field full"><label>Doctor name *</label><input type="text" id="m-name" placeholder="e.g. Dr. Robin Idle" /></div>
+      <div class="field"><label>Specialty</label>
+        <select id="m-specialty">
+          <option value="">— select —</option>
+          <option>GP</option><option>UK GP</option><option>ED Specialist</option>
+          <option>Surgeon</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Email</label><input type="email" id="m-email" placeholder="doctor@email.com" /></div>
+    </div>
+
+    <div class="modal-section-title">Placement details</div>
+    <div class="modal-grid">
+      <div class="field"><label>Client</label><input type="text" id="m-client" placeholder="e.g. IPN, Partnered Health" /></div>
+      <div class="field"><label>Practice name</label><input type="text" id="m-practice" placeholder="e.g. Morayfield Heath Hub" /></div>
+      <div class="field"><label>State / Country</label>
+        <select id="m-state">
+          <option value="">— select —</option>
+          <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
+          <option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
+          <option>NZ</option>
+        </select>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="m-status">
+          <option>Placed</option><option>Started</option>
+          <option>Invoice Sent</option><option>Paid</option>
+        </select>
+      </div>
+      <div class="field"><label>Start date</label><input type="date" id="m-start" /></div>
+      <div class="field"><label>Started date (actual)</label><input type="date" id="m-started" /></div>
+      <div class="field"><label>Contract end date</label><input type="date" id="m-end" /></div>
+      <div class="field"><label>Bullhorn ID</label><input type="text" id="m-bhid" placeholder="e.g. 2167" /></div>
+    </div>
+
+    <div class="modal-section-title">Source &amp; fees</div>
+    <div class="modal-grid">
+      <div class="field"><label>Source</label>
+        <select id="m-source" onchange="autoCalcNet()">
+          <option value="">— select —</option>
+          <option value="Website">Website (100%)</option>
+          <option value="LinkedIn">LinkedIn (100%)</option>
+          <option value="Dedicare">Dedicare (50%)</option>
+          <option value="Referral">Referral (100%)</option>
+        </select>
+      </div>
+      <div class="field" id="referrer-wrap" style="display:none"><label>Referred by</label><input type="text" id="m-referrer" placeholder="e.g. Lewis Clarke" /></div>
+      <div class="field"><label>Est. fee ($)</label><input type="number" id="m-fee" placeholder="e.g. 20000" oninput="autoCalcNet()" /></div>
+      <div class="field"><label>MP net fee ($) <span style="color:var(--hint);font-weight:400;font-size:11px">auto-calculated</span></label><input type="number" id="m-netfee" placeholder="Auto-calculated" /></div>
+      <div class="field"><label>Invoice date</label><input type="date" id="m-invoice" /></div>
+      <div class="field"><label>Payment received date</label><input type="date" id="m-paid" /></div>
+    </div>
+
+    <div class="modal-section-title">Notes</div>
+    <div class="modal-grid">
+      <div class="field full"><textarea id="m-notes" placeholder="Any notes about this placement..."></textarea></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" id="save-btn" onclick="savePlacement()">Save placement</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Supabase Configuration ─────────────────────────────────────
+// Replace these two values with your own from:
+// Supabase dashboard → Settings → API
+const SUPABASE_URL      = 'https://qoyokyuzkpfvaakdkmxg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
+// ──────────────────────────────────────────────────────────────
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let placements = [];
+let statusFilter = '';
+let openDetailId = null;
+let editingId = null;
+let saving = false;
+
+const STATUS_CLASS = {
+  'Started':'b-started','Placed':'b-placed',
+  'Invoice Sent':'b-invoiced','Paid':'b-paid'
+};
+
+// ── DB ↔ JS mapping ──────────────────────────────────────────
+function fromDb(row) {
+  return {
+    id:          row.id,
+    name:        row.name        || '',
+    email:       row.email       || '',
+    specialty:   row.specialty   || '',
+    client:      row.client      || '',
+    practice:    row.practice    || '',
+    state:       row.state       || '',
+    status:      row.status      || 'Placed',
+    source:      row.source      || '',
+    referrer:    row.referrer    || '',
+    start:       row.start_date  || '',
+    startedDate: row.started_date|| '',
+    endDate:     row.end_date    || '',
+    fee:         row.fee    != null ? String(row.fee)    : '',
+    netfee:      row.netfee != null ? String(row.netfee) : '',
+    bhid:        row.bhid        || '',
+    invoiceDate: row.invoice_date|| '',
+    paidDate:    row.paid_date   || '',
+    notes:       row.notes       || ''
+  };
+}
+
+function toDb(p) {
+  const parseDate = d => (d && d.trim()) ? d.trim() : null;
+  const parseNum  = v => { const n = parseInt((v||'').toString().replace(/[^0-9]/g,'')); return isNaN(n)||n===0 ? null : n; };
+  return {
+    name:         p.name,
+    email:        p.email        || '',
+    specialty:    p.specialty    || '',
+    client:       p.client       || '',
+    practice:     p.practice     || '',
+    state:        p.state        || '',
+    status:       p.status       || 'Placed',
+    source:       p.source       || '',
+    referrer:     p.referrer     || '',
+    start_date:   parseDate(p.start),
+    started_date: parseDate(p.startedDate),
+    end_date:     parseDate(p.endDate),
+    fee:          parseNum(p.fee),
+    netfee:       parseNum(p.netfee),
+    bhid:         p.bhid         || '',
+    invoice_date: parseDate(p.invoiceDate),
+    paid_date:    parseDate(p.paidDate),
+    notes:        p.notes        || '',
+    updated_at:   new Date().toISOString()
+  };
+}
+
+// ── Load ─────────────────────────────────────────────────────
+async function loadData() {
+  document.getElementById('loading-msg').style.display = 'block';
+  document.getElementById('place-table').style.display = 'none';
+  document.getElementById('empty-msg').style.display = 'none';
+
+  const { data, error } = await db.from('otd_placements').select('*').order('id');
+  document.getElementById('loading-msg').style.display = 'none';
+
+  if (error) {
+    document.getElementById('empty-msg').textContent = 'Could not load data. Check your Supabase credentials.';
+    document.getElementById('empty-msg').style.display = 'block';
+    console.error(error);
+    return;
+  }
+  placements = (data || []).map(fromDb);
+  render();
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function calcNetFee(p) {
+  const gross = parseInt((p.fee||'').toString().replace(/[^0-9]/g,''))||0;
+  if (!gross) return parseInt((p.netfee||'').toString().replace(/[^0-9]/g,''))||0;
+  const src = (p.source||'').toLowerCase();
+  return src === 'dedicare' ? Math.round(gross * 0.5) : gross;
+}
+
+function autoCalcNet() {
+  const src = document.getElementById('m-source').value;
+  const fee = parseInt(document.getElementById('m-fee').value)||0;
+  document.getElementById('referrer-wrap').style.display = src==='Referral' ? 'flex' : 'none';
+  if (fee > 0) document.getElementById('m-netfee').value = src==='Dedicare' ? Math.round(fee*0.5) : fee;
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function formatDate(dt) {
+  if(!dt)return'—';
+  const p=dt.split('-');
+  return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtCurrency(v){const n=parseInt((v||'').toString().replace(/[^0-9]/g,''));if(!n||isNaN(n))return'—';return'$'+n.toLocaleString();}
+
+function setDateDisplay(){
+  document.getElementById('today-date').textContent=new Date().toLocaleDateString('en-AU',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+
+// ── Sidebar ──────────────────────────────────────────────────
+function buildMonthlyBreakdown() {
+  const months=[];
+  for(let m=4;m<=16;m++){
+    const yr=2026+Math.floor(m/12);
+    const mo=m%12;
+    months.push({yr,mo,label:new Date(yr,mo,1).toLocaleDateString('en-AU',{month:'short',year:'numeric'})});
+  }
+  const byMonth={};
+  months.forEach(m=>byMonth[`${m.yr}-${String(m.mo+1).padStart(2,'0')}`]=0);
+  placements.forEach(p=>{
+    const net=calcNetFee(p);
+    if(!net)return;
+    const sd=p.start||p.startedDate||'';
+    if(!sd)return;
+    const parts=sd.split('-');
+    if(parts.length<2)return;
+    const key=`${parts[0]}-${parts[1]}`;
+    if(key in byMonth)byMonth[key]+=net;
+  });
+  const now=new Date();
+  const currentKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const container=document.getElementById('monthly-breakdown');
+  container.innerHTML=months.map(m=>{
+    const key=`${m.yr}-${String(m.mo+1).padStart(2,'0')}`;
+    const val=byMonth[key]||0;
+    const isCurrent=key===currentKey;
+    return `<div class="month-row${isCurrent?' current-month':''}">
+      <span class="m-label">${m.label}</span>
+      <span class="m-val${val===0?' zero':''}">$${val.toLocaleString()}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateSidebar(){
+  const started=placements.filter(p=>p.status==='Started'||p.status==='Invoice Sent'||p.status==='Paid').length;
+  const placed=placements.filter(p=>p.status==='Placed').length;
+  document.getElementById('s-total').textContent=placements.length;
+  document.getElementById('s-started').textContent=started;
+  document.getElementById('s-placed').textContent=placed;
+  let total=0,startedFee=0;
+  placements.forEach(p=>{
+    const net=calcNetFee(p);
+    total+=net;
+    if(p.status==='Started'||p.status==='Invoice Sent'||p.status==='Paid')startedFee+=net;
+  });
+  document.getElementById('f-total').textContent='$'+total.toLocaleString();
+  document.getElementById('f-started').textContent='$'+startedFee.toLocaleString();
+  buildMonthlyBreakdown();
+}
+
+// ── Toggle detail ─────────────────────────────────────────────
+function toggleDetail(id,e){
+  if(e&&e.target.closest('.row-actions,select'))return;
+  openDetailId=(openDetailId===id)?null:id;
+  render();
+}
+
+// ── Render ────────────────────────────────────────────────────
+function render(){
+  updateSidebar();
+  const search=(document.getElementById('search-input').value||'').toLowerCase();
+  const fState=document.getElementById('f-state').value;
+  const fClient=document.getElementById('f-client').value;
+  const fSource=document.getElementById('f-source').value;
+
+  let visible=placements.slice();
+  if(statusFilter)visible=visible.filter(p=>p.status===statusFilter);
+  if(fState)visible=visible.filter(p=>p.state===fState);
+  if(fClient)visible=visible.filter(p=>(p.client||'').includes(fClient));
+  if(fSource)visible=visible.filter(p=>p.source===fSource);
+  if(search)visible=visible.filter(p=>(p.name+p.practice+p.client+p.state+p.notes+p.source).toLowerCase().includes(search));
+
+  const statusOrder={'Started':0,'Invoice Sent':1,'Paid':2,'Placed':3};
+  visible.sort((a,b)=>{
+    const so=(statusOrder[a.status]||3)-(statusOrder[b.status]||3);
+    if(so!==0)return so;
+    return(a.start||'').localeCompare(b.start||'');
+  });
+
+  document.getElementById('result-count').textContent=visible.length===placements.length?`${placements.length} placements`:`${visible.length} of ${placements.length}`;
+  const tbody=document.getElementById('place-list');
+  const empty=document.getElementById('empty-msg');
+  const table=document.getElementById('place-table');
+  if(visible.length===0){tbody.innerHTML='';empty.textContent='No placements match your filters.';empty.style.display='block';table.style.display='none';return;}
+  empty.style.display='none';table.style.display='';
+
+  let html='';
+  visible.forEach(p=>{
+    const isOpen=openDetailId===p.id;
+    const statusCls=STATUS_CLASS[p.status]||'b-placed';
+    const net=calcNetFee(p);
+
+    html+=`<tr class="place-row${isOpen?' active-row':''}" onclick="toggleDetail(${p.id},event)">
+      <td>
+        <div class="doc-name">${escHtml(p.name)}</div>
+        <div class="doc-sub">${escHtml(p.source||'')}${p.referrer?' — '+escHtml(p.referrer):''}</div>
+      </td>
+      <td style="font-size:13px;color:var(--muted)">${escHtml(p.specialty||'—')}</td>
+      <td style="font-size:13px;color:var(--muted)">${escHtml(p.practice||'—')}</td>
+      <td style="font-size:13px;color:var(--muted)">${escHtml(p.client||'—')}</td>
+      <td style="font-size:13px;color:var(--muted)">${escHtml(p.state||'—')}</td>
+      <td style="font-size:13px;color:var(--muted)">${formatDate(p.start)}</td>
+      <td><span class="badge ${statusCls}">${escHtml(p.status)}</span></td>
+      <td style="font-size:13px;font-weight:500;color:var(--text)">${fmtCurrency(p.fee)}</td>
+      <td style="font-size:13px;font-weight:500;color:var(--accent)">${net?'$'+net.toLocaleString():'—'}</td>
+      <td><div class="row-actions">
+        <button onclick="openEditModal(${p.id})" title="Edit">&#9998;</button>
+        <button onclick="deletePlacement(${p.id})" title="Delete" style="color:#e08080">&#128465;</button>
+      </div></td>
+      <td style="text-align:right"><span class="chevron${isOpen?' open':''}">&#8250;</span></td>
+    </tr>`;
+
+    if(isOpen){
+      html+=`<tr class="detail-row"><td colspan="11"><div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">Placement details</div>
+          <div class="detail-field"><label>Practice</label><div class="detail-value${p.practice?'':' empty'}">${escHtml(p.practice)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>Client</label><div class="detail-value${p.client?'':' empty'}">${escHtml(p.client)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>State</label><div class="detail-value">${escHtml(p.state||'—')}</div></div>
+          <div class="detail-field"><label>Start date</label><div class="detail-value">${formatDate(p.start)}</div></div>
+          <div class="detail-field"><label>Actually started</label><div class="detail-value${p.startedDate?'':' empty'}">${p.startedDate?formatDate(p.startedDate):'Not yet'}</div></div>
+          <div class="detail-field"><label>Contract end</label><div class="detail-value">${formatDate(p.endDate)}</div></div>
+          <div class="detail-field"><label>Bullhorn ID</label><div class="detail-value${p.bhid?'':' empty'}">${escHtml(p.bhid)||'Not recorded'}</div></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Fees &amp; invoicing</div>
+          <div class="detail-field"><label>Source</label><div class="detail-value">${escHtml(p.source||'—')}${p.referrer?' — '+escHtml(p.referrer):''}</div></div>
+          <div class="detail-field"><label>Est. fee (gross)</label><div class="detail-value">${fmtCurrency(p.fee)}</div></div>
+          <div class="detail-field"><label>MP net fee</label><div class="detail-value" style="color:var(--accent);font-weight:500">${net?'$'+net.toLocaleString():'—'}</div></div>
+          <div class="detail-field"><label>Email</label><div class="detail-value${p.email?'':' empty'}">${p.email?`<a href="mailto:${escHtml(p.email)}">${escHtml(p.email)}</a>`:'Not recorded'}</div></div>
+          <div class="detail-field"><label>Invoice date</label><div class="detail-value">${formatDate(p.invoiceDate)}</div></div>
+          <div class="detail-field"><label>Payment received</label><div class="detail-value${p.paidDate?'':' empty'}">${p.paidDate?formatDate(p.paidDate):'Not yet received'}</div></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Notes</div>
+          <div class="detail-notes${p.notes?'':' empty'}">${p.notes?escHtml(p.notes):'No notes recorded.'}</div>
+        </div>
+        <div class="detail-row-actions">
+          <button class="btn sm" onclick="openEditModal(${p.id})">&#9998; Edit</button>
+          ${p.email?`<button class="btn sm" onclick="emailDoctor(${p.id})">&#9993; Email</button>`:''}
+        </div>
+      </div></td></tr>`;
+    }
+  });
+  tbody.innerHTML=html;
+}
+
+// ── CRUD ─────────────────────────────────────────────────────
+function emailDoctor(id){
+  const p=placements.find(x=>x.id===id);if(!p||!p.email)return;
+  window.location.href=`mailto:${p.email}`;
+}
+
+function openAddModal(){
+  editingId=null;
+  document.getElementById('modal-title').textContent='Add placement';
+  ['m-name','m-email','m-client','m-practice','m-bhid','m-referrer','m-notes'].forEach(id=>document.getElementById(id).value='');
+  ['m-specialty','m-state','m-source'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-status').value='Placed';
+  ['m-start','m-started','m-end','m-fee','m-netfee','m-invoice','m-paid'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('referrer-wrap').style.display='none';
+  document.getElementById('place-modal').classList.add('visible');
+  setTimeout(()=>document.getElementById('m-name').focus(),50);
+}
+
+function openEditModal(id){
+  const p=placements.find(x=>x.id===id);if(!p)return;
+  editingId=id;
+  document.getElementById('modal-title').textContent='Edit — '+p.name;
+  document.getElementById('m-name').value=p.name||'';
+  document.getElementById('m-email').value=p.email||'';
+  document.getElementById('m-specialty').value=p.specialty||'';
+  document.getElementById('m-client').value=p.client||'';
+  document.getElementById('m-practice').value=p.practice||'';
+  document.getElementById('m-state').value=p.state||'';
+  document.getElementById('m-status').value=p.status||'Placed';
+  document.getElementById('m-source').value=p.source||'';
+  document.getElementById('m-referrer').value=p.referrer||'';
+  document.getElementById('referrer-wrap').style.display=p.source==='Referral'?'flex':'none';
+  document.getElementById('m-start').value=p.start||'';
+  document.getElementById('m-started').value=p.startedDate||'';
+  document.getElementById('m-end').value=p.endDate||'';
+  document.getElementById('m-fee').value=p.fee||'';
+  document.getElementById('m-netfee').value=p.netfee||'';
+  document.getElementById('m-bhid').value=p.bhid||'';
+  document.getElementById('m-invoice').value=p.invoiceDate||'';
+  document.getElementById('m-paid').value=p.paidDate||'';
+  document.getElementById('m-notes').value=p.notes||'';
+  document.getElementById('place-modal').classList.add('visible');
+  setTimeout(()=>document.getElementById('m-name').focus(),50);
+}
+
+async function savePlacement(){
+  if(saving)return;
+  const name=document.getElementById('m-name').value.trim();
+  if(!name){document.getElementById('m-name').focus();return;}
+
+  const formData={
+    name,
+    email:       document.getElementById('m-email').value.trim(),
+    specialty:   document.getElementById('m-specialty').value,
+    client:      document.getElementById('m-client').value.trim(),
+    practice:    document.getElementById('m-practice').value.trim(),
+    state:       document.getElementById('m-state').value,
+    status:      document.getElementById('m-status').value,
+    source:      document.getElementById('m-source').value,
+    referrer:    document.getElementById('m-referrer').value.trim(),
+    start:       document.getElementById('m-start').value||'',
+    startedDate: document.getElementById('m-started').value||'',
+    endDate:     document.getElementById('m-end').value||'',
+    fee:         document.getElementById('m-fee').value,
+    netfee:      document.getElementById('m-netfee').value,
+    bhid:        document.getElementById('m-bhid').value.trim(),
+    invoiceDate: document.getElementById('m-invoice').value||'',
+    paidDate:    document.getElementById('m-paid').value||'',
+    notes:       document.getElementById('m-notes').value.trim()
+  };
+
+  saving=true;
+  const btn=document.getElementById('save-btn');
+  btn.textContent='Saving…';btn.disabled=true;
+
+  if(editingId){
+    const {error}=await db.from('otd_placements').update(toDb(formData)).eq('id',editingId);
+    if(error){alert('Error saving: '+error.message);saving=false;btn.textContent='Save placement';btn.disabled=false;return;}
+    const idx=placements.findIndex(x=>x.id===editingId);
+    if(idx>=0)placements[idx]={...placements[idx],...formData};
+  } else {
+    const {data,error}=await db.from('otd_placements').insert([toDb(formData)]).select().single();
+    if(error){alert('Error saving: '+error.message);saving=false;btn.textContent='Save placement';btn.disabled=false;return;}
+    placements.push(fromDb(data));
+  }
+
+  saving=false;btn.textContent='Save placement';btn.disabled=false;
+  closeModal();render();
+}
+
+async function deletePlacement(id){
+  if(!confirm('Remove this placement?'))return;
+  const{error}=await db.from('otd_placements').delete().eq('id',id);
+  if(error){alert('Error deleting: '+error.message);return;}
+  placements=placements.filter(x=>x.id!==id);
+  if(openDetailId===id)openDetailId=null;
+  render();
+}
+
+function backupData(){
+  const blob=new Blob([JSON.stringify({placements,nextId:placements.length+1},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  const d=new Date();
+  a.download=`otd_placements_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+function closeModal(){document.getElementById('place-modal').classList.remove('visible');}
+function setStatus(s,btn){
+  statusFilter=s;
+  document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');render();
+}
+function clearFilters(){
+  document.getElementById('search-input').value='';
+  document.getElementById('f-state').value='';
+  document.getElementById('f-client').value='';
+  document.getElementById('f-source').value='';
+  statusFilter='';
+  document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.status-btn').classList.add('active');
+  render();
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModal();}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// Show config banner if credentials not set
+if(SUPABASE_URL.includes('YOUR-PROJECT')||SUPABASE_ANON_KEY.includes('YOUR_ANON')){
+  document.getElementById('config-banner').classList.add('visible');
+}
+
+setDateDisplay();
+loadData();
+</script>
+</body>
+</html>

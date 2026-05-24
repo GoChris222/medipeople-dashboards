@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Permanent Doctor Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f5f0;--surface:#fff;--raised:#f9f9f7;--border:#e8e8e4;
+  --border-med:#d8d8d4;--text:#1a1a18;--muted:#6b6b66;--hint:#aaa;
+  --accent:#1a7a4a;--accent-hover:#155f3a;--danger:#c0392b;
+  --warn:#b85c00;--info:#2563a8;--purple:#6d3ab5;--radius:10px;
+}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);min-height:100vh}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.25rem 1rem;display:flex;flex-direction:column;gap:1rem;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{font-size:13px;font-weight:600;color:var(--text);padding-bottom:.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.sidebar-logo span{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block}
+.sidebar-section{font-size:10px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.08em;margin-top:.5rem}
+.stat-card{background:var(--raised);border-radius:var(--radius);padding:.75rem;border:1px solid var(--border)}
+.stat-card .stat-val{font-size:22px;font-weight:500;color:var(--text);margin-bottom:2px}
+.stat-card .stat-val.green{color:var(--accent)}
+.stat-card .stat-val.red{color:var(--danger)}
+.stat-card .stat-val.blue{color:var(--info)}
+.stat-card .stat-val.purple{color:var(--purple)}
+.stat-card .stat-label{font-size:11px;color:var(--muted)}
+.fee-card{background:var(--raised);border-radius:var(--radius);padding:.75rem;border:1px solid var(--border)}
+.fee-card .fee-val{font-size:18px;font-weight:500;color:var(--accent)}
+.fee-card .fee-label{font-size:11px;color:var(--muted);margin-bottom:2px}
+.fee-total{background:#eef8f2;border-radius:var(--radius);padding:.75rem;border:1px solid #b0dcc0}
+.fee-total .fee-val{font-size:20px;font-weight:600;color:var(--accent)}
+.fee-total .fee-label{font-size:11px;color:var(--muted);margin-bottom:2px}
+
+/* MAIN */
+.main{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.topbar h1{font-size:20px;font-weight:500}
+.topbar .date{font-size:13px;color:var(--muted);margin-top:2px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:5px;font-size:13px;padding:6px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border-med);background:var(--surface);color:var(--muted);transition:all .15s;font-family:inherit;white-space:nowrap}
+.btn:hover{background:var(--bg);color:var(--text)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:var(--accent-hover);color:#fff}
+.btn.sm{font-size:12px;padding:4px 10px}
+
+/* CONFIG BANNER */
+.config-banner{background:#fff8e6;border:1px solid #f0d890;border-radius:var(--radius);padding:.75rem 1rem;font-size:13px;color:#9a6700;display:none;align-items:center;gap:8px}
+.config-banner.visible{display:flex}
+
+/* FILTERS */
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search-box{font-size:13px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--text);font-family:inherit;outline:none;min-width:220px}
+.search-box:focus{border-color:#999}
+.filter-select{font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--muted);font-family:inherit;outline:none;cursor:pointer}
+.filter-label{font-size:11px;color:var(--hint);font-weight:500;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.filter-group{display:flex;align-items:center;gap:6px}
+.stage-filters{display:flex;gap:6px;flex-wrap:wrap}
+.stage-btn{font-size:11px;padding:3px 12px;border-radius:20px;border:1px solid var(--border-med);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;font-family:inherit}
+.stage-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.clear-btn{font-size:12px;color:var(--hint);cursor:pointer;padding:4px 8px;border-radius:6px;border:none;background:none;font-family:inherit}
+.clear-btn:hover{color:var(--text)}
+
+/* TABLE */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.25rem;border-bottom:1px solid var(--border)}
+.panel-title{font-size:14px;font-weight:500}
+.result-count{font-size:12px;color:var(--hint)}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border);background:var(--raised)}
+thead th{font-size:11px;font-weight:500;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;padding:.65rem 1rem;text-align:left;white-space:nowrap}
+tbody tr.doc-row{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer}
+tbody tr.doc-row:last-of-type{border-bottom:none}
+tbody tr.doc-row:hover{background:#fafaf8}
+tbody tr.doc-row.active-row{background:#f4faf7}
+td{padding:.7rem 1rem;vertical-align:middle}
+.doc-name{font-size:14px;font-weight:500;color:var(--text)}
+.doc-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.chevron{font-size:13px;color:var(--hint);transition:transform .2s;display:inline-block}
+.chevron.open{transform:rotate(90deg)}
+.row-actions{display:flex;gap:4px;justify-content:flex-end;opacity:0;transition:opacity .15s}
+tbody tr.doc-row:hover .row-actions{opacity:1}
+.row-actions button{background:none;border:none;cursor:pointer;color:var(--hint);padding:4px;border-radius:6px;font-size:14px;transition:color .12s}
+.row-actions button:hover{color:var(--text)}
+
+/* BADGES */
+.badge{font-size:11px;padding:2px 9px;border-radius:10px;font-weight:500;white-space:nowrap;display:inline-block}
+.stage-new{background:#eef4fd;color:#2563a8;border:1px solid #c0d4f0}
+.stage-call{background:#f3eeff;color:#6d3ab5;border:1px solid #d4b8f5}
+.stage-active{background:#eef8f2;color:#1a7a4a;border:1px solid #b0dcc0}
+.stage-interview{background:#fef6ec;color:#b85c00;border:1px solid #f5d9b0}
+.stage-sent{background:#e8f4fd;color:#0e6fa8;border:1px solid #a8d4f0}
+.stage-pending{background:#fff8e6;color:#9a6700;border:1px solid #f0d890}
+.stage-placed{background:#1a7a4a;color:#fff;border:1px solid #1a7a4a}
+.stage-onhold{background:#f9f9f7;color:var(--muted);border:1px solid var(--border-med)}
+.stage-withdrawn{background:#fdf0ee;color:#c0392b;border:1px solid #f5c5be}
+.status-active{background:#eef8f2;color:#1a7a4a;border:1px solid #b0dcc0;font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block}
+.status-warm{background:#fef6ec;color:#b85c00;border:1px solid #f5d9b0;font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block}
+.status-cold{background:#eef4fd;color:#2563a8;border:1px solid #c0d4f0;font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block}
+.status-placed{background:#1a7a4a;color:#fff;border:1px solid #1a7a4a;font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block}
+.status-onhold{background:#f9f9f7;color:var(--muted);border:1px solid var(--border-med);font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block}
+.status-withdrawn{background:#fdf0ee;color:#c0392b;border:1px solid #f5c5be;font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block}
+.due-text{font-size:12px;color:var(--muted)}
+.due-text.overdue{color:var(--danger);font-weight:500}
+
+/* DETAIL ROW */
+tr.detail-row td{padding:0;border-bottom:1px solid var(--border)}
+.detail-inner{background:#f4faf7;border-top:1px solid #d4ead9;padding:1.25rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.detail-section{display:flex;flex-direction:column;gap:5px}
+.detail-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.detail-field{display:flex;flex-direction:column;gap:2px}
+.detail-field label{font-size:11px;color:var(--hint)}
+.detail-value{font-size:13px;color:var(--text);line-height:1.5}
+.detail-value a{color:var(--info);text-decoration:none}
+.detail-value a:hover{text-decoration:underline}
+.detail-value.empty{color:var(--hint);font-style:italic}
+.detail-notes{font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.detail-notes.empty{color:var(--hint);font-style:italic}
+.detail-row-actions{display:flex;gap:8px;padding-top:.75rem;border-top:1px solid #d4ead9;grid-column:1/-1;margin-top:.25rem}
+
+.empty-msg{padding:2.5rem;text-align:center;color:var(--hint);font-size:13px}
+.loading-msg{padding:2.5rem;text-align:center;color:var(--muted);font-size:13px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:100;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.75rem;width:95%;max-width:640px;box-shadow:0 8px 32px rgba(0,0,0,0.12);margin-bottom:60px}
+.modal h2{font-size:16px;font-weight:500;margin-bottom:1.25rem}
+.modal-section-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .6rem;padding-top:.75rem;border-top:1px solid var(--border)}
+.modal-section-title:first-of-type{margin-top:0;padding-top:0;border-top:none}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-grid .full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--text);font-family:inherit;outline:none;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#999}
+.field input::placeholder,.field textarea::placeholder{color:var(--hint)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+.month-row{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:6px;font-size:12px}
+.month-row:hover{background:var(--raised)}
+.month-row .m-label{color:var(--muted)}
+.month-row .m-val{font-weight:500;color:var(--accent)}
+.month-row .m-val.zero{color:var(--hint);font-weight:400}
+.month-row.current-month{background:#eef8f2;border:1px solid #b0dcc0}
+.month-row.current-month .m-label{color:var(--accent);font-weight:600}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto}
+  .detail-inner{grid-template-columns:1fr 1fr}
+  body{padding:0}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo"><span></span> Permanent Doctor Dashboard</div>
+
+  <div class="sidebar-section">Overview</div>
+  <div class="stat-card"><div class="stat-val" id="s-total">—</div><div class="stat-label">Total candidates</div></div>
+  <div class="stat-card"><div class="stat-val green" id="s-active">—</div><div class="stat-label">Active</div></div>
+  <div class="stat-card"><div class="stat-val blue" id="s-interview">—</div><div class="stat-label">Interview / Sent out</div></div>
+  <div class="stat-card"><div class="stat-val purple" id="s-placed">—</div><div class="stat-label">Placed</div></div>
+
+  <div class="sidebar-section">Pipeline value</div>
+  <div class="fee-card"><div class="fee-label">Est. gross fees (active)</div><div class="fee-val" id="f-gross">—</div></div>
+  <div class="fee-card"><div class="fee-label">MP net fees (active)</div><div class="fee-val" id="f-net">—</div></div>
+  <div class="fee-total"><div class="fee-label">Placed — confirmed net</div><div class="fee-val" id="f-placed">—</div></div>
+
+  <div class="sidebar-section" style="margin-top:1rem">Monthly forecast (MP net)</div>
+  <div id="monthly-breakdown" style="display:flex;flex-direction:column;gap:4px"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Permanent Doctor Dashboard</h1>
+      <div class="date" id="today-date"></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" onclick="backupData()">&#8681; Backup</button>
+      <button class="btn primary" onclick="openAddModal()">+ Add doctor</button>
+    </div>
+  </div>
+
+  <div class="config-banner" id="config-banner">
+    ⚠ Supabase credentials not configured — open this file and fill in SUPABASE_URL and SUPABASE_ANON_KEY at the top of the script.
+  </div>
+
+  <div class="filter-bar">
+    <input class="search-box" type="text" id="search-input" placeholder="&#128269; Search by name, specialty, location, client..." oninput="render()" />
+    <div class="filter-group">
+      <span class="filter-label">Specialty</span>
+      <select class="filter-select" id="f-specialty" onchange="render()">
+        <option value="">All</option>
+        <option>GP</option><option>UK GP</option><option>GP ST3</option>
+        <option>ED Specialist</option><option>IR Locum</option><option>Surgeon</option><option>Other</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Status</span>
+      <select class="filter-select" id="f-status" onchange="render()">
+        <option value="">All</option>
+        <option>Active</option><option>Warm</option><option>Cold</option>
+        <option>Placed</option><option>On Hold</option><option>Withdrawn</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Rego</span>
+      <select class="filter-select" id="f-rego" onchange="render()">
+        <option value="">All</option>
+        <option>ESP</option><option>PESCI</option><option>Specialist Assessment</option>
+        <option>ACEM</option><option>FRACGP</option><option>FACRRM</option><option>Other</option>
+      </select>
+    </div>
+    <button class="clear-btn" onclick="clearFilters()">&#10005; Clear</button>
+  </div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <button class="stage-btn active" onclick="setStage('',this)">All</button>
+    <button class="stage-btn" onclick="setStage('New Enquiry',this)">New Enquiry</button>
+    <button class="stage-btn" onclick="setStage('Call',this)">Call</button>
+    <button class="stage-btn" onclick="setStage('Active',this)">Active</button>
+    <button class="stage-btn" onclick="setStage('Interview',this)">Interview</button>
+    <button class="stage-btn" onclick="setStage('Sent out',this)">Sent out</button>
+    <button class="stage-btn" onclick="setStage('Pending',this)">Pending</button>
+    <button class="stage-btn" onclick="setStage('Placed',this)">Placed</button>
+    <button class="stage-btn" onclick="setStage('On Hold',this)">On Hold</button>
+    <button class="stage-btn" onclick="setStage('Withdrawn',this)">Withdrawn</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Candidates</span>
+      <span class="result-count" id="result-count"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table id="doc-table">
+        <thead>
+          <tr>
+            <th style="width:20%">Doctor</th>
+            <th style="width:10%">Specialty</th>
+            <th style="width:12%">Location</th>
+            <th style="width:10%">Stage</th>
+            <th style="width:10%">Client</th>
+            <th style="width:9%">Status</th>
+            <th style="width:10%">Due date</th>
+            <th style="width:11%">Next action</th>
+            <th style="width:5%"></th>
+            <th style="width:28px"></th>
+          </tr>
+        </thead>
+        <tbody id="doc-list"></tbody>
+      </table>
+    </div>
+    <div class="loading-msg" id="loading-msg">Loading candidates…</div>
+    <div class="empty-msg" id="empty-msg" style="display:none">No candidates match your filters.</div>
+  </div>
+</div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="doc-modal">
+  <div class="modal">
+    <h2 id="modal-title">Add doctor</h2>
+    <div class="modal-section-title">Personal details</div>
+    <div class="modal-grid">
+      <div class="field full"><label>Full name *</label><input type="text" id="m-name" placeholder="e.g. Dr. Anna McCabe" /></div>
+      <div class="field"><label>Email</label><input type="email" id="m-email" placeholder="email@example.com" /></div>
+      <div class="field"><label>Type / Specialty</label>
+        <select id="m-specialty">
+          <option value="">— select —</option>
+          <option>GP</option><option>UK GP</option><option>GP ST3</option>
+          <option>ED Specialist</option><option>IR Locum</option><option>Surgeon</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Preferred location</label><input type="text" id="m-location" placeholder="e.g. VIC – Rosebud" /></div>
+      <div class="field"><label>Referral source</label>
+        <select id="m-source" onchange="autoCalcNetFee()">
+          <option value="">— select —</option>
+          <option value="Website">Website (100%)</option>
+          <option value="LinkedIn">LinkedIn (100%)</option>
+          <option value="Dedicare">Dedicare (50%)</option>
+          <option value="Referral">Referral</option>
+        </select>
+      </div>
+      <div class="field" id="referrer-field" style="display:none"><label>Referred by</label><input type="text" id="m-referrer" placeholder="e.g. Dr. James Smith" /></div>
+    </div>
+    <div class="modal-section-title">Pipeline</div>
+    <div class="modal-grid">
+      <div class="field"><label>Stage</label>
+        <select id="m-stage">
+          <option>New Enquiry</option><option>Call</option><option>Active</option>
+          <option>Interview</option><option>Sent out</option><option>Pending</option>
+          <option>Placed</option><option>On Hold</option><option>Withdrawn</option>
+        </select>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="m-status">
+          <option>Active</option><option>Warm</option><option>Cold</option>
+          <option>Placed</option><option>On Hold</option><option>Withdrawn</option>
+        </select>
+      </div>
+      <div class="field"><label>Client</label><input type="text" id="m-client" placeholder="e.g. IPN, Partnered Health" /></div>
+      <div class="field"><label>Rego type</label>
+        <select id="m-rego">
+          <option value="">— select —</option>
+          <option>ESP</option><option>PESCI</option><option>Specialist Assessment</option>
+          <option>ACEM</option><option>FRACGP</option><option>FACRRM</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Last contact date</label><input type="date" id="m-lastcontact" /></div>
+      <div class="field"><label>Due date</label><input type="date" id="m-due" /></div>
+      <div class="field"><label>Interview date</label><input type="date" id="m-interview" /></div>
+      <div class="field"><label>Start date</label><input type="text" id="m-start" placeholder="e.g. Oct 2026" /></div>
+    </div>
+    <div class="modal-section-title">Fees</div>
+    <div class="modal-grid">
+      <div class="field"><label>Est. fee ($)</label><input type="number" id="m-fee" placeholder="e.g. 20000" oninput="autoCalcNetFee()" /></div>
+      <div class="field"><label>MP net fee ($) <span style="color:var(--hint);font-weight:400;font-size:11px">— auto-calculated, override if needed</span></label><input type="number" id="m-netfee" placeholder="Auto-calculated" /></div>
+      <div class="field"><label>Bullhorn ID</label><input type="text" id="m-bhid" placeholder="e.g. 33282" /></div>
+      <div class="field"></div>
+    </div>
+    <div class="modal-section-title">Notes</div>
+    <div class="modal-grid">
+      <div class="field full"><label>Next action</label><input type="text" id="m-action" placeholder="e.g. Follow up with Amanda re interview" /></div>
+      <div class="field full"><label>Notes</label><textarea id="m-notes" placeholder="Running contact log — most recent entry first with date prefix e.g. 21/05..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" id="save-btn" onclick="saveDoctor()">Save doctor</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Supabase Configuration ─────────────────────────────────────
+// Replace these two values with your own from:
+// Supabase dashboard → Settings → API
+const SUPABASE_URL      = 'https://qoyokyuzkpfvaakdkmxg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
+// ──────────────────────────────────────────────────────────────
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let doctors = [];
+let stageFilter = '';
+let openDetailId = null;
+let editingId = null;
+let saving = false;
+
+const STAGE_CLASS = {
+  'New Enquiry':'stage-new','Call':'stage-call','Active':'stage-active',
+  'Interview':'stage-interview','Sent out':'stage-sent','Pending':'stage-pending',
+  'Placed':'stage-placed','On Hold':'stage-onhold','Withdrawn':'stage-withdrawn'
+};
+const STATUS_CLASS = {
+  'Active':'status-active','Warm':'status-warm','Cold':'status-cold',
+  'Placed':'status-placed','On Hold':'status-onhold','Withdrawn':'status-withdrawn'
+};
+
+// ── DB ↔ JS mapping ──────────────────────────────────────────
+function fromDb(row) {
+  return {
+    id:            row.id,
+    name:          row.name           || '',
+    email:         row.email          || '',
+    specialty:     row.specialty      || '',
+    location:      row.location       || '',
+    source:        row.source         || '',
+    referrer:      row.referrer       || '',
+    stage:         row.stage          || 'New Enquiry',
+    status:        row.status         || 'Active',
+    client:        row.client         || '',
+    rego:          row.rego           || '',
+    lastContact:   row.last_contact   || '',
+    due:           row.due_date       || '',
+    interviewDate: row.interview_date || '',
+    startDate:     row.start_date     || '',
+    fee:           row.fee    != null ? String(row.fee)    : '',
+    netfee:        row.netfee != null ? String(row.netfee) : '',
+    bhid:          row.bhid           || '',
+    nextAction:    row.next_action    || '',
+    notes:         row.notes          || ''
+  };
+}
+
+function toDb(d) {
+  const parseDate = v => (v && v.trim()) ? v.trim() : null;
+  const parseNum  = v => { const n = parseInt((v||'').toString().replace(/[^0-9]/g,'')); return isNaN(n)||n===0 ? null : n; };
+  return {
+    name:           d.name,
+    email:          d.email          || '',
+    specialty:      d.specialty      || '',
+    location:       d.location       || '',
+    source:         d.source         || '',
+    referrer:       d.referrer       || '',
+    stage:          d.stage          || 'New Enquiry',
+    status:         d.status         || 'Active',
+    client:         d.client         || '',
+    rego:           d.rego           || '',
+    last_contact:   parseDate(d.lastContact),
+    due_date:       parseDate(d.due),
+    interview_date: parseDate(d.interviewDate),
+    start_date:     (d.startDate||'').trim() || null,
+    fee:            parseNum(d.fee),
+    netfee:         parseNum(d.netfee),
+    bhid:           d.bhid           || '',
+    next_action:    d.nextAction     || '',
+    notes:          d.notes          || '',
+    updated_at:     new Date().toISOString()
+  };
+}
+
+// ── Load ─────────────────────────────────────────────────────
+async function loadData() {
+  document.getElementById('loading-msg').style.display = 'block';
+  document.getElementById('doc-table').style.display = 'none';
+  document.getElementById('empty-msg').style.display = 'none';
+
+  const { data, error } = await db.from('perm_doctors').select('*').order('id');
+  document.getElementById('loading-msg').style.display = 'none';
+
+  if (error) {
+    document.getElementById('empty-msg').textContent = 'Could not load data. Check your Supabase credentials.';
+    document.getElementById('empty-msg').style.display = 'block';
+    console.error(error);
+    return;
+  }
+  doctors = (data || []).map(fromDb);
+  render();
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function today() { return new Date().toISOString().split('T')[0]; }
+function isOverdue(d) { return d.due && d.due < today() && d.stage!=='Placed' && d.stage!=='Withdrawn'; }
+
+function formatDate(dt) {
+  if(!dt)return'—';
+  const p=dt.split('-');
+  return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function formatCurrency(v){
+  const n=parseInt((v||'').toString().replace(/[^0-9]/g,''));
+  if(!n||isNaN(n))return'—';
+  return'$'+n.toLocaleString();
+}
+
+function calcNetFee(d) {
+  const gross = parseInt((d.fee||'').toString().replace(/[^0-9]/g,''))||0;
+  if (!gross) return parseInt((d.netfee||'').toString().replace(/[^0-9]/g,''))||0;
+  const src = (d.source||'').toLowerCase();
+  return src === 'dedicare' ? Math.round(gross * 0.5) : gross;
+}
+
+function autoCalcNetFee() {
+  const src = document.getElementById('m-source').value;
+  const fee = parseInt(document.getElementById('m-fee').value)||0;
+  document.getElementById('referrer-field').style.display = src==='Referral' ? 'flex' : 'none';
+  if (fee > 0) {
+    document.getElementById('m-netfee').value = src==='Dedicare' ? Math.round(fee*0.5) : fee;
+  }
+}
+
+function setDateDisplay(){
+  document.getElementById('today-date').textContent=new Date().toLocaleDateString('en-AU',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+
+// ── Sidebar ──────────────────────────────────────────────────
+function buildMonthlyBreakdown() {
+  const months = [];
+  for (let m = 4; m <= 15; m++) {
+    const yr = 2026 + Math.floor(m/12);
+    const mo = m % 12;
+    months.push({yr, mo, label: new Date(yr,mo,1).toLocaleDateString('en-AU',{month:'short',year:'numeric'})});
+  }
+  const byMonth = {};
+  months.forEach(m => byMonth[`${m.yr}-${String(m.mo+1).padStart(2,'0')}`] = 0);
+
+  doctors.forEach(d => {
+    if (!d.startDate || ['Withdrawn','On Hold'].includes(d.stage)) return;
+    const net = calcNetFee(d);
+    if (!net) return;
+    let yr, mo;
+    const sd = d.startDate.trim();
+    const isoMatch = sd.match(/^(\d{4})-(\d{2})/);
+    const dmyMatch = sd.match(/^(\d{2})-(\d{2})-(\d{4})/);
+    const monYrMatch = sd.match(/^([A-Za-z]+)\s+(\d{4})/);
+    if (isoMatch) { yr=parseInt(isoMatch[1]); mo=parseInt(isoMatch[2])-1; }
+    else if (dmyMatch) { yr=parseInt(dmyMatch[3]); mo=parseInt(dmyMatch[2])-1; }
+    else if (monYrMatch) {
+      const monthNames=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+      mo=monthNames.indexOf(monYrMatch[1].toLowerCase().substring(0,3));
+      yr=parseInt(monYrMatch[2]);
+    } else return;
+    const key = `${yr}-${String(mo+1).padStart(2,'0')}`;
+    if (key in byMonth) byMonth[key] += net;
+  });
+
+  const now = new Date();
+  const currentKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const container = document.getElementById('monthly-breakdown');
+  container.innerHTML = months.map(m => {
+    const key = `${m.yr}-${String(m.mo+1).padStart(2,'0')}`;
+    const val = byMonth[key]||0;
+    const isCurrent = key === currentKey;
+    return `<div class="month-row${isCurrent?' current-month':''}">
+      <span class="m-label">${m.label}</span>
+      <span class="m-val${val===0?' zero':''}">$${val.toLocaleString()}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateSidebar(){
+  const active=doctors.filter(d=>['Active','Warm'].includes(d.status)&&d.stage!=='Placed'&&d.stage!=='Withdrawn').length;
+  const interview=doctors.filter(d=>['Interview','Sent out'].includes(d.stage)).length;
+  const placed=doctors.filter(d=>d.stage==='Placed').length;
+  document.getElementById('s-total').textContent=doctors.length;
+  document.getElementById('s-active').textContent=active;
+  document.getElementById('s-interview').textContent=interview;
+  document.getElementById('s-placed').textContent=placed;
+
+  let gross=0,net=0,placedFee=0;
+  doctors.forEach(d=>{
+    const f=parseInt((d.fee||'').toString().replace(/[^0-9]/g,''))||0;
+    const n=calcNetFee(d);
+    if(d.stage==='Placed'){placedFee+=n;}
+    else if(!['Withdrawn'].includes(d.stage)){gross+=f;net+=n;}
+  });
+  document.getElementById('f-gross').textContent='$'+gross.toLocaleString();
+  document.getElementById('f-net').textContent='$'+net.toLocaleString();
+  document.getElementById('f-placed').textContent='$'+placedFee.toLocaleString();
+  buildMonthlyBreakdown();
+}
+
+// ── Toggle detail ─────────────────────────────────────────────
+function toggleDetail(id,e){
+  if(e&&e.target.closest('.row-actions,select'))return;
+  openDetailId=(openDetailId===id)?null:id;
+  render();
+}
+
+// ── Render ────────────────────────────────────────────────────
+function render(){
+  updateSidebar();
+  const search=(document.getElementById('search-input').value||'').toLowerCase();
+  const fSpec=document.getElementById('f-specialty').value;
+  const fStatus=document.getElementById('f-status').value;
+  const fRego=document.getElementById('f-rego').value;
+
+  let visible=doctors.slice();
+  if(stageFilter)visible=visible.filter(d=>d.stage===stageFilter);
+  if(fSpec)visible=visible.filter(d=>d.specialty===fSpec);
+  if(fStatus)visible=visible.filter(d=>d.status===fStatus);
+  if(fRego)visible=visible.filter(d=>d.rego===fRego);
+  if(search)visible=visible.filter(d=>(d.name+d.specialty+d.location+d.client+d.notes+d.nextAction+d.source).toLowerCase().includes(search));
+
+  const stagePriority={'Interview':0,'Sent out':1,'Active':2,'Pending':3,'Call':4,'New Enquiry':5,'On Hold':6,'Placed':7,'Withdrawn':8};
+  visible.sort((a,b)=>{
+    const aOd=isOverdue(a)?0:1, bOd=isOverdue(b)?0:1;
+    if(aOd!==bOd)return aOd-bOd;
+    return (stagePriority[a.stage]||5)-(stagePriority[b.stage]||5);
+  });
+
+  document.getElementById('result-count').textContent=visible.length===doctors.length?`${doctors.length} candidates`:`${visible.length} of ${doctors.length}`;
+  const tbody=document.getElementById('doc-list');
+  const empty=document.getElementById('empty-msg');
+  const table=document.getElementById('doc-table');
+  if(visible.length===0){tbody.innerHTML='';empty.textContent='No candidates match your filters.';empty.style.display='block';table.style.display='none';return;}
+  empty.style.display='none';table.style.display='';
+
+  let html='';
+  visible.forEach(d=>{
+    const isOpen=openDetailId===d.id;
+    const od=isOverdue(d);
+    const stageCls=STAGE_CLASS[d.stage]||'stage-new';
+    const statusCls=STATUS_CLASS[d.status]||'status-active';
+    const dueText=d.due?`<span class="due-text${od?' overdue':''}">${od?'⚠ ':''}${formatDate(d.due)}</span>`:'<span style="color:var(--hint)">—</span>';
+    const actionPreview=d.nextAction?`<span style="font-size:12px;color:var(--muted)">${escHtml(d.nextAction.substring(0,40))}${d.nextAction.length>40?'…':''}</span>`:'<span style="color:var(--hint);font-size:12px">—</span>';
+
+    html+=`<tr class="doc-row${isOpen?' active-row':''}" onclick="toggleDetail(${d.id},event)">
+      <td>
+        <div class="doc-name">${escHtml(d.name)}</div>
+        <div class="doc-sub">${escHtml(d.source||'')}${d.referrer?' — '+escHtml(d.referrer):''}</div>
+      </td>
+      <td><span style="font-size:13px;color:var(--muted)">${escHtml(d.specialty||'—')}</span></td>
+      <td><span style="font-size:13px;color:var(--muted)">${escHtml(d.location||'—')}</span></td>
+      <td><span class="badge ${stageCls}">${escHtml(d.stage)}</span></td>
+      <td><span style="font-size:13px;color:var(--muted)">${escHtml(d.client||'—')}</span></td>
+      <td><span class="${statusCls}">${escHtml(d.status||'—')}</span></td>
+      <td>${dueText}</td>
+      <td>${actionPreview}</td>
+      <td><div class="row-actions">
+        <button onclick="openEditModal(${d.id})" title="Edit">&#9998;</button>
+        <button onclick="deleteDoctor(${d.id})" title="Delete" style="color:#e08080">&#128465;</button>
+      </div></td>
+      <td style="text-align:right"><span class="chevron${isOpen?' open':''}">&#8250;</span></td>
+    </tr>`;
+
+    if(isOpen){
+      html+=`<tr class="detail-row"><td colspan="10"><div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">Contact</div>
+          <div class="detail-field"><label>Email</label><div class="detail-value${d.email?'':' empty'}">${d.email?`<a href="mailto:${escHtml(d.email)}">${escHtml(d.email)}</a>`:'Not recorded'}</div></div>
+          <div class="detail-field"><label>Source</label><div class="detail-value${d.source?'':' empty'}">${escHtml(d.source)||'Not recorded'}${d.referrer?' — '+escHtml(d.referrer):''}</div></div>
+          <div class="detail-field"><label>Bullhorn ID</label><div class="detail-value${d.bhid?'':' empty'}">${escHtml(d.bhid)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>Last contact</label><div class="detail-value">${formatDate(d.lastContact)}</div></div>
+          <div class="detail-field"><label>Interview date</label><div class="detail-value">${formatDate(d.interviewDate)}</div></div>
+          <div class="detail-field"><label>Start date</label><div class="detail-value${d.startDate?'':' empty'}">${escHtml(d.startDate)||'Not set'}</div></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Placement details</div>
+          <div class="detail-field"><label>Rego type</label><div class="detail-value${d.rego?'':' empty'}">${escHtml(d.rego)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>Est. fee</label><div class="detail-value">${formatCurrency(d.fee)}</div></div>
+          <div class="detail-field"><label>MP net fee</label><div class="detail-value">${d.fee?formatCurrency(calcNetFee(d)):'—'}</div></div>
+          <div class="detail-field"><label>Next action</label><div class="detail-value${d.nextAction?'':' empty'}">${escHtml(d.nextAction)||'None'}</div></div>
+          <div class="detail-field"><label>Due date</label><div class="detail-value${od?' overdue':''}">${formatDate(d.due)}</div></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Notes</div>
+          <div class="detail-notes${d.notes?'':' empty'}">${d.notes?escHtml(d.notes):'No notes recorded.'}</div>
+        </div>
+        <div class="detail-row-actions">
+          <button class="btn sm" onclick="openEditModal(${d.id})">&#9998; Edit</button>
+          ${d.email?`<button class="btn sm" onclick="emailDoctor(${d.id})">&#9993; Email</button>`:''}
+        </div>
+      </div></td></tr>`;
+    }
+  });
+  tbody.innerHTML=html;
+}
+
+// ── CRUD ─────────────────────────────────────────────────────
+function emailDoctor(id){
+  const d=doctors.find(x=>x.id===id);if(!d||!d.email)return;
+  window.location.href=`mailto:${d.email}?subject=${encodeURIComponent('Permanent GP Position — Australia')}&body=${encodeURIComponent(`Dear ${d.name},\n\nI hope you are well. I wanted to follow up regarding your interest in a permanent GP position in Australia.\n\nKind regards,\nChris`)}`;
+}
+
+function openAddModal(){
+  editingId=null;
+  document.getElementById('modal-title').textContent='Add doctor';
+  ['m-name','m-email','m-location','m-client','m-start','m-bhid','m-action','m-notes','m-referrer'].forEach(id=>document.getElementById(id).value='');
+  ['m-specialty','m-stage','m-status','m-rego','m-source'].forEach(id=>document.getElementById(id).value=id==='m-stage'?'New Enquiry':id==='m-status'?'Active':'');
+  document.getElementById('referrer-field').style.display='none';
+  ['m-lastcontact','m-due','m-interview','m-fee','m-netfee'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('doc-modal').classList.add('visible');
+  setTimeout(()=>document.getElementById('m-name').focus(),50);
+}
+
+function openEditModal(id){
+  const d=doctors.find(x=>x.id===id);if(!d)return;
+  editingId=id;
+  document.getElementById('modal-title').textContent='Edit — '+d.name;
+  document.getElementById('m-name').value=d.name||'';
+  document.getElementById('m-email').value=d.email||'';
+  document.getElementById('m-specialty').value=d.specialty||'';
+  document.getElementById('m-location').value=d.location||'';
+  document.getElementById('m-source').value=d.source||'';
+  document.getElementById('m-referrer').value=d.referrer||'';
+  document.getElementById('referrer-field').style.display=d.source==='Referral'?'flex':'none';
+  document.getElementById('m-stage').value=d.stage||'New Enquiry';
+  document.getElementById('m-status').value=d.status||'Active';
+  document.getElementById('m-client').value=d.client||'';
+  document.getElementById('m-rego').value=d.rego||'';
+  document.getElementById('m-lastcontact').value=d.lastContact||'';
+  document.getElementById('m-due').value=d.due||'';
+  document.getElementById('m-interview').value=d.interviewDate||'';
+  document.getElementById('m-start').value=d.startDate||'';
+  document.getElementById('m-fee').value=d.fee||'';
+  document.getElementById('m-netfee').value=d.netfee||'';
+  document.getElementById('m-bhid').value=d.bhid||'';
+  document.getElementById('m-action').value=d.nextAction||'';
+  document.getElementById('m-notes').value=d.notes||'';
+  document.getElementById('doc-modal').classList.add('visible');
+  setTimeout(()=>document.getElementById('m-name').focus(),50);
+}
+
+async function saveDoctor(){
+  if(saving)return;
+  const name=document.getElementById('m-name').value.trim();
+  if(!name){document.getElementById('m-name').focus();return;}
+
+  const formData={
+    name,
+    email:         document.getElementById('m-email').value.trim(),
+    specialty:     document.getElementById('m-specialty').value,
+    location:      document.getElementById('m-location').value.trim(),
+    source:        document.getElementById('m-source').value,
+    referrer:      document.getElementById('m-referrer').value.trim(),
+    stage:         document.getElementById('m-stage').value,
+    status:        document.getElementById('m-status').value,
+    client:        document.getElementById('m-client').value.trim(),
+    rego:          document.getElementById('m-rego').value,
+    lastContact:   document.getElementById('m-lastcontact').value||'',
+    due:           document.getElementById('m-due').value||'',
+    interviewDate: document.getElementById('m-interview').value||'',
+    startDate:     document.getElementById('m-start').value.trim(),
+    fee:           document.getElementById('m-fee').value,
+    netfee:        document.getElementById('m-netfee').value,
+    bhid:          document.getElementById('m-bhid').value.trim(),
+    nextAction:    document.getElementById('m-action').value.trim(),
+    notes:         document.getElementById('m-notes').value.trim()
+  };
+
+  saving=true;
+  const btn=document.getElementById('save-btn');
+  btn.textContent='Saving…';btn.disabled=true;
+
+  if(editingId){
+    const{error}=await db.from('perm_doctors').update(toDb(formData)).eq('id',editingId);
+    if(error){alert('Error saving: '+error.message);saving=false;btn.textContent='Save doctor';btn.disabled=false;return;}
+    const idx=doctors.findIndex(x=>x.id===editingId);
+    if(idx>=0)doctors[idx]={...doctors[idx],...formData};
+  } else {
+    const{data,error}=await db.from('perm_doctors').insert([toDb(formData)]).select().single();
+    if(error){alert('Error saving: '+error.message);saving=false;btn.textContent='Save doctor';btn.disabled=false;return;}
+    doctors.push(fromDb(data));
+  }
+
+  saving=false;btn.textContent='Save doctor';btn.disabled=false;
+  closeModal();render();
+}
+
+async function deleteDoctor(id){
+  if(!confirm('Remove this candidate?'))return;
+  const{error}=await db.from('perm_doctors').delete().eq('id',id);
+  if(error){alert('Error deleting: '+error.message);return;}
+  doctors=doctors.filter(x=>x.id!==id);
+  if(openDetailId===id)openDetailId=null;
+  render();
+}
+
+function backupData(){
+  const blob=new Blob([JSON.stringify({doctors,nextId:doctors.length+1},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  const d=new Date();
+  a.download=`perm_doctors_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+function closeModal(){document.getElementById('doc-modal').classList.remove('visible');}
+function setStage(s,btn){
+  stageFilter=s;
+  document.querySelectorAll('.stage-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');render();
+}
+function clearFilters(){
+  document.getElementById('search-input').value='';
+  document.getElementById('f-specialty').value='';
+  document.getElementById('f-status').value='';
+  document.getElementById('f-rego').value='';
+  stageFilter='';
+  document.querySelectorAll('.stage-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.stage-btn').classList.add('active');
+  render();
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModal();}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+if(SUPABASE_URL.includes('YOUR-PROJECT')||SUPABASE_ANON_KEY.includes('YOUR_ANON')){
+  document.getElementById('config-banner').classList.add('visible');
+}
+
+setDateDisplay();
+loadData();
+</script>
+</body>
+</html>

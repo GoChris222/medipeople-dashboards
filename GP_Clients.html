@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overseas GP AU Clients</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#f5f5f0;
+    --surface:#ffffff;
+    --raised:#f9f9f7;
+    --border:#e8e8e4;
+    --border-med:#d8d8d4;
+    --text:#1a1a18;
+    --muted:#6b6b66;
+    --hint:#aaaaaa;
+    --accent:#1a7a4a;
+    --accent-hover:#155f3a;
+    --danger:#c0392b;
+    --warn:#b85c00;
+    --info:#2563a8;
+    --purple:#6d3ab5;
+    --radius:10px;
+  }
+  body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);min-height:100vh;padding:2rem}
+  h1{font-size:22px;font-weight:500}
+  .subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+  .top-bar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap}
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+  .metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:1.5rem}
+  .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem}
+  .metric .label{font-size:11px;color:var(--muted);margin-bottom:5px}
+  .metric .value{font-size:20px;font-weight:500;color:var(--text)}
+  .metric .value.green{color:var(--accent)}
+  .metric .value.red{color:var(--danger)}
+  .metric .value.blue{color:var(--info)}
+  .metric .value.purple{color:var(--purple)}
+
+  .btn{display:inline-flex;align-items:center;gap:5px;font-size:13px;padding:6px 13px;border-radius:8px;cursor:pointer;border:1px solid var(--border-med);background:var(--surface);color:var(--muted);transition:all .15s;font-family:inherit;white-space:nowrap}
+  .btn:hover{background:var(--bg);color:var(--text)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:#fff}
+  .btn.sm{font-size:12px;padding:4px 10px}
+
+  /* BANNERS */
+  .config-banner{background:#fff8e6;border:1px solid #f0d890;border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1.25rem;font-size:13px;color:#9a6700;display:none;align-items:center;gap:8px}
+  .config-banner.visible{display:flex}
+  .followup-bar{display:none;background:#fff8e6;border:1px solid #f0d890;border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1.25rem;align-items:flex-start;gap:10px}
+  .followup-bar.visible{display:flex}
+  .followup-bar-title{font-size:13px;font-weight:600;color:#9a6700;margin-bottom:3px}
+  .followup-bar-list{font-size:12px;color:#9a6700;line-height:1.7}
+
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1.25rem}
+  .panel-header{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.25rem;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+  .panel-title{font-size:14px;font-weight:500}
+
+  .filter-bar{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);background:var(--raised);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .search-box{font-size:13px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--text);font-family:inherit;outline:none;min-width:200px}
+  .search-box:focus{border-color:#999}
+  .filter-select{font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--muted);font-family:inherit;outline:none;cursor:pointer}
+  .filter-label{font-size:11px;color:var(--hint);font-weight:500;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+  .filter-group{display:flex;align-items:center;gap:6px}
+  .clear-btn{font-size:12px;color:var(--hint);cursor:pointer;padding:4px 8px;border-radius:6px;border:none;background:none;font-family:inherit}
+  .clear-btn:hover{color:var(--text)}
+
+  table{width:100%;border-collapse:collapse}
+  thead tr{border-bottom:1px solid var(--border);background:var(--raised)}
+  thead th{font-size:11px;font-weight:500;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;padding:.65rem 1rem;text-align:left;white-space:nowrap;cursor:pointer;user-select:none}
+  thead th:hover{color:var(--muted)}
+  tbody tr.practice-row{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer}
+  tbody tr.practice-row:last-of-type{border-bottom:none}
+  tbody tr.practice-row:hover{background:#fafaf8}
+  tbody tr.practice-row.active-row{background:#f4faf7}
+  td{padding:.7rem 1rem;vertical-align:middle}
+  .practice-name{font-size:14px;font-weight:500;color:var(--text)}
+  .practice-sub{font-size:12px;color:var(--muted);margin-top:1px}
+  .chevron{font-size:13px;color:var(--hint);transition:transform .2s;display:inline-block}
+  .chevron.open{transform:rotate(90deg)}
+  .row-actions{display:flex;gap:4px;justify-content:flex-end;opacity:0;transition:opacity .15s}
+  tbody tr.practice-row:hover .row-actions{opacity:1}
+  .row-actions button{background:none;border:none;cursor:pointer;color:var(--hint);padding:4px 5px;border-radius:6px;font-size:15px;transition:color .12s}
+  .row-actions button:hover{color:var(--text)}
+
+  .badge{font-size:11px;padding:2px 9px;border-radius:10px;font-weight:500;white-space:nowrap;display:inline-block}
+  .s-new{background:#eef4fd;color:#2563a8;border:1px solid #c0d4f0}
+  .s-contacted{background:#fef6ec;color:#b85c00;border:1px solid #f5d9b0}
+  .s-spoke{background:#f3eeff;color:#6d3ab5;border:1px solid #d4b8f5}
+  .s-sent{background:#e8f4fd;color:#0e6fa8;border:1px solid #a8d4f0}
+  .s-followup{background:#fff8e6;color:#9a6700;border:1px solid #f0d890}
+  .s-interested{background:#eef8f2;color:#1a7a4a;border:1px solid #b0dcc0}
+  .s-notinterested{background:#fdf0ee;color:#c0392b;border:1px solid #f5c5be}
+  .s-placed{background:#1a7a4a;color:#fff;border:1px solid #1a7a4a}
+  .dpa-yes{background:#eef8f2;color:#1a7a4a;border:1px solid #b0dcc0;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap;display:inline-block}
+  .dpa-no{background:#f9f9f7;color:var(--muted);border:1px solid var(--border-med);font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap;display:inline-block}
+  .billing-bulk{background:#eef8f2;color:#1a7a4a;border:1px solid #b0dcc0;font-size:11px;padding:2px 8px;border-radius:10px;white-space:nowrap;display:inline-block}
+  .billing-mixed{background:#fef6ec;color:#b85c00;border:1px solid #f5d9b0;font-size:11px;padding:2px 8px;border-radius:10px;white-space:nowrap;display:inline-block}
+  .billing-private{background:#f3eeff;color:#6d3ab5;border:1px solid #d4b8f5;font-size:11px;padding:2px 8px;border-radius:10px;white-space:nowrap;display:inline-block}
+  .status-select{font-size:11px;padding:3px 8px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer;outline:none}
+
+  tr.detail-row td{padding:0;border-bottom:1px solid var(--border)}
+  .detail-inner{background:#f4faf7;border-top:1px solid #d4ead9;padding:1.25rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+  .detail-section{display:flex;flex-direction:column;gap:6px}
+  .detail-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+  .detail-field{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+  .detail-field label{font-size:11px;color:var(--hint);font-weight:500}
+  .detail-value{font-size:13px;color:var(--text);line-height:1.5}
+  .detail-value a{color:var(--info);text-decoration:none}
+  .detail-value a:hover{text-decoration:underline}
+  .detail-value.empty{color:var(--hint);font-style:italic}
+  .detail-row-actions{display:flex;gap:6px;padding-top:.75rem;border-top:1px solid #d4ead9;grid-column:1/-1;margin-top:.25rem}
+
+  .followup-due{font-size:12px;color:var(--danger);font-weight:500}
+  .followup-ok{font-size:12px;color:var(--muted)}
+
+  .empty{padding:2.5rem 1.25rem;text-align:center;color:var(--hint);font-size:13px}
+  .loading-msg{padding:2.5rem 1.25rem;text-align:center;color:var(--muted);font-size:13px}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:100;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+  .modal-overlay.visible{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.75rem;width:95%;max-width:680px;box-shadow:0 8px 32px rgba(0,0,0,0.12);margin-bottom:60px}
+  .modal h2{font-size:16px;font-weight:500;margin-bottom:1.25rem}
+  .modal-section{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .6rem;padding-top:.75rem;border-top:1px solid var(--border)}
+  .modal-section:first-of-type{margin-top:0;padding-top:0;border-top:none}
+  .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .modal-grid .full{grid-column:1/-1}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:12px;color:var(--muted);font-weight:500}
+  .field input,.field select,.field textarea{font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--border-med);background:var(--surface);color:var(--text);font-family:inherit;outline:none;width:100%}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:#999}
+  .field input::placeholder,.field textarea::placeholder{color:var(--hint)}
+  .field textarea{resize:vertical;min-height:70px;line-height:1.5}
+  .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+  .import-zone{border:2px dashed var(--border-med);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:1rem;background:var(--raised)}
+  .import-zone:hover{border-color:var(--accent);background:#f0f9f4}
+  .import-zone p{font-size:13px;color:var(--muted);margin-top:6px}
+  .import-zone .icon{font-size:28px;color:var(--hint)}
+  .import-preview{display:none;margin-bottom:1rem}
+  .import-preview img{max-width:100%;border-radius:8px;border:1px solid var(--border);max-height:160px;object-fit:cover}
+  .import-status{font-size:12px;color:var(--accent);margin-top:6px;font-weight:500}
+
+  @media(max-width:900px){
+    .metrics{grid-template-columns:repeat(3,1fr)}
+    .detail-inner{grid-template-columns:1fr 1fr}
+    .modal-grid{grid-template-columns:1fr}
+    .modal-grid .full{grid-column:1}
+    body{padding:1rem}
+  }
+  @media(max-width:500px){
+    .metrics{grid-template-columns:repeat(2,1fr)}
+    .detail-inner{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>GP Clients</h1>
+    <div class="subtitle">Permanent placement pipeline — overseas trained GPs</div>
+  </div>
+  <div class="top-actions">
+    <button class="btn" onclick="backupData()">&#8681; Backup</button>
+    <button class="btn" onclick="openMigrateModal()">&#8679; Migrate from browser</button>
+    <button class="btn" onclick="openImportModal()">&#128247; Import from screenshot</button>
+    <button class="btn primary" onclick="openAddModal()">+ Add practice</button>
+  </div>
+</div>
+
+<div class="config-banner" id="config-banner">
+  ⚠ Supabase credentials not configured — open this file and fill in SUPABASE_URL and SUPABASE_ANON_KEY at the top of the script.
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="label">Total practices</div><div class="value" id="m-total">—</div></div>
+  <div class="metric"><div class="label">DPA</div><div class="value green" id="m-dpa">—</div></div>
+  <div class="metric"><div class="label">CV sent</div><div class="value blue" id="m-sent">—</div></div>
+  <div class="metric"><div class="label">Interested</div><div class="value green" id="m-interested">—</div></div>
+  <div class="metric"><div class="label">GP placed</div><div class="value purple" id="m-placed">—</div></div>
+  <div class="metric"><div class="label">Follow-ups due</div><div class="value red" id="m-followup">—</div></div>
+</div>
+
+<div class="followup-bar" id="followup-bar">
+  <span style="color:#9a6700;font-size:16px;flex-shrink:0">&#9200;</span>
+  <div style="flex:1">
+    <div class="followup-bar-title">Follow-ups due today or overdue</div>
+    <div class="followup-bar-list" id="followup-list"></div>
+  </div>
+  <span style="cursor:pointer;color:#9a6700;font-size:20px;flex-shrink:0;line-height:1" onclick="this.parentElement.classList.remove('visible')">&times;</span>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-title">Practices</span>
+    <span id="result-count" style="font-size:12px;color:var(--hint)"></span>
+  </div>
+  <div class="filter-bar">
+    <input class="search-box" type="text" placeholder="&#128269; Search by name, suburb, doctor, software..." id="search-input" oninput="renderTable()" />
+    <div class="filter-group">
+      <span class="filter-label">State</span>
+      <select class="filter-select" id="f-state" onchange="renderTable()">
+        <option value="">All</option>
+        <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
+        <option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">DPA</span>
+      <select class="filter-select" id="f-dpa" onchange="renderTable()">
+        <option value="">All</option>
+        <option value="yes">DPA</option>
+        <option value="no">Non-DPA</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Billing</span>
+      <select class="filter-select" id="f-billing" onchange="renderTable()">
+        <option value="">All</option>
+        <option value="Bulk">Bulk</option>
+        <option value="Mixed">Mixed</option>
+        <option value="Private">Private</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Status</span>
+      <select class="filter-select" id="f-status" onchange="renderTable()">
+        <option value="">All</option>
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="spoke">Spoke to PM</option>
+        <option value="sent">CV Sent</option>
+        <option value="followup">Follow-up</option>
+        <option value="interested">Interested</option>
+        <option value="notinterested">Not interested</option>
+        <option value="placed">GP Placed</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">MM</span>
+      <select class="filter-select" id="f-mm" onchange="renderTable()">
+        <option value="">All</option>
+        <option>MM1</option><option>MM2</option><option>MM3</option>
+        <option>MM4</option><option>MM5</option><option>MM6</option><option>MM7</option>
+      </select>
+    </div>
+    <button class="clear-btn" onclick="clearFilters()">&#10005; Clear filters</button>
+  </div>
+
+  <div style="overflow-x:auto">
+    <table id="practice-table" style="display:none">
+      <thead>
+        <tr>
+          <th style="width:20%">Practice</th>
+          <th style="width:12%">Location</th>
+          <th style="width:9%">DPA / MM</th>
+          <th style="width:9%">Billing</th>
+          <th style="width:11%">Practice manager</th>
+          <th style="width:10%">Status</th>
+          <th style="width:9%">Follow-up</th>
+          <th style="width:10%">Software</th>
+          <th style="width:7%"></th>
+          <th style="width:28px"></th>
+        </tr>
+      </thead>
+      <tbody id="practice-list"></tbody>
+    </table>
+  </div>
+  <div class="loading-msg" id="loading-msg">Loading practices…</div>
+  <div class="empty" id="empty-msg" style="display:none">No practices match your filters.</div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="practice-modal">
+  <div class="modal">
+    <h2 id="modal-title">Add practice</h2>
+    <div class="modal-section">Practice details</div>
+    <div class="modal-grid">
+      <div class="field full"><label>Practice name *</label><input type="text" id="p-name" placeholder="e.g. Morayfield Family Medical" /></div>
+      <div class="field full"><label>Address</label><input type="text" id="p-address" placeholder="Street address" /></div>
+      <div class="field"><label>Suburb</label><input type="text" id="p-suburb" placeholder="e.g. Morayfield" /></div>
+      <div class="field"><label>State</label>
+        <select id="p-state">
+          <option value="">— select —</option>
+          <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
+          <option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
+        </select>
+      </div>
+      <div class="field"><label>Nearest major city</label><input type="text" id="p-city" placeholder="e.g. Brisbane" /></div>
+      <div class="field"><label>Proximity to city</label><input type="text" id="p-proximity" placeholder="e.g. 45 km / 50 min" /></div>
+      <div class="field"><label>Phone</label><input type="tel" id="p-phone" placeholder="07 XXXX XXXX" /></div>
+      <div class="field"><label>Website</label><input type="text" id="p-website" placeholder="https://..." /></div>
+      <div class="field"><label>Practice software</label>
+        <select id="p-software">
+          <option value="">— unknown —</option>
+          <option>Best Practice</option><option>Medical Director</option><option>Zedmed</option>
+          <option>Genie</option><option>Helix</option><option>Medical Director Cloud</option>
+          <option>Clinic to Cloud</option><option>Communicare</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Billing type</label>
+        <select id="p-billing">
+          <option value="">— unknown —</option>
+          <option value="Bulk">Bulk billing</option>
+          <option value="Mixed">Mixed billing</option>
+          <option value="Private">Private billing</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-section">DPA &amp; MM Classification</div>
+    <div class="modal-grid">
+      <div class="field"><label>DPA status</label>
+        <select id="p-dpa">
+          <option value="">— unknown —</option>
+          <option value="yes">DPA</option>
+          <option value="no">Non-DPA</option>
+        </select>
+      </div>
+      <div class="field"><label>Modified Monash (MM) level</label>
+        <select id="p-mm">
+          <option value="">— unknown —</option>
+          <option>MM1</option><option>MM2</option><option>MM3</option>
+          <option>MM4</option><option>MM5</option><option>MM6</option><option>MM7</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-section">Practice manager</div>
+    <div class="modal-grid">
+      <div class="field"><label>Practice manager name</label><input type="text" id="p-pm-name" placeholder="First and last name" /></div>
+      <div class="field"><label>Practice manager email</label><input type="email" id="p-pm-email" placeholder="pm@practice.com.au" /></div>
+    </div>
+    <div class="modal-section">GP &amp; placement</div>
+    <div class="modal-grid">
+      <div class="field"><label>GP who accepted position here</label><input type="text" id="p-gp" placeholder="e.g. Dr. James Smith" /></div>
+      <div class="field"><label>New GP to send to this practice</label><input type="text" id="p-gp-new" placeholder="e.g. Dr. Sarah Jones" /></div>
+    </div>
+    <div class="modal-section">Pipeline</div>
+    <div class="modal-grid">
+      <div class="field"><label>Status</label>
+        <select id="p-status">
+          <option value="new">New</option><option value="contacted">Contacted</option>
+          <option value="spoke">Spoke to PM</option><option value="sent">CV Sent</option>
+          <option value="followup">Follow-up</option><option value="interested">Interested</option>
+          <option value="notinterested">Not interested</option><option value="placed">GP Placed</option>
+        </select>
+      </div>
+      <div class="field"><label>Follow-up date</label><input type="date" id="p-followup" /></div>
+      <div class="field full"><label>Notes</label><textarea id="p-notes" placeholder="Call outcome, receptionist name, any context..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('practice-modal')">Cancel</button>
+      <button class="btn primary" id="save-btn" onclick="savePractice()">Save practice</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screenshot Import Modal -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal" style="max-width:560px">
+    <h2>&#128247; Import from screenshot</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:.75rem;line-height:1.5">Upload a screenshot of the practice website or Google listing. Claude will extract the name, address, suburb, state, phone, website, software, billing type, DPA status and automatically calculate the proximity to the nearest major city.</p>
+    <div class="field" style="margin-bottom:1rem">
+      <label>Anthropic API key <span style="color:var(--hint);font-weight:400">(required for extraction)</span></label>
+      <input type="password" id="api-key-input" placeholder="sk-ant-..." />
+      <span style="font-size:11px;color:var(--hint);margin-top:3px">Your key is only used locally and never stored.</span>
+    </div>
+    <div class="import-zone" id="import-zone" onclick="document.getElementById('img-input').click()">
+      <div class="icon">&#128444;</div>
+      <p>Click to upload a screenshot</p>
+      <p style="font-size:11px;margin-top:4px">PNG, JPG supported</p>
+    </div>
+    <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)" />
+    <div class="import-preview" id="import-preview">
+      <img id="preview-img" src="" alt="Preview" />
+      <div class="import-status" id="import-status"></div>
+    </div>
+    <div id="extracted-fields" style="display:none">
+      <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem">Extracted details — review and confirm</div>
+      <div class="modal-grid">
+        <div class="field full"><label>Practice name</label><input type="text" id="ex-name" /></div>
+        <div class="field full"><label>Address</label><input type="text" id="ex-address" /></div>
+        <div class="field"><label>Suburb</label><input type="text" id="ex-suburb" /></div>
+        <div class="field"><label>State</label>
+          <select id="ex-state">
+            <option value="">— select —</option>
+            <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
+            <option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
+          </select>
+        </div>
+        <div class="field"><label>Nearest major city</label><input type="text" id="ex-city" /></div>
+        <div class="field"><label>Proximity to city</label><input type="text" id="ex-proximity" /></div>
+        <div class="field"><label>Phone</label><input type="tel" id="ex-phone" /></div>
+        <div class="field"><label>Website</label><input type="text" id="ex-website" /></div>
+        <div class="field"><label>DPA status</label>
+          <select id="ex-dpa">
+            <option value="">— unknown —</option>
+            <option value="yes">DPA</option><option value="no">Non-DPA</option>
+          </select>
+        </div>
+        <div class="field"><label>MM level</label>
+          <select id="ex-mm">
+            <option value="">— unknown —</option>
+            <option>MM1</option><option>MM2</option><option>MM3</option>
+            <option>MM4</option><option>MM5</option><option>MM6</option><option>MM7</option>
+          </select>
+        </div>
+        <div class="field"><label>Billing type</label>
+          <select id="ex-billing">
+            <option value="">— unknown —</option>
+            <option value="Bulk">Bulk billing</option>
+            <option value="Mixed">Mixed billing</option>
+            <option value="Private">Private billing</option>
+          </select>
+        </div>
+        <div class="field"><label>Practice software</label>
+          <select id="ex-software">
+            <option value="">— unknown —</option>
+            <option>Best Practice</option><option>Medical Director</option><option>Zedmed</option>
+            <option>Genie</option><option>Helix</option><option>Medical Director Cloud</option>
+            <option>Clinic to Cloud</option><option>Communicare</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>PM name</label><input type="text" id="ex-pm-name" /></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('import-modal')">Cancel</button>
+      <button class="btn primary" id="import-confirm-btn" style="display:none" onclick="confirmImport()">Add to pipeline</button>
+    </div>
+  </div>
+</div>
+
+<!-- Migrate from browser modal -->
+<div class="modal-overlay" id="migrate-modal">
+  <div class="modal" style="max-width:480px">
+    <h2>&#8679; Migrate from browser storage</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6">This will read practices saved in your browser's local storage from the old GP Clients file and upload them to Supabase. This only needs to be done once.</p>
+    <div id="migrate-status" style="font-size:13px;color:var(--muted);padding:.75rem;background:var(--raised);border-radius:8px;border:1px solid var(--border);min-height:40px"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('migrate-modal')">Close</button>
+      <button class="btn primary" id="migrate-btn" onclick="runMigration()">Migrate now</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Supabase Configuration ─────────────────────────────────────
+// Replace these two values with your own from:
+// Supabase dashboard → Settings → API
+const SUPABASE_URL      = 'https://qoyokyuzkpfvaakdkmxg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
+// ──────────────────────────────────────────────────────────────
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const OLD_LS_KEY = 'gp_clients_v3';
+
+let practices = [];
+let openDetailId = null;
+let editingId = null;
+let saving = false;
+
+const STATUS_LABELS = {
+  new:'New', contacted:'Contacted', spoke:'Spoke to PM',
+  sent:'CV Sent', followup:'Follow-up', interested:'Interested',
+  notinterested:'Not interested', placed:'GP Placed'
+};
+const STATUS_CLASS = {
+  new:'s-new', contacted:'s-contacted', spoke:'s-spoke',
+  sent:'s-sent', followup:'s-followup', interested:'s-interested',
+  notinterested:'s-notinterested', placed:'s-placed'
+};
+
+// ── DB ↔ JS mapping ──────────────────────────────────────────
+function fromDb(row) {
+  return {
+    id:        row.id,
+    name:      row.name      || '',
+    address:   row.address   || '',
+    suburb:    row.suburb    || '',
+    state:     row.state     || '',
+    city:      row.city      || '',
+    proximity: row.proximity || '',
+    phone:     row.phone     || '',
+    website:   row.website   || '',
+    software:  row.software  || '',
+    billing:   row.billing   || '',
+    dpa:       row.dpa       || '',
+    mm:        row.mm        || '',
+    pmName:    row.pm_name   || '',
+    pmEmail:   row.pm_email  || '',
+    gp:        row.gp        || '',
+    gpNew:     row.gp_new    || '',
+    status:    row.status    || 'new',
+    followup:  row.followup_date || '',
+    notes:     row.notes     || ''
+  };
+}
+
+function toDb(p) {
+  return {
+    name:          p.name      || '',
+    address:       p.address   || '',
+    suburb:        p.suburb    || '',
+    state:         p.state     || '',
+    city:          p.city      || '',
+    proximity:     p.proximity || '',
+    phone:         p.phone     || '',
+    website:       p.website   || '',
+    software:      p.software  || '',
+    billing:       p.billing   || '',
+    dpa:           p.dpa       || '',
+    mm:            p.mm        || '',
+    pm_name:       p.pmName    || '',
+    pm_email:      p.pmEmail   || '',
+    gp:            p.gp        || '',
+    gp_new:        p.gpNew     || '',
+    status:        p.status    || 'new',
+    followup_date: (p.followup && p.followup.trim()) ? p.followup.trim() : null,
+    notes:         p.notes     || '',
+    updated_at:    new Date().toISOString()
+  };
+}
+
+// ── Load ─────────────────────────────────────────────────────
+async function loadData() {
+  const { data, error } = await db.from('gp_clients').select('*').order('id');
+  document.getElementById('loading-msg').style.display = 'none';
+  if (error) {
+    document.getElementById('empty-msg').textContent = 'Could not load data. Check your Supabase credentials.';
+    document.getElementById('empty-msg').style.display = 'block';
+    console.error(error);
+    return;
+  }
+  practices = (data || []).map(fromDb);
+  renderTable();
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function today() { return new Date().toISOString().split('T')[0]; }
+function isFollowupDue(p) { return p.followup && p.followup <= today() && p.status !== 'placed' && p.status !== 'notinterested'; }
+
+function formatDate(d) {
+  if (!d) return '—';
+  const p = d.split('-');
+  return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function updateMetrics() {
+  document.getElementById('m-total').textContent = practices.length;
+  document.getElementById('m-dpa').textContent = practices.filter(p=>p.dpa==='yes').length;
+  document.getElementById('m-sent').textContent = practices.filter(p=>p.status==='sent').length;
+  document.getElementById('m-interested').textContent = practices.filter(p=>p.status==='interested').length;
+  document.getElementById('m-placed').textContent = practices.filter(p=>p.status==='placed').length;
+  const due = practices.filter(isFollowupDue);
+  document.getElementById('m-followup').textContent = due.length;
+  if (due.length > 0) {
+    document.getElementById('followup-list').innerHTML = due.map(p=>`• ${p.name} (${p.suburb||''}${p.state?', '+p.state:''}) — due ${formatDate(p.followup)}`).join('<br>');
+    document.getElementById('followup-bar').classList.add('visible');
+  }
+}
+
+function toggleDetail(id, e) {
+  if (e && e.target.closest('.row-actions,select')) return;
+  openDetailId = (openDetailId === id) ? null : id;
+  renderTable();
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderTable() {
+  updateMetrics();
+  const search = (document.getElementById('search-input').value||'').toLowerCase();
+  const fState = document.getElementById('f-state').value;
+  const fDpa = document.getElementById('f-dpa').value;
+  const fBilling = document.getElementById('f-billing').value;
+  const fStatus = document.getElementById('f-status').value;
+  const fMm = document.getElementById('f-mm').value;
+
+  let visible = practices.slice();
+  if (fState) visible = visible.filter(p=>p.state===fState);
+  if (fDpa) visible = visible.filter(p=>p.dpa===fDpa);
+  if (fBilling) visible = visible.filter(p=>p.billing===fBilling);
+  if (fStatus) visible = visible.filter(p=>p.status===fStatus);
+  if (fMm) visible = visible.filter(p=>p.mm===fMm);
+  if (search) visible = visible.filter(p=>(
+    p.name+p.suburb+p.state+p.city+p.pmName+p.gp+p.gpNew+p.software+p.notes+p.billing+p.dpa+p.mm
+  ).toLowerCase().includes(search));
+
+  document.getElementById('result-count').textContent = visible.length === practices.length
+    ? `${practices.length} practices` : `${visible.length} of ${practices.length} practices`;
+
+  const tbody = document.getElementById('practice-list');
+  const empty = document.getElementById('empty-msg');
+  const table = document.getElementById('practice-table');
+
+  if (visible.length === 0) {
+    tbody.innerHTML=''; empty.textContent='No practices match your filters. Try adjusting your search.'; empty.style.display='block'; table.style.display='none'; return;
+  }
+  empty.style.display='none'; table.style.display='';
+
+  let html = '';
+  visible.forEach(p => {
+    const isOpen = openDetailId === p.id;
+    const fuDue = isFollowupDue(p);
+    const fuText = p.followup
+      ? `<span class="${fuDue?'followup-due':'followup-ok'}">${fuDue?'⚠ ':''}${formatDate(p.followup)}</span>`
+      : '<span style="color:var(--hint)">—</span>';
+    const dpaBadge = p.dpa==='yes' ? `<span class="dpa-yes">DPA</span>` : p.dpa==='no' ? `<span class="dpa-no">Non-DPA</span>` : '<span style="color:var(--hint);font-size:12px">—</span>';
+    const mmText = p.mm ? `<span style="font-size:11px;color:var(--muted);margin-left:4px">${p.mm}</span>` : '';
+    const billingClass = p.billing==='Bulk'?'billing-bulk':p.billing==='Mixed'?'billing-mixed':p.billing==='Private'?'billing-private':'';
+    const billingBadge = p.billing ? `<span class="${billingClass}">${p.billing}</span>` : '<span style="color:var(--hint);font-size:12px">—</span>';
+
+    html += `<tr class="practice-row${isOpen?' active-row':''}" onclick="toggleDetail(${p.id},event)">
+      <td>
+        <div class="practice-name">${escHtml(p.name)}</div>
+        <div class="practice-sub">${escHtml(p.suburb||'')}${p.state?', '+p.state:''}</div>
+      </td>
+      <td style="font-size:12px;color:var(--muted)">
+        ${escHtml(p.suburb||'—')}${p.state?'<br><span style="color:var(--hint)">'+p.state+'</span>':''}
+        ${p.proximity?'<br><span style="font-size:11px;color:var(--hint)">'+escHtml(p.proximity)+'</span>':''}
+      </td>
+      <td>${dpaBadge}${mmText}</td>
+      <td>${billingBadge}</td>
+      <td style="font-size:13px;color:var(--muted)">${escHtml(p.pmName||'—')}</td>
+      <td>
+        <select class="status-select ${STATUS_CLASS[p.status]||''}" onchange="updateStatus(${p.id},this.value)" onclick="event.stopPropagation()">
+          ${Object.entries(STATUS_LABELS).map(([v,l])=>`<option value="${v}"${p.status===v?' selected':''}>${l}</option>`).join('')}
+        </select>
+      </td>
+      <td>${fuText}</td>
+      <td style="font-size:12px;color:var(--muted)">${escHtml(p.software||'—')}</td>
+      <td><div class="row-actions">
+        <button onclick="openEditModal(${p.id})" title="Edit">&#9998;</button>
+        <button onclick="quickEmail(${p.id})" title="Email PM">&#9993;</button>
+        <button onclick="deletePractice(${p.id})" title="Delete" style="color:#e08080">&#128465;</button>
+      </div></td>
+      <td style="text-align:right"><span class="chevron${isOpen?' open':''}">&#8250;</span></td>
+    </tr>`;
+
+    if (isOpen) {
+      const hasNotes = p.notes && p.notes.trim();
+      html += `<tr class="detail-row"><td colspan="10"><div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">Contact</div>
+          <div class="detail-field"><label>Phone</label><div class="detail-value${p.phone?'':' empty'}">${p.phone?`<a href="tel:${escHtml(p.phone)}">${escHtml(p.phone)}</a>`:'Not recorded'}</div></div>
+          <div class="detail-field"><label>Website</label><div class="detail-value${p.website?'':' empty'}">${p.website?`<a href="${escHtml(p.website)}" target="_blank">${escHtml(p.website)}</a>`:'Not recorded'}</div></div>
+          <div class="detail-field"><label>PM name</label><div class="detail-value${p.pmName?'':' empty'}">${escHtml(p.pmName)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>PM email</label><div class="detail-value${p.pmEmail?'':' empty'}">${p.pmEmail?`<a href="mailto:${escHtml(p.pmEmail)}">${escHtml(p.pmEmail)}</a>`:'Not recorded'}</div></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Location &amp; classification</div>
+          <div class="detail-field"><label>Address</label><div class="detail-value${p.address?'':' empty'}">${escHtml(p.address)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>Suburb / State</label><div class="detail-value">${escHtml(p.suburb||'—')}${p.state?', '+p.state:''}</div></div>
+          <div class="detail-field"><label>Nearest city</label><div class="detail-value${p.city?'':' empty'}">${escHtml(p.city)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>Proximity</label><div class="detail-value${p.proximity?'':' empty'}">${escHtml(p.proximity)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>DPA / MM</label><div class="detail-value">${p.dpa==='yes'?'DPA':p.dpa==='no'?'Non-DPA':'—'}${p.mm?' · '+p.mm:''}</div></div>
+          <div class="detail-field"><label>Billing</label><div class="detail-value${p.billing?'':' empty'}">${escHtml(p.billing)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>Software</label><div class="detail-value${p.software?'':' empty'}">${escHtml(p.software)||'Not recorded'}</div></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">GP details</div>
+          <div class="detail-field"><label>GP who accepted position here</label><div class="detail-value${p.gp?'':' empty'}">${escHtml(p.gp)||'Not recorded'}</div></div>
+          <div class="detail-field"><label>New GP to send to this practice</label><div class="detail-value${p.gpNew?'':' empty'}">${escHtml(p.gpNew)||'Not yet assigned'}</div></div>
+          <div class="detail-field"><label>Follow-up date</label><div class="detail-value">${formatDate(p.followup)}</div></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Notes</div>
+          <div class="detail-value${hasNotes?'':' empty'}" style="white-space:pre-wrap;font-size:13px;line-height:1.6">${hasNotes?escHtml(p.notes):'No notes yet.'}</div>
+        </div>
+        <div class="detail-row-actions">
+          <button class="btn sm" onclick="openEditModal(${p.id})">&#9998; Edit</button>
+          <button class="btn sm" onclick="quickEmail(${p.id})">&#9993; Email PM</button>
+        </div>
+      </div></td></tr>`;
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+// ── CRUD ─────────────────────────────────────────────────────
+async function updateStatus(id, val) {
+  const p = practices.find(p=>p.id===id);
+  if (!p) return;
+  const old = p.status;
+  p.status = val;
+  const { error } = await db.from('gp_clients').update({status:val,updated_at:new Date().toISOString()}).eq('id',id);
+  if (error) { p.status=old; alert('Error updating status: '+error.message); }
+  renderTable();
+}
+
+async function deletePractice(id) {
+  if (!confirm('Remove this practice from the pipeline?')) return;
+  const { error } = await db.from('gp_clients').delete().eq('id', id);
+  if (error) { alert('Error deleting: '+error.message); return; }
+  practices = practices.filter(p=>p.id!==id);
+  if (openDetailId===id) openDetailId=null;
+  renderTable();
+}
+
+function quickEmail(id) {
+  const p = practices.find(p=>p.id===id);
+  if (!p || !p.pmEmail) { alert('No PM email recorded for this practice.'); return; }
+  const subject = encodeURIComponent(`GP Enquiry — Permanent Position — ${p.name}`);
+  const body = encodeURIComponent(`Dear ${p.pmName||'Practice Manager'},\n\nI hope this email finds you well.\n\nMy name is Chris and I specialise in placing overseas-trained General Practitioners into permanent positions at Australian practices. I'm writing to enquire whether ${p.name} would be open to discussing an opportunity with one of my available GPs${p.gpNew?' ('+p.gpNew+')':''}.\n\nI would be delighted to provide a CV and further details at your convenience.\n\nKind regards,\nChris`);
+  window.location.href = `mailto:${p.pmEmail}?subject=${subject}&body=${body}`;
+}
+
+function clearFilters() {
+  document.getElementById('search-input').value='';
+  document.getElementById('f-state').value='';
+  document.getElementById('f-dpa').value='';
+  document.getElementById('f-billing').value='';
+  document.getElementById('f-status').value='';
+  document.getElementById('f-mm').value='';
+  renderTable();
+}
+
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Add practice';
+  ['p-name','p-address','p-suburb','p-city','p-proximity','p-phone','p-website','p-pm-name','p-pm-email','p-gp','p-gp-new','p-notes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['p-state','p-software','p-billing','p-dpa','p-mm'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-status').value='new';
+  document.getElementById('p-followup').value='';
+  document.getElementById('practice-modal').classList.add('visible');
+  setTimeout(()=>document.getElementById('p-name').focus(),50);
+}
+
+function openEditModal(id) {
+  const p = practices.find(p=>p.id===id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = 'Edit practice';
+  document.getElementById('p-name').value = p.name||'';
+  document.getElementById('p-address').value = p.address||'';
+  document.getElementById('p-suburb').value = p.suburb||'';
+  document.getElementById('p-state').value = p.state||'';
+  document.getElementById('p-city').value = p.city||'';
+  document.getElementById('p-proximity').value = p.proximity||'';
+  document.getElementById('p-phone').value = p.phone||'';
+  document.getElementById('p-website').value = p.website||'';
+  document.getElementById('p-software').value = p.software||'';
+  document.getElementById('p-billing').value = p.billing||'';
+  document.getElementById('p-dpa').value = p.dpa||'';
+  document.getElementById('p-mm').value = p.mm||'';
+  document.getElementById('p-pm-name').value = p.pmName||'';
+  document.getElementById('p-pm-email').value = p.pmEmail||'';
+  document.getElementById('p-gp').value = p.gp||'';
+  document.getElementById('p-gp-new').value = p.gpNew||'';
+  document.getElementById('p-status').value = p.status||'new';
+  document.getElementById('p-followup').value = p.followup||'';
+  document.getElementById('p-notes').value = p.notes||'';
+  document.getElementById('practice-modal').classList.add('visible');
+  setTimeout(()=>document.getElementById('p-name').focus(),50);
+}
+
+async function savePractice() {
+  if (saving) return;
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) { document.getElementById('p-name').focus(); return; }
+  const data = {
+    name,
+    address:   document.getElementById('p-address').value.trim(),
+    suburb:    document.getElementById('p-suburb').value.trim(),
+    state:     document.getElementById('p-state').value,
+    city:      document.getElementById('p-city').value.trim(),
+    proximity: document.getElementById('p-proximity').value.trim(),
+    phone:     document.getElementById('p-phone').value.trim(),
+    website:   document.getElementById('p-website').value.trim(),
+    software:  document.getElementById('p-software').value,
+    billing:   document.getElementById('p-billing').value,
+    dpa:       document.getElementById('p-dpa').value,
+    mm:        document.getElementById('p-mm').value,
+    pmName:    document.getElementById('p-pm-name').value.trim(),
+    pmEmail:   document.getElementById('p-pm-email').value.trim(),
+    gp:        document.getElementById('p-gp').value.trim(),
+    gpNew:     document.getElementById('p-gp-new').value.trim(),
+    status:    document.getElementById('p-status').value,
+    followup:  document.getElementById('p-followup').value||'',
+    notes:     document.getElementById('p-notes').value.trim()
+  };
+
+  saving = true;
+  const btn = document.getElementById('save-btn');
+  btn.textContent='Saving…'; btn.disabled=true;
+
+  if (editingId) {
+    const { error } = await db.from('gp_clients').update(toDb(data)).eq('id', editingId);
+    if (error) { alert('Error saving: '+error.message); saving=false; btn.textContent='Save practice'; btn.disabled=false; return; }
+    const idx = practices.findIndex(p=>p.id===editingId);
+    if (idx>=0) practices[idx]={...practices[idx],...data};
+  } else {
+    const { data: row, error } = await db.from('gp_clients').insert([toDb(data)]).select().single();
+    if (error) { alert('Error saving: '+error.message); saving=false; btn.textContent='Save practice'; btn.disabled=false; return; }
+    practices.push(fromDb(row));
+  }
+
+  saving=false; btn.textContent='Save practice'; btn.disabled=false;
+  closeModal('practice-modal');
+  renderTable();
+}
+
+function backupData() {
+  const blob = new Blob([JSON.stringify({practices,nextId:practices.length+1},null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const d = new Date();
+  a.download = `gp_clients_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Screenshot import ─────────────────────────────────────────
+function openImportModal() {
+  document.getElementById('import-preview').style.display='none';
+  document.getElementById('extracted-fields').style.display='none';
+  document.getElementById('import-confirm-btn').style.display='none';
+  document.getElementById('img-input').value='';
+  document.getElementById('import-status').textContent='';
+  document.getElementById('import-modal').classList.add('visible');
+}
+
+async function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const b64full = e.target.result;
+    const b64 = b64full.split(',')[1];
+    const mime = file.type || 'image/png';
+    document.getElementById('preview-img').src = b64full;
+    document.getElementById('import-preview').style.display='block';
+    document.getElementById('import-status').textContent = '⏳ Analysing screenshot…';
+    await extractFromImage(b64, mime);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function extractFromImage(b64, mime) {
+  const apiKey = document.getElementById('api-key-input').value.trim();
+  if (!apiKey) {
+    document.getElementById('import-status').textContent = '⚠ Please enter your Anthropic API key above first.';
+    document.getElementById('extracted-fields').style.display='block';
+    document.getElementById('import-confirm-btn').style.display='inline-flex';
+    return;
+  }
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1200,
+        messages:[{
+          role:"user",
+          content:[
+            {type:"image",source:{type:"base64",media_type:mime,data:b64}},
+            {type:"text",text:`Extract details from this Australian medical practice screenshot. Return ONLY a valid JSON object with these keys (use "" if unknown): name, address, suburb, state (NSW/VIC/QLD/WA/SA/TAS/ACT/NT), phone, website, software (Best Practice/Medical Director/Zedmed/Genie/Helix/Medical Director Cloud/Clinic to Cloud/Communicare/Other or ""), billing (Bulk/Mixed/Private or ""), dpa ("yes"/"no"/""), mm (MM1-MM7 or ""), pmName, city (nearest major Australian city), proximity (e.g. "45 km / ~50 min N of Brisbane"). Return ONLY the JSON.`}
+          ]
+        }]
+      })
+    });
+    const data = await response.json();
+    const text = (data.content||[]).map(c=>c.text||'').join('');
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const ex = JSON.parse(match[0]);
+      ['name','address','suburb','city','proximity','phone','website','pm-name'].forEach(k => {
+        const el = document.getElementById('ex-'+k);
+        if (el) el.value = ex[k.replace('-','')]||ex[k]||'';
+      });
+      document.getElementById('ex-state').value = ex.state||'';
+      document.getElementById('ex-dpa').value = ex.dpa||'';
+      document.getElementById('ex-mm').value = ex.mm||'';
+      document.getElementById('ex-billing').value = ex.billing||'';
+      document.getElementById('ex-software').value = ex.software||'';
+      document.getElementById('ex-pm-name').value = ex.pmName||'';
+      document.getElementById('import-status').textContent = '✓ Details extracted — review and confirm below.';
+    } else {
+      document.getElementById('import-status').textContent = 'Could not auto-extract — please fill in below.';
+    }
+  } catch(err) {
+    document.getElementById('import-status').textContent = 'Extraction error — fill in details manually below.';
+    console.error(err);
+  }
+  document.getElementById('extracted-fields').style.display='block';
+  document.getElementById('import-confirm-btn').style.display='inline-flex';
+}
+
+async function confirmImport() {
+  const name = document.getElementById('ex-name').value.trim();
+  if (!name) { document.getElementById('ex-name').focus(); return; }
+  const data = {
+    name,
+    address:   document.getElementById('ex-address').value.trim(),
+    suburb:    document.getElementById('ex-suburb').value.trim(),
+    state:     document.getElementById('ex-state').value,
+    city:      document.getElementById('ex-city').value.trim(),
+    proximity: document.getElementById('ex-proximity').value.trim(),
+    phone:     document.getElementById('ex-phone').value.trim(),
+    website:   document.getElementById('ex-website').value.trim(),
+    software:  document.getElementById('ex-software').value,
+    billing:   document.getElementById('ex-billing').value,
+    dpa:       document.getElementById('ex-dpa').value,
+    mm:        document.getElementById('ex-mm').value,
+    pmName:    document.getElementById('ex-pm-name').value.trim(),
+    pmEmail:   '',
+    gp:'', gpNew:'', status:'new', followup:'', notes:''
+  };
+  const { data: row, error } = await db.from('gp_clients').insert([toDb(data)]).select().single();
+  if (error) { alert('Error saving: '+error.message); return; }
+  practices.push(fromDb(row));
+  closeModal('import-modal');
+  renderTable();
+}
+
+// ── Migration from localStorage ───────────────────────────────
+function openMigrateModal() {
+  const raw = localStorage.getItem(OLD_LS_KEY);
+  const el = document.getElementById('migrate-status');
+  if (!raw) {
+    el.textContent = 'No data found in browser storage (localStorage key "gp_clients_v3"). Nothing to migrate — you\'re already using Supabase.';
+    document.getElementById('migrate-btn').disabled = true;
+  } else {
+    try {
+      const d = JSON.parse(raw);
+      const count = (d.practices||[]).length;
+      el.textContent = `Found ${count} practice${count!==1?'s':''} in browser storage. Click "Migrate now" to upload them all to Supabase.`;
+      document.getElementById('migrate-btn').disabled = false;
+    } catch(e) {
+      el.textContent = 'Found browser storage data but could not read it. It may be corrupted.';
+      document.getElementById('migrate-btn').disabled = true;
+    }
+  }
+  document.getElementById('migrate-modal').classList.add('visible');
+}
+
+async function runMigration() {
+  const raw = localStorage.getItem(OLD_LS_KEY);
+  if (!raw) return;
+  const el = document.getElementById('migrate-status');
+  const btn = document.getElementById('migrate-btn');
+  btn.disabled = true;
+  btn.textContent = 'Migrating…';
+
+  try {
+    const d = JSON.parse(raw);
+    const oldPractices = d.practices || [];
+    let success = 0, failed = 0;
+
+    for (const p of oldPractices) {
+      const mapped = {
+        name:      p.name     || '',
+        address:   p.address  || '',
+        suburb:    p.suburb   || '',
+        state:     p.state    || '',
+        city:      p.city     || '',
+        proximity: p.proximity|| '',
+        phone:     p.phone    || '',
+        website:   p.website  || '',
+        software:  p.software || '',
+        billing:   p.billing  || '',
+        dpa:       p.dpa      || '',
+        mm:        p.mm       || '',
+        pm_name:   p.pmName   || '',
+        pm_email:  p.pmEmail  || '',
+        gp:        p.gp       || '',
+        gp_new:    p.gpNew    || '',
+        status:    p.status   || 'new',
+        followup_date: (p.followup && p.followup.trim()) ? p.followup.trim() : null,
+        notes:     p.notes    || ''
+      };
+      const { error } = await db.from('gp_clients').insert([mapped]);
+      if (error) { failed++; } else { success++; }
+    }
+
+    if (success > 0) {
+      el.textContent = `✓ Migration complete! ${success} practice${success!==1?'s':''} uploaded to Supabase.${failed>0?' '+failed+' failed.':''} Refreshing…`;
+      localStorage.removeItem(OLD_LS_KEY);
+      setTimeout(() => { closeModal('migrate-modal'); loadData(); }, 2000);
+    } else {
+      el.textContent = `Migration failed — ${failed} error${failed!==1?'s':''}. Check console for details.`;
+      btn.disabled = false;
+      btn.textContent = 'Retry';
+    }
+  } catch(e) {
+    el.textContent = 'Migration failed: ' + e.message;
+    btn.disabled = false;
+    btn.textContent = 'Retry';
+  }
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('visible'); }
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) { if (e.target===this) this.classList.remove('visible'); });
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key==='Escape') document.querySelectorAll('.modal-overlay.visible').forEach(m=>m.classList.remove('visible'));
+});
+
+if (SUPABASE_URL.includes('YOUR-PROJECT')||SUPABASE_ANON_KEY.includes('YOUR_ANON')) {
+  document.getElementById('config-banner').classList.add('visible');
+}
+
+loadData();
+</script>
+</body>
+</html>
