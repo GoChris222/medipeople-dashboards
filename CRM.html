@@ -830,13 +830,27 @@ async function loadFollowups(){
 // ── PROFILE MODAL ─────────────────────────────────────────────
 async function openProfile(id){
   currentProfileId=id;
-  const[{data:p},{data:acts}]=await Promise.all([
+  const[{data:p},{data:acts},{data:placements}]=await Promise.all([
     sb.from('crm_profiles').select('*').eq('id',id).single(),
-    sb.from('crm_activities').select('*').eq('profile_id',id).order('created_at',{ascending:false})
+    sb.from('crm_activities').select('*').eq('profile_id',id).order('created_at',{ascending:false}),
+    sb.from('crm_placements').select('*').eq('candidate_id',id).order('start_date',{ascending:false})
   ]);
   if(!p)return;
   const color={doctor:'#2563eb',locum:'#7c3aed',otd:'#d97706'}[p.type]||'#6b7280';
   const ini=p.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  // For placed locums: show most recent placement dates; for available locums: show available dates
+  const isPlaced = p.pipeline_stage==='Placed' || p.status==='Placed';
+  const latestPlace = placements&&placements.length?placements[0]:null;
+  let dateLabel='', dateValue='';
+  if(p.type==='locum'){
+    if(isPlaced && latestPlace && latestPlace.start_date){
+      dateLabel='Last Placed';
+      dateValue=`${latestPlace.start_date}${latestPlace.end_date?' → '+latestPlace.end_date:''}`;
+    } else if(p.available_from||p.available_to){
+      dateLabel='Available';
+      dateValue=`${p.available_from||'?'} → ${p.available_to||'?'}`;
+    }
+  }
   document.getElementById('prof-name').textContent=p.name;
   document.getElementById('prof-body').innerHTML=`
     <div class="ph">
@@ -853,17 +867,20 @@ async function openProfile(id){
     <div class="dg">
       ${di('Specialty',p.specialty)} ${di('Sub-specialty',p.sub_specialty)} ${di('Years Exp.',p.years_experience!=null?p.years_experience+' yrs':null)}
       ${di('Location',[p.current_location,p.state].filter(Boolean).join(', '))} ${di('MM Level',p.mm_level?'MM'+p.mm_level:null)} ${di('DPA Areas',(p.dpa_areas||[]).join(', '))}
-      ${p.type==='locum'?di('Available',`${p.available_from||'?'} → ${p.available_to||'?'}`):''}
+      ${p.type==='locum'&&dateLabel?di(dateLabel,dateValue):''}
       ${p.type==='locum'?di('Daily Rate',p.daily_rate_min?`$${p.daily_rate_min}${p.daily_rate_max?` – $${p.daily_rate_max}`:''}`:null):''}
       ${p.type==='otd'?di('Visa',p.visa_type):''}  ${p.type==='otd'?di('Registration',p.registration_status):''}  ${p.type==='otd'?di('AHPRA',p.ahpra_number):''}
       ${di('Source',p.source)} ${di('Referral',p.referral_source?`${p.referral_source} (${p.referral_split_pct||0}%)`:null)} ${di('Follow-up',p.follow_up_date)}
+      ${p.type==='locum'&&placements&&placements.length?di('Total Placements',placements.length+' placement'+(placements.length!==1?'s':'')):''}
     </div>
     ${p.notes?`<div style="background:var(--amb-l);border-radius:7px;padding:10px;margin-bottom:14px;font-size:13px;">📝 ${esc(p.notes)}</div>`:''}
     <div class="tabs" style="margin-bottom:14px;">
       <div class="tab active" onclick="stab(this,'ptl')">Timeline (${(acts||[]).length})</div>
+      ${placements&&placements.length?`<div class="tab" onclick="stab(this,'ppl')">Placements (${placements.length})</div>`:''}
       ${p.cv_text?`<div class="tab" onclick="stab(this,'pcv')">CV</div>`:''}
     </div>
     <div id="ptl" class="tab-pane active">${renderTL(acts||[])}</div>
+    ${placements&&placements.length?`<div id="ppl" class="tab-pane">${renderProfilePlacements(placements)}</div>`:''}
     ${p.cv_text?`<div id="pcv" class="tab-pane"><div style="background:var(--g50);border-radius:7px;padding:14px;font-size:12px;white-space:pre-wrap;max-height:350px;overflow-y:auto;">${esc(p.cv_text)}</div></div>`:''}
   `;
   document.getElementById('m-profile').classList.remove('hidden');
@@ -901,6 +918,28 @@ async function openClientProfile(id){
     <div id="ctl" class="tab-pane active">${renderTL(acts||[])}</div>
   `;
   document.getElementById('m-cprofile').classList.remove('hidden');
+}
+
+function renderProfilePlacements(placements){
+  if(!placements||!placements.length)return'<div class="empty" style="padding:20px;"><p>No placements yet.</p></div>';
+  return`<table style="width:100%;border-collapse:collapse;">
+    <thead><tr>
+      <th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;border-bottom:1px solid var(--g200);text-align:left;">Client</th>
+      <th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;border-bottom:1px solid var(--g200);text-align:left;">Start</th>
+      <th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;border-bottom:1px solid var(--g200);text-align:left;">End</th>
+      <th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;border-bottom:1px solid var(--g200);text-align:left;">Rate</th>
+      <th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;border-bottom:1px solid var(--g200);text-align:left;">Fee</th>
+      <th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;border-bottom:1px solid var(--g200);text-align:left;">Status</th>
+    </tr></thead>
+    <tbody>${placements.map(pl=>`<tr style="border-bottom:1px solid var(--g100);">
+      <td style="padding:9px 12px;font-size:13px;"><strong>${esc(pl.client_name||'—')}</strong></td>
+      <td style="padding:9px 12px;font-size:13px;">${pl.start_date||'—'}</td>
+      <td style="padding:9px 12px;font-size:13px;">${pl.end_date||'—'}</td>
+      <td style="padding:9px 12px;font-size:13px;">${pl.agreed_rate?'$'+fmt(pl.agreed_rate)+(pl.placement_type==='Locum'?'/day':''):'—'}</td>
+      <td style="padding:9px 12px;font-size:13px;color:var(--grn);font-weight:600;">${pl.net_fee?'$'+fmt(pl.net_fee):'—'}</td>
+      <td style="padding:9px 12px;">${statusBadge(pl.status)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
 }
 
 function di(l,v){
