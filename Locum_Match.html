@@ -317,7 +317,10 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
           <select id="v-role-type">
             <option value="">Select type</option>
             <option value="GP Only">GP Only</option>
-            <option value="GPM VMO">GPM VMO</option>
+            <option value="GP VMO">GP VMO</option>
+            <option value="IR">IR</option>
+            <option value="Gen Radiologist">Gen Radiologist</option>
+            <option value="ED VMO">ED VMO</option>
             <option value="Either">Either</option>
           </select>
         </div>
@@ -802,7 +805,8 @@ function toggleCold(headerEl){
 function matchCard(s,vac){
   const c=s.cand;
   const prefs=candPrefs[c.id]||{};
-  const roleTag=prefs.role_types?`<span class="b b-${prefs.role_types==='GP Only'?'grn':'pur'}">${esc(prefs.role_types)}</span>`:'<span class="b b-gray">Type not set</span>';
+  const roleColor={'GP Only':'grn','GP VMO':'pur','ED VMO':'pur','IR':'blue','Gen Radiologist':'blue'}[prefs.role_types]||'gray';
+  const roleTag=prefs.role_types&&prefs.role_types!=='both'?`<span class="b b-${roleColor}">${esc(prefs.role_types)}</span>`:'<span class="b b-gray">Type not set</span>';
   const allSignals=[
     ...s.reasons.map(r=>`<span class="sig sig-ok">${esc(r)}</span>`),
     ...s.warnings.map(w=>`<span class="sig sig-warn">${esc(w)}</span>`),
@@ -998,9 +1002,12 @@ function openCandProfile(candId){
       <div class="fi">
         <label>Role type</label>
         <select id="cp-role-type">
-          <option value="both" ${(!prefs.role_types||prefs.role_types==='both')?'selected':''}>Both GP Only and GPM VMO</option>
+          <option value="both" ${(!prefs.role_types||prefs.role_types==='both')?'selected':''}>Any / not set</option>
           <option value="GP Only" ${prefs.role_types==='GP Only'?'selected':''}>GP Only</option>
-          <option value="GPM VMO" ${prefs.role_types==='GPM VMO'?'selected':''}>GPM VMO only</option>
+          <option value="GP VMO" ${prefs.role_types==='GP VMO'||prefs.role_types==='GPM VMO'?'selected':''}>GP VMO</option>
+          <option value="IR" ${prefs.role_types==='IR'?'selected':''}>IR</option>
+          <option value="Gen Radiologist" ${prefs.role_types==='Gen Radiologist'?'selected':''}>Gen Radiologist</option>
+          <option value="ED VMO" ${prefs.role_types==='ED VMO'?'selected':''}>ED VMO</option>
         </select>
       </div>
       <div class="fi">
