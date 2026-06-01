@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediPeople · Locum GP Matcher</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --pri:#2563eb;--pri-d:#1d4ed8;--pri-l:#eff6ff;
+  --grn:#16a34a;--grn-l:#f0fdf4;
+  --amb:#d97706;--amb-l:#fffbeb;
+  --red:#dc2626;--red-l:#fef2f2;
+  --pur:#7c3aed;--pur-l:#f5f3ff;
+  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;
+  --g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;
+  --g800:#1f2937;--g900:#111827;
+  --sw:224px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--g50);color:var(--g800);display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+#sb{width:var(--sw);background:var(--g900);color:#fff;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sb-logo{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo h1{font-size:15px;font-weight:700;color:#fff;}
+.sb-logo p{font-size:11px;color:var(--g400);margin-top:1px;}
+.sb-sec{padding:14px 16px 4px;font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.06em;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;font-size:13.5px;color:var(--g300);transition:all .12s;border-left:3px solid transparent;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.sb-item.active{background:rgba(37,99,235,.22);color:#fff;border-left-color:var(--pri);}
+.sb-item .ico{font-size:16px;width:18px;text-align:center;}
+.sb-item .bdg{margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;}
+.sb-divider{height:1px;background:rgba(255,255,255,.06);margin:6px 0;}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#topbar{height:52px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0;}
+#topbar h2{font-size:16px;font-weight:600;}
+#topbar .sp{flex:1;}
+#content{flex:1;overflow-y:auto;padding:20px;}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all .12s;}
+.btn-pri{background:var(--pri);color:#fff;}.btn-pri:hover{background:var(--pri-d);}
+.btn-sec{background:var(--g100);color:var(--g700);border:1px solid var(--g200);}.btn-sec:hover{background:var(--g200);}
+.btn-sm{padding:4px 10px;font-size:12px;}
+.btn-xs{padding:3px 8px;font-size:11px;}
+.btn-grn{background:var(--grn-l);color:var(--grn);border:1px solid #bbf7d0;}
+.btn-red{background:var(--red-l);color:var(--red);border:1px solid #fecaca;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:16px 18px;}
+.stat .lbl{font-size:11px;color:var(--g500);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+.stat .val{font-size:26px;font-weight:700;margin-top:4px;}
+.stat .sub{font-size:11px;color:var(--g400);margin-top:2px;}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--g200);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.ch{padding:12px 16px;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:10px;}
+.ch h3{font-size:14px;font-weight:600;}.ch .sp{flex:1;}
+
+/* BADGES */
+.b{display:inline-block;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;}
+.b-blue{background:var(--pri-l);color:var(--pri);}
+.b-grn{background:var(--grn-l);color:var(--grn);}
+.b-amb{background:var(--amb-l);color:var(--amb);}
+.b-red{background:var(--red-l);color:var(--red);}
+.b-pur{background:var(--pur-l);color:var(--pur);}
+.b-gray{background:var(--g100);color:var(--g600);}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;}
+.ov.hidden{display:none;}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:680px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-lg{max-width:820px;}
+.mh{padding:16px 20px;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:10px;}
+.mh h3{font-size:15px;font-weight:600;flex:1;}
+.mh .x{background:none;border:none;font-size:19px;color:var(--g400);cursor:pointer;padding:3px 7px;border-radius:5px;}.mh .x:hover{background:var(--g100);}
+.mb{padding:18px 20px;}
+.mf{padding:12px 20px;border-top:1px solid var(--g200);display:flex;justify-content:flex-end;gap:8px;}
+
+/* FORMS */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg3{grid-template-columns:1fr 1fr 1fr;}
+.fi{display:flex;flex-direction:column;gap:4px;}
+.fi.s2{grid-column:span 2;}.fi.s3{grid-column:span 3;}
+.fi label{font-size:11px;font-weight:600;color:var(--g600);}
+.fi input,.fi select,.fi textarea{padding:7px 9px;border:1px solid var(--g300);border-radius:7px;font-size:13px;color:var(--g800);font-family:inherit;}
+.fi input:focus,.fi select:focus,.fi textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.fi textarea{resize:vertical;min-height:60px;}
+.sec-title{font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px;border-bottom:1px solid var(--g100);padding-bottom:6px;}
+
+/* VIEWS */
+.view{display:none;}.view.active{display:block;}
+
+/* MATCH ENGINE LAYOUT */
+.match-layout{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start;}
+.vac-list-item{padding:10px 12px;border:1px solid var(--g200);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:all .12s;}
+.vac-list-item:hover{border-color:var(--pri);background:var(--pri-l);}
+.vac-list-item.selected{border-color:var(--pri);background:var(--pri-l);}
+.vac-list-item .vtitle{font-size:13px;font-weight:600;}
+.vac-list-item .vmeta{font-size:11px;color:var(--g500);margin-top:2px;}
+
+/* TIER SECTIONS */
+.tier-section{margin-bottom:14px;border:1px solid var(--g200);border-radius:10px;overflow:hidden;}
+.tier-header{padding:9px 14px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;}
+.tier-hot .tier-header{background:#f0fdf4;border-bottom:1px solid #bbf7d0;color:#15803d;}
+.tier-warm .tier-header{background:#fffbeb;border-bottom:1px solid #fcd34d;color:#92400e;}
+.tier-cold .tier-header{background:var(--red-l);border-bottom:1px solid #fecaca;color:#991b1b;}
+
+/* CANDIDATE MATCH CARDS */
+.match-card{padding:14px;border-bottom:1px solid var(--g100);display:flex;gap:12px;align-items:flex-start;}
+.match-card:last-child{border-bottom:none;}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.match-info{flex:1;}
+.match-name{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.match-signals{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;}
+.sig{font-size:11px;padding:2px 7px;border-radius:999px;}
+.sig-ok{background:#f0fdf4;color:#15803d;}
+.sig-warn{background:#fffbeb;color:#92400e;}
+.sig-bad{background:var(--red-l);color:#991b1b;}
+.match-actions{display:flex;gap:6px;align-items:center;margin-top:6px;}
+.match-meta{font-size:11px;color:var(--g400);}
+
+/* VACANCY DETAIL */
+.vac-detail{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:14px;margin-bottom:14px;}
+.vd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.vd-item{background:var(--g50);border-radius:7px;padding:8px 10px;}
+.vd-item .vd-lbl{font-size:10px;color:var(--g500);font-weight:600;}
+.vd-item .vd-val{font-size:12px;font-weight:600;color:var(--g800);margin-top:1px;}
+
+/* URGENCY PILL */
+.urgency-high{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.urgency-med{background:#fffbeb;color:#92400e;border:1px solid #fcd34d;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.urgency-low{background:var(--g100);color:var(--g600);border:1px solid var(--g200);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+
+/* CANDIDATE TABLE */
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--g50);}
+th{padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--g200);white-space:nowrap;}
+td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--g100);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.clk:hover td{background:var(--g50);cursor:pointer;}
+
+/* OUTCOME LOG */
+.outcome-item{padding:10px 14px;border-bottom:1px solid var(--g100);display:flex;gap:10px;align-items:flex-start;}
+.outcome-item:last-child{border-bottom:none;}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 20px;color:var(--g400);}
+.empty .ei{font-size:40px;margin-bottom:10px;}
+.empty p{font-size:14px;}
+
+/* PROFILE PANEL */
+.prof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.di{background:var(--g50);border-radius:7px;padding:9px 10px;}
+.di .dl{font-size:10px;color:var(--g500);font-weight:600;margin-bottom:2px;}
+.di .dv{font-size:12px;font-weight:600;color:var(--g800);}
+
+/* TAGS */
+.tag{display:inline-block;background:var(--g100);color:var(--g600);font-size:11px;padding:2px 7px;border-radius:999px;margin:1px;}
+.tag-grn{background:#dcfce7;color:#15803d;}
+.tag-red{background:var(--red-l);color:#991b1b;}
+.tag-amb{background:#fffbeb;color:#92400e;}
+
+/* SCORE BARS */
+.score-bar-wrap{background:var(--g100);border-radius:999px;height:6px;flex:1;}
+.score-bar{height:6px;border-radius:999px;transition:width .4s;}
+
+/* BROADCAST BOX */
+.broadcast-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 14px;margin-top:10px;}
+.broadcast-box textarea{width:100%;border:none;background:transparent;font-size:13px;color:var(--g800);resize:vertical;min-height:80px;outline:none;font-family:inherit;}
+
+/* NOTIFICATION */
+.notif{position:fixed;bottom:20px;right:20px;background:var(--g900);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .2s;}
+.notif.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sb">
+  <div class="sb-logo">
+    <h1>MediPeople</h1>
+    <p>Locum GP Matcher</p>
+  </div>
+  <div class="sb-sec">Navigation</div>
+  <div class="sb-item active" data-view="dash" onclick="nav(this,'dash')">
+    <span class="ico">📊</span> Dashboard
+  </div>
+  <div class="sb-item" data-view="match" onclick="nav(this,'match')">
+    <span class="ico">🎯</span> Match engine
+  </div>
+  <div class="sb-item" data-view="vacancies" onclick="nav(this,'vacancies')">
+    <span class="ico">💼</span> Vacancies
+  </div>
+  <div class="sb-item" data-view="candidates" onclick="nav(this,'candidates')">
+    <span class="ico">👨‍⚕️</span> Candidates
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-sec">History</div>
+  <div class="sb-item" data-view="outcomes" onclick="nav(this,'outcomes')">
+    <span class="ico">📋</span> Outcome log
+  </div>
+  <div style="margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,.06);">
+    <a href="https://gochris222.github.io/medipeople-dashboards/CRM.html" style="font-size:12px;color:var(--g400);text-decoration:none;display:flex;align-items:center;gap:6px;">
+      ← Back to CRM
+    </a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <h2 id="tb-title">Dashboard</h2>
+    <div class="sp"></div>
+    <div id="tb-actions"></div>
+  </div>
+  <div id="content">
+
+    <!-- DASHBOARD VIEW -->
+    <div id="view-dash" class="view active">
+      <div class="stats" id="dash-stats">
+        <div class="stat"><div class="lbl">Open vacancies</div><div class="val" id="s-vac">—</div><div class="sub">Needing to be filled</div></div>
+        <div class="stat"><div class="lbl">Active locum GPs</div><div class="val" id="s-cands">—</div><div class="sub">In system</div></div>
+        <div class="stat"><div class="lbl">Hot matches today</div><div class="val" id="s-hot">—</div><div class="sub">Across all vacancies</div></div>
+        <div class="stat"><div class="lbl">Outcomes logged</div><div class="val" id="s-outcomes">—</div><div class="sub">Accepted + declined</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="card">
+          <div class="ch"><h3>🔥 Hottest matches right now</h3><div class="sp"></div><button class="btn btn-sec btn-sm" onclick="nav(document.querySelector('[data-view=match]'),'match')">View all →</button></div>
+          <div id="dash-hot-list" style="padding:4px 0;"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>💼 Open vacancies</h3><div class="sp"></div><button class="btn btn-pri btn-sm" onclick="openAddVacancy()">+ Add vacancy</button></div>
+          <div id="dash-vac-list" style="padding:4px 0;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCH ENGINE VIEW -->
+    <div id="view-match" class="view">
+      <div class="match-layout">
+        <!-- Left: vacancy selector + details -->
+        <div>
+          <div class="card" style="margin-bottom:12px;">
+            <div class="ch"><h3>Vacancies</h3><div class="sp"></div><button class="btn btn-pri btn-sm" onclick="openAddVacancy()">+ Add</button></div>
+            <div style="padding:10px;" id="match-vac-list">
+              <div class="empty"><p>No vacancies yet.<br>Add one to start matching.</p></div>
+            </div>
+          </div>
+          <div id="match-vac-detail" style="display:none;"></div>
+        </div>
+        <!-- Right: match results -->
+        <div id="match-results">
+          <div class="empty" style="background:#fff;border:1px solid var(--g200);border-radius:10px;">
+            <div class="ei">🎯</div>
+            <p>Select a vacancy on the left<br>to see ranked candidate matches.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VACANCIES VIEW -->
+    <div id="view-vacancies" class="view">
+      <div class="card">
+        <div class="ch"><h3>All vacancies</h3><div class="sp"></div><button class="btn btn-pri btn-sm" onclick="openAddVacancy()">+ Add vacancy</button></div>
+        <div id="vac-table-wrap"></div>
+      </div>
+    </div>
+
+    <!-- CANDIDATES VIEW -->
+    <div id="view-candidates" class="view">
+      <div class="card">
+        <div class="ch"><h3>Locum GP candidates</h3><div class="sp"></div>
+          <span style="font-size:12px;color:var(--g500);margin-right:8px;">Pulled from CRM · </span>
+          <button class="btn btn-sec btn-sm" onclick="loadCandidates()">↻ Refresh</button>
+        </div>
+        <div id="cand-table-wrap"></div>
+      </div>
+    </div>
+
+    <!-- OUTCOMES VIEW -->
+    <div id="view-outcomes" class="view">
+      <div class="card">
+        <div class="ch">
+          <h3>Outcome log</h3>
+          <div class="sp"></div>
+          <span style="font-size:12px;color:var(--g500);">Builds candidate Likelihood scores over time</span>
+        </div>
+        <div id="outcome-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT VACANCY MODAL -->
+<div class="ov hidden" id="vac-modal">
+  <div class="modal modal-lg">
+    <div class="mh"><h3 id="vac-modal-title">Add vacancy</h3><button class="x" onclick="closeModal('vac-modal')">✕</button></div>
+    <div class="mb">
+      <div class="fg fg3">
+        <div class="fi s3"><label>Job title / clinic name *</label><input id="v-title" placeholder="e.g. Dubbo GP Clinic — July locum"></div>
+        <div class="fi s3"><label>Client / facility *</label><input id="v-client" placeholder="e.g. Western NSW Primary Health Network"></div>
+        <div class="fi"><label>Location (town/suburb)</label><input id="v-location" placeholder="e.g. Dubbo"></div>
+        <div class="fi"><label>State *</label>
+          <select id="v-state">
+            <option value="">Select state</option>
+            <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
+            <option>SA</option><option>TAS</option><option>NT</option><option>ACT</option><option>NZ</option>
+          </select>
+        </div>
+        <div class="fi"><label>Role type *</label>
+          <select id="v-role-type">
+            <option value="">Select type</option>
+            <option value="GP Only">GP Only</option>
+            <option value="GPM VMO">GPM VMO</option>
+            <option value="Either">Either</option>
+          </select>
+        </div>
+        <div class="fi"><label>Start date</label><input type="date" id="v-start"></div>
+        <div class="fi"><label>End date</label><input type="date" id="v-end"></div>
+        <div class="fi"><label>Block length (weeks)</label><input type="number" id="v-block-weeks" placeholder="e.g. 2" min="1" max="26"></div>
+        <div class="fi"><label>Daily rate ($)</label><input type="number" id="v-rate" placeholder="e.g. 1800"></div>
+        <div class="fi"><label>DPA required?</label>
+          <select id="v-dpa">
+            <option value="false">No</option><option value="true">Yes</option>
+          </select>
+        </div>
+        <div class="fi"><label>Rural / remote?</label>
+          <select id="v-rural">
+            <option value="false">No</option><option value="true">Yes</option>
+          </select>
+        </div>
+        <div class="fi"><label>Travel provided?</label>
+          <select id="v-travel">
+            <option value="false">No</option><option value="true">Yes</option>
+          </select>
+        </div>
+        <div class="fi"><label>Accommodation provided?</label>
+          <select id="v-accom">
+            <option value="false">No</option><option value="true">Yes</option>
+          </select>
+        </div>
+        <div class="fi"><label>Urgency</label>
+          <select id="v-urgency">
+            <option value="normal">Normal</option>
+            <option value="high">High — fill within 2 weeks</option>
+            <option value="critical">Critical — fill ASAP</option>
+          </select>
+        </div>
+        <div class="fi"><label>Status</label>
+          <select id="v-status">
+            <option value="Open">Open</option>
+            <option value="Filled">Filled</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="fi s3"><label>Notes</label><textarea id="v-notes" placeholder="Any extra details — ED sessions, billing type, car required, etc."></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('vac-modal')">Cancel</button>
+      <button class="btn btn-pri" onclick="saveVacancy()">Save vacancy</button>
+    </div>
+  </div>
+</div>
+
+<!-- CANDIDATE PROFILE / PREFS MODAL -->
+<div class="ov hidden" id="cand-modal">
+  <div class="modal modal-lg">
+    <div class="mh"><h3 id="cand-modal-name">Candidate profile</h3><button class="x" onclick="closeModal('cand-modal')">✕</button></div>
+    <div class="mb" id="cand-modal-body"></div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('cand-modal')">Close</button>
+      <button class="btn btn-pri" onclick="saveCandPrefs()">Save preferences</button>
+    </div>
+  </div>
+</div>
+
+<!-- OUTCOME LOG MODAL -->
+<div class="ov hidden" id="outcome-modal">
+  <div class="modal">
+    <div class="mh"><h3>Log outcome</h3><button class="x" onclick="closeModal('outcome-modal')">✕</button></div>
+    <div class="mb">
+      <div class="fg" style="margin-bottom:12px;">
+        <div class="fi"><label>Candidate</label><input id="o-cand-name" disabled style="background:var(--g50);"></div>
+        <div class="fi"><label>Vacancy</label><input id="o-vac-title" disabled style="background:var(--g50);"></div>
+      </div>
+      <div class="fg">
+        <div class="fi"><label>Outcome *</label>
+          <select id="o-outcome" onchange="toggleOutcomeReason()">
+            <option value="">Select outcome</option>
+            <option value="accepted">✅ Accepted</option>
+            <option value="declined">❌ Declined</option>
+            <option value="ghosted">👻 Ghosted (no reply)</option>
+            <option value="pending">⏳ Sent — awaiting reply</option>
+          </select>
+        </div>
+        <div class="fi" id="o-reason-wrap">
+          <label>Reason (if declined)</label>
+          <select id="o-reason">
+            <option value="">Select reason</option>
+            <option value="rate_low">Rate too low</option>
+            <option value="location">Location not suitable</option>
+            <option value="dates">Dates don't work</option>
+            <option value="block_too_long">Block too long</option>
+            <option value="block_too_short">Block too short</option>
+            <option value="not_available">Not available</option>
+            <option value="personal">Personal / family reason</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="fi s2"><label>Notes</label><input id="o-notes" placeholder="Any extra context..."></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('outcome-modal')">Cancel</button>
+      <button class="btn btn-pri" onclick="saveOutcome()">Log outcome</button>
+    </div>
+  </div>
+</div>
+
+<!-- BROADCAST MESSAGE MODAL -->
+<div class="ov hidden" id="msg-modal">
+  <div class="modal">
+    <div class="mh"><h3 id="msg-modal-title">Outreach message</h3><button class="x" onclick="closeModal('msg-modal')">✕</button></div>
+    <div class="mb">
+      <div style="margin-bottom:10px;font-size:12px;color:var(--g500);">Edit before sending. Copy and paste into email or WhatsApp.</div>
+      <textarea id="msg-body" style="width:100%;min-height:200px;padding:10px;border:1px solid var(--g300);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;"></textarea>
+    </div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('msg-modal')">Close</button>
+      <button class="btn btn-pri" onclick="copyMsg()">Copy message</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div id="notif" class="notif"></div>
+
+<script>
+const SB_URL='https://qoyokyuzkpfvaakdkmxg.supabase.co';
+const SB_KEY='sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+// ─── LOCAL STORAGE KEYS ───────────────────────────────────────────────────
+const LS_VAC='mp_locum_vacancies';
+const LS_PREFS='mp_locum_cand_prefs';
+const LS_OUTCOMES='mp_locum_outcomes';
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+let vacancies=[];
+let candidates=[];
+let candPrefs={};
+let outcomes=[];
+let editingVacId=null;
+let outcomeContext={candId:null,vacId:null};
+let currentCandId=null;
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+async function init(){
+  vacancies=JSON.parse(localStorage.getItem(LS_VAC)||'[]');
+  candPrefs=JSON.parse(localStorage.getItem(LS_PREFS)||'{}');
+  outcomes=JSON.parse(localStorage.getItem(LS_OUTCOMES)||'[]');
+  await loadCandidates();
+  renderDash();
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────
+function nav(el,view){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  const titles={dash:'Dashboard',match:'Match engine',vacancies:'Vacancies',candidates:'Candidates',outcomes:'Outcome log'};
+  document.getElementById('tb-title').textContent=titles[view]||view;
+  document.getElementById('tb-actions').innerHTML='';
+  if(view==='dash') renderDash();
+  if(view==='match') renderMatchView();
+  if(view==='vacancies') renderVacanciesTable();
+  if(view==='candidates') renderCandidatesTable();
+  if(view==='outcomes') renderOutcomeLog();
+}
+
+// ─── LOAD CANDIDATES FROM SUPABASE ────────────────────────────────────────
+async function loadCandidates(){
+  const{data,error}=await sb.from('crm_profiles')
+    .select('*')
+    .eq('type','locum')
+    .eq('status','Active')
+    .order('name');
+  if(error){console.error(error);candidates=[];return;}
+  candidates=data||[];
+}
+
+// ─── SAVE/LOAD HELPERS ────────────────────────────────────────────────────
+function saveVacs(){localStorage.setItem(LS_VAC,JSON.stringify(vacancies));}
+function savePrefs(){localStorage.setItem(LS_PREFS,JSON.stringify(candPrefs));}
+function saveOutcomes(){localStorage.setItem(LS_OUTCOMES,JSON.stringify(outcomes));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ─── MATCHING ENGINE ──────────────────────────────────────────────────────
+function scoreCandidate(cand,vac){
+  const prefs=candPrefs[cand.id]||{};
+  let score=0;
+  let reasons=[];
+  let warnings=[];
+  let blocks=[];
+
+  // 1. ROLE TYPE (15pts)
+  const rt=prefs.role_types||'both';
+  if(vac.role_type==='Either'||rt==='both'){
+    score+=15;reasons.push('Role type: any fit');
+  } else if(vac.role_type===rt||(rt==='GP Only'&&vac.role_type==='GP Only')||(rt==='GPM VMO'&&vac.role_type==='GPM VMO')){
+    score+=15;reasons.push('✓ Role type match ('+vac.role_type+')');
+  } else {
+    blocks.push('✗ Role type mismatch (doctor prefers '+rt+')');
+  }
+
+  // 2. AVAILABILITY (25pts)
+  const avFrom=cand.availability_from;
+  const avTo=cand.availability_to;
+  if(vac.start_date&&avFrom&&avTo){
+    const vs=new Date(vac.start_date),ve=new Date(vac.end_date||vac.start_date);
+    const as=new Date(avFrom),ae=new Date(avTo);
+    if(as<=vs&&ae>=ve){score+=25;reasons.push('✓ Available '+fmtDate(vac.start_date)+(vac.end_date?' – '+fmtDate(vac.end_date):''));}
+    else if(as<=ve&&ae>=vs){score+=12;warnings.push('⚠ Partial availability overlap');}
+    else{blocks.push('✗ Not available these dates');}
+  } else if(avFrom){
+    score+=12;warnings.push('⚠ Availability listed but no end date');
+  } else {
+    score+=8;warnings.push('⚠ Availability not confirmed');
+  }
+
+  // 3. LOCATION / STATE (20pts)
+  const prefStates=prefs.preferred_states||[];
+  const avoidStates=prefs.avoided_states||[];
+  if(avoidStates.includes(vac.state)){
+    blocks.push('✗ Avoids '+vac.state);
+  } else if(prefStates.length===0){
+    score+=12;warnings.push('⚠ No location preference set');
+  } else if(prefStates.includes(vac.state)){
+    score+=20;reasons.push('✓ Prefers '+vac.state);
+  } else {
+    score+=5;warnings.push('⚠ '+vac.state+' not in preferred states');
+  }
+
+  // 4. RATE (20pts)
+  const rateMin=cand.daily_rate_min;
+  const budget=vac.rate;
+  if(rateMin&&budget){
+    if(rateMin<=budget){score+=20;reasons.push('✓ Rate ok ($'+rateMin+'/day min, budget $'+budget+')');}
+    else if(rateMin<=budget*1.1){score+=10;warnings.push('⚠ Rate $'+rateMin+' slightly over budget $'+budget);}
+    else{blocks.push('✗ Rate $'+rateMin+' over budget $'+budget);}
+  } else if(rateMin){
+    score+=10;warnings.push('⚠ No budget set for vacancy');
+  } else {
+    score+=10;warnings.push('⚠ Candidate rate not on file');
+  }
+
+  // 5. DPA (10pts)
+  if(vac.dpa==='true'||vac.dpa===true){
+    const dpaAreas=cand.dpa_areas||[];
+    if(dpaAreas.length>0||cand.dpa_status){score+=10;reasons.push('✓ DPA eligible');}
+    else{blocks.push('✗ DPA required but candidate not DPA eligible');}
+  } else {
+    score+=5;// no penalty for non-DPA jobs
+  }
+
+  // 6. BLOCK LENGTH (10pts)
+  const blockPref=prefs.block_pref||'any';
+  const blockWks=parseInt(vac.block_weeks)||0;
+  if(blockPref==='any'||!blockWks){
+    score+=10;
+  } else if(blockPref==='short'&&blockWks<=2){
+    score+=10;reasons.push('✓ Short block preferred ('+blockWks+' wk)');
+  } else if(blockPref==='long'&&blockWks>=3){
+    score+=10;reasons.push('✓ Long block preferred ('+blockWks+' wk)');
+  } else if(blockPref==='short'&&blockWks>2){
+    warnings.push('⚠ Prefers short blocks, this is '+blockWks+' wks');
+    score+=3;
+  } else if(blockPref==='long'&&blockWks<3){
+    warnings.push('⚠ Prefers longer blocks, this is only '+blockWks+' wks');
+    score+=3;
+  }
+
+  // 7. RURAL PREFERENCE (bonus/penalty, no pts cap)
+  const ruralOk=prefs.rural_ok;
+  if((vac.rural==='true'||vac.rural===true)){
+    if(ruralOk===true||ruralOk==='true'){score+=5;reasons.push('✓ Open to rural/remote');}
+    else if(ruralOk===false||ruralOk==='false'){blocks.push('✗ Not interested in rural/remote');}
+    else{warnings.push('⚠ Rural role — preference not set');}
+  }
+
+  // 8. LIKELIHOOD MODIFIER — from outcome history
+  const candOutcomes=outcomes.filter(o=>o.cand_id===cand.id);
+  const accepted=candOutcomes.filter(o=>o.outcome==='accepted').length;
+  const declined=candOutcomes.filter(o=>o.outcome==='declined').length;
+  const ghosted=candOutcomes.filter(o=>o.outcome==='ghosted').length;
+  // Check for similar state outcomes
+  const stateAccepted=outcomes.filter(o=>o.cand_id===cand.id&&o.outcome==='accepted'&&o.vac_state===vac.state).length;
+  const stateDeclined=outcomes.filter(o=>o.cand_id===cand.id&&o.outcome==='declined'&&o.vac_state===vac.state&&o.reason==='location').length;
+  if(stateAccepted>0){score+=8;reasons.push('✓ Placed in '+vac.state+' before');}
+  if(stateDeclined>0){score-=10;warnings.push('⚠ Previously declined '+vac.state+' location');}
+  if(ghosted>=2){score-=15;warnings.push('⚠ Ghosted '+ghosted+'x — reliability risk');}
+  else if(ghosted===1){score-=5;warnings.push('⚠ Ghosted once previously');}
+  if(accepted>=3){score+=5;reasons.push('✓ Strong acceptance history ('+accepted+' placements)');}
+
+  // Declined for rate on similar jobs
+  const rateDeclined=outcomes.filter(o=>o.cand_id===cand.id&&o.outcome==='declined'&&o.reason==='rate_low').length;
+  if(rateDeclined>=2){warnings.push('⚠ Declined '+rateDeclined+'x for low rate — negotiate carefully');}
+
+  // Cap score
+  score=Math.max(0,Math.min(100,score));
+
+  // Tier
+  let tier='cold';
+  if(score>=68)tier='hot';
+  else if(score>=42)tier='warm';
+
+  return{score,tier,reasons,warnings,blocks,candOutcomes};
+}
+
+function getTier(score){
+  if(score>=68)return'hot';
+  if(score>=42)return'warm';
+  return'cold';
+}
+
+function tierLabel(tier){
+  if(tier==='hot')return'🔥 Hot';
+  if(tier==='warm')return'🟡 Warm';
+  return'❄️ Cold';
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────
+function renderDash(){
+  const openVacs=vacancies.filter(v=>v.status==='Open');
+  document.getElementById('s-vac').textContent=openVacs.length;
+  document.getElementById('s-cands').textContent=candidates.length;
+  document.getElementById('s-outcomes').textContent=outcomes.length;
+
+  // Count hot matches across all open vacancies
+  let hotCount=0;
+  let hotItems=[];
+  openVacs.forEach(v=>{
+    candidates.forEach(c=>{
+      const r=scoreCandidate(c,v);
+      if(r.tier==='hot'){
+        hotCount++;
+        hotItems.push({cand:c,vac:v,score:r.score,reasons:r.reasons});
+      }
+    });
+  });
+  document.getElementById('s-hot').textContent=hotCount;
+  hotItems.sort((a,b)=>b.score-a.score);
+
+  const hotList=document.getElementById('dash-hot-list');
+  if(hotItems.length===0){
+    hotList.innerHTML='<div class="empty"><p>No hot matches yet.<br>Add vacancies and confirm candidate availability.</p></div>';
+  } else {
+    hotList.innerHTML=hotItems.slice(0,5).map(h=>`
+      <div style="padding:10px 14px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px;">
+        <div class="av" style="background:#2563eb;width:32px;height:32px;font-size:12px;">${initials(h.cand.name)}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${esc(h.cand.name)}</div>
+          <div style="font-size:11px;color:var(--g500);">${esc(h.vac.title)} · Score ${h.score}</div>
+        </div>
+        <span class="b b-grn">🔥 Hot</span>
+      </div>`).join('');
+  }
+
+  const vacList=document.getElementById('dash-vac-list');
+  if(openVacs.length===0){
+    vacList.innerHTML='<div class="empty"><p>No open vacancies.<br>Add one to get started.</p></div>';
+  } else {
+    vacList.innerHTML=openVacs.slice(0,5).map(v=>`
+      <div style="padding:10px 14px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="openMatchForVac('${v.id}')">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${esc(v.title)}</div>
+          <div style="font-size:11px;color:var(--g500);">${esc(v.state)} · ${esc(v.role_type)} · ${v.rate?'$'+v.rate+'/day':''}</div>
+        </div>
+        ${urgencyBadge(v.urgency)}
+      </div>`).join('');
+  }
+}
+
+function openMatchForVac(vacId){
+  nav(document.querySelector('[data-view=match]'),'match');
+  setTimeout(()=>selectVacancy(vacId),50);
+}
+
+// ─── MATCH VIEW ───────────────────────────────────────────────────────────
+function renderMatchView(){
+  const el=document.getElementById('match-vac-list');
+  if(vacancies.length===0){
+    el.innerHTML='<div class="empty"><p>No vacancies yet.</p></div>';
+    return;
+  }
+  el.innerHTML=vacancies.filter(v=>v.status==='Open').map(v=>`
+    <div class="vac-list-item" id="vli-${v.id}" onclick="selectVacancy('${v.id}')">
+      <div class="vtitle">${esc(v.title)}</div>
+      <div class="vmeta">${esc(v.state||'')} · ${esc(v.role_type||'')} ${v.rate?'· $'+v.rate+'/day':''}</div>
+      ${urgencyBadge(v.urgency)}
+    </div>`).join('');
+}
+
+function selectVacancy(vacId){
+  document.querySelectorAll('.vac-list-item').forEach(el=>el.classList.remove('selected'));
+  const el=document.getElementById('vli-'+vacId);
+  if(el)el.classList.add('selected');
+  const vac=vacancies.find(v=>v.id===vacId);
+  if(!vac)return;
+  renderVacDetail(vac);
+  renderMatchResults(vac);
+}
+
+function renderVacDetail(vac){
+  const el=document.getElementById('match-vac-detail');
+  el.style.display='block';
+  el.innerHTML=`
+    <div class="vac-detail">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:600;">${esc(vac.title)}</span>
+        <div class="sp" style="flex:1;"></div>
+        ${urgencyBadge(vac.urgency)}
+        <button class="btn btn-sec btn-xs" onclick="openEditVacancy('${vac.id}')">Edit</button>
+      </div>
+      <div class="vd-grid">
+        <div class="vd-item"><div class="vd-lbl">Location</div><div class="vd-val">${esc(vac.location||'')} ${esc(vac.state||'')}</div></div>
+        <div class="vd-item"><div class="vd-lbl">Role type</div><div class="vd-val">${esc(vac.role_type||'—')}</div></div>
+        <div class="vd-item"><div class="vd-lbl">Dates</div><div class="vd-val">${vac.start_date?fmtDate(vac.start_date):'TBC'}${vac.end_date?' – '+fmtDate(vac.end_date):''}</div></div>
+        <div class="vd-item"><div class="vd-lbl">Block</div><div class="vd-val">${vac.block_weeks?vac.block_weeks+' week'+(vac.block_weeks>1?'s':''):'—'}</div></div>
+        <div class="vd-item"><div class="vd-lbl">Rate</div><div class="vd-val">${vac.rate?'$'+vac.rate+'/day':'—'}</div></div>
+        <div class="vd-item"><div class="vd-lbl">DPA</div><div class="vd-val" style="color:${vac.dpa==='true'?'var(--grn)':'var(--g500)'}">${vac.dpa==='true'?'Required':'No'}</div></div>
+      </div>
+      ${vac.travel==='true'||vac.accom==='true'?`<div style="font-size:11px;color:var(--grn);margin-top:6px;">${vac.travel==='true'?'✓ Travel provided ':''} ${vac.accom==='true'?'✓ Accommodation provided':''}</div>`:''}
+      ${vac.notes?`<div style="font-size:11px;color:var(--g500);margin-top:6px;border-top:1px solid var(--g100);padding-top:6px;">${esc(vac.notes)}</div>`:''}
+    </div>`;
+}
+
+function renderMatchResults(vac){
+  const el=document.getElementById('match-results');
+  if(candidates.length===0){
+    el.innerHTML='<div class="empty" style="background:#fff;border:1px solid var(--g200);border-radius:10px;"><div class="ei">👨‍⚕️</div><p>No locum GP candidates found in CRM.<br>Add candidates in the CRM first.</p></div>';
+    return;
+  }
+
+  // Score all candidates
+  const scored=candidates.map(c=>({cand:c,...scoreCandidate(c,vac)}));
+  scored.sort((a,b)=>b.score-a.score);
+
+  const hot=scored.filter(s=>s.tier==='hot');
+  const warm=scored.filter(s=>s.tier==='warm');
+  const cold=scored.filter(s=>s.tier==='cold');
+
+  let html=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="font-size:14px;font-weight:600;">${esc(vac.title)}</span>
+      <span style="font-size:12px;color:var(--g500);">${scored.length} candidates scored</span>
+      <div style="flex:1;"></div>`;
+
+  const hotWarmCands=scored.filter(s=>s.tier!=='cold');
+  if(hotWarmCands.length>0){
+    html+=`<button class="btn btn-sec btn-sm" onclick="openBroadcast(${JSON.stringify(vac.id)},${JSON.stringify(hotWarmCands.map(s=>s.cand.id))})">📣 Broadcast Hot+Warm (${hotWarmCands.length})</button>`;
+  }
+  html+='</div>';
+
+  if(hot.length>0){
+    html+=`<div class="tier-section tier-hot">
+      <div class="tier-header">🔥 Hot — strong fit, likely to accept (${hot.length})</div>
+      ${hot.map(s=>matchCard(s,vac)).join('')}
+    </div>`;
+  }
+  if(warm.length>0){
+    html+=`<div class="tier-section tier-warm">
+      <div class="tier-header">🟡 Warm — good fit, one or two friction points (${warm.length})</div>
+      ${warm.map(s=>matchCard(s,vac)).join('')}
+    </div>`;
+  }
+  if(cold.length>0){
+    html+=`<div class="tier-section tier-cold">
+      <div class="tier-header" style="cursor:pointer;" onclick="toggleCold(this)">❄️ Cold — significant issues, last resort (${cold.length}) <span style="margin-left:auto;font-size:11px;">▼ Show</span></div>
+      <div class="cold-content" style="display:none;">${cold.map(s=>matchCard(s,vac)).join('')}</div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+function toggleCold(headerEl){
+  const content=headerEl.nextElementSibling;
+  const isHidden=content.style.display==='none';
+  content.style.display=isHidden?'block':'none';
+  headerEl.querySelector('span').textContent=isHidden?'▲ Hide':'▼ Show';
+}
+
+function matchCard(s,vac){
+  const c=s.cand;
+  const prefs=candPrefs[c.id]||{};
+  const roleTag=prefs.role_types?`<span class="b b-${prefs.role_types==='GP Only'?'grn':'pur'}">${esc(prefs.role_types)}</span>`:'<span class="b b-gray">Type not set</span>';
+  const allSignals=[
+    ...s.reasons.map(r=>`<span class="sig sig-ok">${esc(r)}</span>`),
+    ...s.warnings.map(w=>`<span class="sig sig-warn">${esc(w)}</span>`),
+    ...s.blocks.map(b=>`<span class="sig sig-bad">${esc(b)}</span>`)
+  ];
+  const lastContact=prefs.last_contact?'Last contact: '+fmtDate(prefs.last_contact):'';
+  return `
+    <div class="match-card">
+      <div class="av" style="background:${avColor(c.name)};">${initials(c.name)}</div>
+      <div class="match-info">
+        <div class="match-name">
+          ${esc(c.name)} ${roleTag}
+          ${c.dpa_areas&&c.dpa_areas.length?'<span class="b b-blue">DPA</span>':''}
+          <span style="margin-left:auto;font-size:12px;font-weight:700;color:${s.tier==='hot'?'var(--grn)':s.tier==='warm'?'var(--amb)':'var(--red)'}">Score: ${s.score}</span>
+        </div>
+        <div class="match-signals">${allSignals.join('')}</div>
+        <div class="match-actions">
+          <button class="btn btn-sec btn-xs" onclick="openDraftMsg('${c.id}','${vac.id}')">✉ Draft message</button>
+          <button class="btn btn-xs" style="background:var(--grn-l);color:var(--grn);border:1px solid #bbf7d0;" onclick="openOutcome('${c.id}','${vac.id}')">Log outcome</button>
+          <button class="btn btn-sec btn-xs" onclick="openCandProfile('${c.id}')">Profile</button>
+          ${lastContact?`<span class="match-meta">${lastContact}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── BROADCAST ────────────────────────────────────────────────────────────
+function openBroadcast(vacId,candIds){
+  const vac=vacancies.find(v=>v.id===vacId);
+  if(!vac)return;
+  const names=candIds.map(id=>{const c=candidates.find(x=>x.id===id);return c?c.name:''}).filter(Boolean);
+  const msg=draftBroadcastMsg(vac,names);
+  document.getElementById('msg-modal-title').textContent='Broadcast message — '+vac.title;
+  document.getElementById('msg-body').value=msg;
+  showModal('msg-modal');
+}
+
+function draftBroadcastMsg(vac,names){
+  const dateStr=vac.start_date?(fmtDate(vac.start_date)+(vac.end_date?' – '+fmtDate(vac.end_date):'')):'dates TBC';
+  return `Hi [Name],
+
+Hope you're well! I have a great locum opportunity I'd love to run by you.
+
+📍 Location: ${vac.location||''} ${vac.state||''}
+📅 Dates: ${dateStr}
+⏱ Block: ${vac.block_weeks?vac.block_weeks+' week'+(vac.block_weeks>1?'s':''):'TBC'}
+💰 Rate: ${vac.rate?'$'+vac.rate+'/day':'TBC'}
+🏥 Role: ${vac.role_type||'GP locum'}${vac.dpa==='true'?' (DPA location)':''}${vac.travel==='true'?'\n✈️ Travel provided':''}${vac.accom==='true'?'\n🏠 Accommodation provided':''}
+
+${vac.notes?'Additional details: '+vac.notes+'\n\n':''}Would this work for you? Happy to chat through any details.
+
+Warm regards,
+[Your name]
+MediPeople`;
+}
+
+// ─── DRAFT MESSAGE ────────────────────────────────────────────────────────
+function openDraftMsg(candId,vacId){
+  const cand=candidates.find(c=>c.id===candId);
+  const vac=vacancies.find(v=>v.id===vacId);
+  if(!cand||!vac)return;
+  const prefs=candPrefs[candId]||{};
+  const result=scoreCandidate(cand,vac);
+  const dateStr=vac.start_date?(fmtDate(vac.start_date)+(vac.end_date?' – '+fmtDate(vac.end_date):'')):'dates TBC';
+  const firstName=cand.name.split(' ')[0];
+
+  // Tailor message based on tier and known signals
+  let hook='';
+  if(result.tier==='hot'){
+    const stateMatch=(prefs.preferred_states||[]).includes(vac.state);
+    if(stateMatch)hook=`This one looks like a great fit for you — it's in ${vac.state} which I know you prefer.`;
+    else if(result.reasons.some(r=>r.includes('Placed')))hook=`I know you've done well in ${vac.state} before, so I wanted to reach out about this one first.`;
+    else hook=`Based on your availability and preferences, this looks like a strong fit.`;
+  } else if(result.tier==='warm'){
+    const warn=result.warnings[0]||'';
+    if(warn.includes('Rate'))hook=`The rate is slightly above budget but I'd love to discuss — there may be some flexibility.`;
+    else if(warn.includes('block'))hook=`I know the block length isn't your usual preference, but I'd love to chat about whether this could work.`;
+    else hook=`This one has a couple of moving parts but I think it could work well for you.`;
+  } else {
+    hook=`I have a locum opportunity coming up and wanted to see if your situation has changed.`;
+  }
+
+  const msg=`Hi ${firstName},
+
+${hook}
+
+📍 ${vac.location||''} ${vac.state||''}
+📅 ${dateStr}
+⏱ ${vac.block_weeks?vac.block_weeks+' week'+(vac.block_weeks>1?'s':''):'TBC block'}
+💰 ${vac.rate?'$'+vac.rate+'/day':'Rate TBC'}
+🏥 ${vac.role_type||'GP locum'}${vac.dpa==='true'?' · DPA location':''}${vac.travel==='true'?'\n✈️ Travel covered':''}${vac.accom==='true'?'\n🏠 Accommodation provided':''}
+
+${vac.notes?vac.notes+'\n\n':''}Are you available and interested? Let me know and I'll lock you in.
+
+Cheers,
+[Your name]`;
+
+  document.getElementById('msg-modal-title').textContent='Message for '+cand.name;
+  document.getElementById('msg-body').value=msg;
+  showModal('msg-modal');
+}
+
+function copyMsg(){
+  const ta=document.getElementById('msg-body');
+  navigator.clipboard.writeText(ta.value).then(()=>notify('Message copied to clipboard'));
+}
+
+// ─── VACANCIES TABLE ──────────────────────────────────────────────────────
+function renderVacanciesTable(){
+  const el=document.getElementById('vac-table-wrap');
+  if(vacancies.length===0){
+    el.innerHTML='<div class="empty"><div class="ei">💼</div><p>No vacancies yet. Add your first one above.</p></div>';
+    return;
+  }
+  el.innerHTML=`<table>
+    <thead><tr>
+      <th>Title</th><th>State</th><th>Role</th><th>Dates</th><th>Rate</th><th>DPA</th><th>Status</th><th>Urgency</th><th></th>
+    </tr></thead>
+    <tbody>${vacancies.map(v=>`
+      <tr>
+        <td style="font-weight:600;">${esc(v.title)}</td>
+        <td>${esc(v.state||'—')}</td>
+        <td>${esc(v.role_type||'—')}</td>
+        <td style="font-size:12px;">${v.start_date?fmtDate(v.start_date):'—'}${v.end_date?' – '+fmtDate(v.end_date):''}</td>
+        <td>${v.rate?'$'+v.rate+'/day':'—'}</td>
+        <td>${v.dpa==='true'?'<span class="b b-grn">Yes</span>':'No'}</td>
+        <td>${statusBadge(v.status)}</td>
+        <td>${urgencyBadge(v.urgency)}</td>
+        <td>
+          <button class="btn btn-sec btn-xs" onclick="openEditVacancy('${v.id}')" style="margin-right:4px;">Edit</button>
+          <button class="btn btn-xs" style="background:var(--pri-l);color:var(--pri);border:1px solid #bfdbfe;" onclick="openMatchForVac('${v.id}')">Match</button>
+        </td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ─── CANDIDATES TABLE ─────────────────────────────────────────────────────
+function renderCandidatesTable(){
+  const el=document.getElementById('cand-table-wrap');
+  if(candidates.length===0){
+    el.innerHTML='<div class="empty"><div class="ei">👨‍⚕️</div><p>No locum GP candidates found in CRM.<br>Check that candidates are set to type "locum" and status "Active".</p></div>';
+    return;
+  }
+  el.innerHTML=`<table>
+    <thead><tr>
+      <th>Name</th><th>Location</th><th>Rate</th><th>Available</th><th>DPA</th><th>Prefs set</th><th>Outcomes</th><th></th>
+    </tr></thead>
+    <tbody>${candidates.map(c=>{
+      const prefs=candPrefs[c.id]||{};
+      const cOutcomes=outcomes.filter(o=>o.cand_id===c.id);
+      const accepted=cOutcomes.filter(o=>o.outcome==='accepted').length;
+      const declined=cOutcomes.filter(o=>o.outcome==='declined').length;
+      const ghosted=cOutcomes.filter(o=>o.outcome==='ghosted').length;
+      const prefsSet=prefs.role_types||prefs.preferred_states;
+      return `<tr class="clk" onclick="openCandProfile('${c.id}')">
+        <td><strong>${esc(c.name)}</strong></td>
+        <td>${esc([c.current_location,c.state].filter(Boolean).join(', ')||'—')}</td>
+        <td>${c.daily_rate_min?'$'+c.daily_rate_min+(c.daily_rate_max?' – $'+c.daily_rate_max:''):c.hourly_rate_min?'$'+c.hourly_rate_min+'/hr':'—'}</td>
+        <td style="font-size:12px;">${c.availability_from?fmtDate(c.availability_from)+(c.availability_to?' – '+fmtDate(c.availability_to):''):'Not set'}</td>
+        <td>${c.dpa_areas&&c.dpa_areas.length?'<span class="b b-grn">DPA</span>':'—'}</td>
+        <td>${prefsSet?'<span class="b b-grn">✓</span>':'<span class="b b-gray">Needed</span>'}</td>
+        <td style="font-size:12px;">${accepted?'<span style="color:var(--grn)">✓'+accepted+'</span> ':''}${declined?'<span style="color:var(--red)">✗'+declined+'</span> ':''}${ghosted?'<span style="color:var(--amb)">👻'+ghosted+'</span>':''} ${!accepted&&!declined&&!ghosted?'—':''}</td>
+        <td onclick="event.stopPropagation()"><button class="btn btn-sec btn-xs" onclick="openCandProfile('${c.id}')">Prefs →</button></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+// ─── CANDIDATE PROFILE ────────────────────────────────────────────────────
+function openCandProfile(candId){
+  currentCandId=candId;
+  const cand=candidates.find(c=>c.id===candId);
+  if(!cand)return;
+  const prefs=candPrefs[candId]||{};
+  const cOutcomes=outcomes.filter(o=>o.cand_id===candId);
+
+  document.getElementById('cand-modal-name').textContent=cand.name;
+
+  const allStates=['NSW','VIC','QLD','WA','SA','TAS','NT','ACT','NZ'];
+  const prefStates=prefs.preferred_states||[];
+  const avoidStates=prefs.avoided_states||[];
+
+  document.getElementById('cand-modal-body').innerHTML=`
+    <div class="prof-grid">
+      <div class="di"><div class="dl">Specialty</div><div class="dv">${esc(cand.specialty||'—')}</div></div>
+      <div class="di"><div class="dl">Location</div><div class="dv">${esc([cand.current_location,cand.state].filter(Boolean).join(', ')||'—')}</div></div>
+      <div class="di"><div class="dl">Daily rate</div><div class="dv">${cand.daily_rate_min?'$'+cand.daily_rate_min+(cand.daily_rate_max?' – $'+cand.daily_rate_max:''):'Not set'}</div></div>
+      <div class="di"><div class="dl">Available from</div><div class="dv">${cand.availability_from?fmtDate(cand.availability_from):'—'}</div></div>
+      <div class="di"><div class="dl">Available to</div><div class="dv">${cand.availability_to?fmtDate(cand.availability_to):'—'}</div></div>
+      <div class="di"><div class="dl">DPA areas</div><div class="dv">${cand.dpa_areas&&cand.dpa_areas.length?cand.dpa_areas.join(', '):'—'}</div></div>
+    </div>
+    <div class="sec-title">Matching preferences <span style="font-weight:400;color:var(--g400);">(set these to improve match accuracy)</span></div>
+    <div class="fg" style="margin-bottom:12px;">
+      <div class="fi">
+        <label>Role type</label>
+        <select id="cp-role-type">
+          <option value="both" ${(!prefs.role_types||prefs.role_types==='both')?'selected':''}>Both GP Only and GPM VMO</option>
+          <option value="GP Only" ${prefs.role_types==='GP Only'?'selected':''}>GP Only</option>
+          <option value="GPM VMO" ${prefs.role_types==='GPM VMO'?'selected':''}>GPM VMO only</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Block length preference</label>
+        <select id="cp-block-pref">
+          <option value="any" ${(!prefs.block_pref||prefs.block_pref==='any')?'selected':''}>No preference</option>
+          <option value="short" ${prefs.block_pref==='short'?'selected':''}>Short (1–2 weeks)</option>
+          <option value="long" ${prefs.block_pref==='long'?'selected':''}>Long (3+ weeks)</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Rural / remote OK?</label>
+        <select id="cp-rural">
+          <option value="" ${prefs.rural_ok===undefined||prefs.rural_ok===''?'selected':''}>Not set</option>
+          <option value="true" ${prefs.rural_ok===true||prefs.rural_ok==='true'?'selected':''}>Yes — open to rural</option>
+          <option value="false" ${prefs.rural_ok===false||prefs.rural_ok==='false'?'selected':''}>No — metro/regional only</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>FIFO willing?</label>
+        <select id="cp-fifo">
+          <option value="" ${!prefs.fifo?'selected':''}>Not set</option>
+          <option value="true" ${prefs.fifo==='true'||prefs.fifo===true?'selected':''}>Yes</option>
+          <option value="false" ${prefs.fifo==='false'||prefs.fifo===false?'selected':''}>No</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Last contact date</label>
+        <input type="date" id="cp-last-contact" value="${prefs.last_contact||''}">
+      </div>
+    </div>
+    <div class="sec-title">Preferred states (tick all that apply)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;" id="cp-pref-states">
+      ${allStates.map(s=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" data-type="pref" data-state="${s}" ${prefStates.includes(s)?'checked':''}> ${s}
+      </label>`).join('')}
+    </div>
+    <div class="sec-title">Avoided states (will reduce match score)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+      ${allStates.map(s=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" data-type="avoid" data-state="${s}" ${avoidStates.includes(s)?'checked':''}> ${s}
+      </label>`).join('')}
+    </div>
+    ${cOutcomes.length>0?`
+    <div class="sec-title">Outcome history (${cOutcomes.length} logged)</div>
+    <div style="background:var(--g50);border-radius:8px;padding:10px;font-size:12px;">
+      ${cOutcomes.map(o=>`<div style="padding:4px 0;border-bottom:1px solid var(--g200);">${outcomeIcon(o.outcome)} <strong>${esc(o.vac_title||'Unknown vacancy')}</strong> — ${esc(o.outcome)}${o.reason?' ('+o.reason.replace('_',' ')+')':''} <span style="color:var(--g400);">${fmtDate(o.date)}</span></div>`).join('')}
+    </div>`:''} `;
+
+  showModal('cand-modal');
+}
+
+function saveCandPrefs(){
+  if(!currentCandId)return;
+  const prefStates=Array.from(document.querySelectorAll('[data-type="pref"]:checked')).map(cb=>cb.dataset.state);
+  const avoidStates=Array.from(document.querySelectorAll('[data-type="avoid"]:checked')).map(cb=>cb.dataset.state);
+  candPrefs[currentCandId]={
+    ...candPrefs[currentCandId],
+    role_types:document.getElementById('cp-role-type').value,
+    block_pref:document.getElementById('cp-block-pref').value,
+    rural_ok:document.getElementById('cp-rural').value,
+    fifo:document.getElementById('cp-fifo').value,
+    last_contact:document.getElementById('cp-last-contact').value,
+    preferred_states:prefStates,
+    avoided_states:avoidStates
+  };
+  savePrefs();
+  closeModal('cand-modal');
+  notify('Preferences saved for '+candidates.find(c=>c.id===currentCandId)?.name);
+}
+
+// ─── OUTCOME LOG ──────────────────────────────────────────────────────────
+function openOutcome(candId,vacId){
+  const cand=candidates.find(c=>c.id===candId);
+  const vac=vacancies.find(v=>v.id===vacId);
+  outcomeContext={candId,vacId};
+  document.getElementById('o-cand-name').value=cand?cand.name:'';
+  document.getElementById('o-vac-title').value=vac?vac.title:'';
+  document.getElementById('o-outcome').value='';
+  document.getElementById('o-reason').value='';
+  document.getElementById('o-notes').value='';
+  document.getElementById('o-reason-wrap').style.display='flex';
+  showModal('outcome-modal');
+}
+
+function toggleOutcomeReason(){
+  const v=document.getElementById('o-outcome').value;
+  document.getElementById('o-reason-wrap').style.display=(v==='declined')?'flex':'none';
+}
+
+function saveOutcome(){
+  const outcome=document.getElementById('o-outcome').value;
+  if(!outcome){notify('Please select an outcome');return;}
+  const cand=candidates.find(c=>c.id===outcomeContext.candId);
+  const vac=vacancies.find(v=>v.id===outcomeContext.vacId);
+  outcomes.unshift({
+    id:uid(),
+    cand_id:outcomeContext.candId,
+    vac_id:outcomeContext.vacId,
+    cand_name:cand?cand.name:'',
+    vac_title:vac?vac.title:'',
+    vac_state:vac?vac.state:'',
+    outcome,
+    reason:document.getElementById('o-reason').value||'',
+    notes:document.getElementById('o-notes').value||'',
+    date:new Date().toISOString().slice(0,10)
+  });
+  saveOutcomes();
+  closeModal('outcome-modal');
+  notify('Outcome logged — candidate score updated');
+  // Re-render match results if we're on that view
+  if(document.getElementById('view-match').classList.contains('active')){
+    const selectedVli=document.querySelector('.vac-list-item.selected');
+    if(selectedVli){const vacId=selectedVli.id.replace('vli-','');selectVacancy(vacId);}
+  }
+}
+
+function renderOutcomeLog(){
+  const el=document.getElementById('outcome-list');
+  if(outcomes.length===0){
+    el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No outcomes logged yet.<br>After contacting a candidate, log the outcome from the Match engine.</p></div>';
+    return;
+  }
+  el.innerHTML=outcomes.map(o=>`
+    <div class="outcome-item">
+      <div style="font-size:18px;">${outcomeIcon(o.outcome)}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;">${esc(o.cand_name)} <span style="color:var(--g400);font-weight:400;">→</span> ${esc(o.vac_title)}</div>
+        <div style="font-size:12px;color:var(--g500);margin-top:2px;">${outcomeLabel(o.outcome)}${o.reason?' · '+o.reason.replace(/_/g,' '):''}${o.notes?' · '+o.notes:''} <span style="color:var(--g300);">· ${fmtDate(o.date)}</span></div>
+      </div>
+      <button class="btn btn-sec btn-xs" onclick="deleteOutcome('${o.id}')">Remove</button>
+    </div>`).join('');
+}
+
+function deleteOutcome(id){
+  outcomes=outcomes.filter(o=>o.id!==id);
+  saveOutcomes();
+  renderOutcomeLog();
+  notify('Outcome removed');
+}
+
+// ─── ADD/EDIT VACANCY ─────────────────────────────────────────────────────
+function openAddVacancy(){
+  editingVacId=null;
+  document.getElementById('vac-modal-title').textContent='Add vacancy';
+  ['v-title','v-client','v-location','v-state','v-role-type','v-start','v-end',
+   'v-block-weeks','v-rate','v-dpa','v-rural','v-travel','v-accom','v-urgency','v-status','v-notes']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'?el.options[0]?.value||'':''});
+  document.getElementById('v-urgency').value='normal';
+  document.getElementById('v-status').value='Open';
+  showModal('vac-modal');
+}
+
+function openEditVacancy(id){
+  const v=vacancies.find(x=>x.id===id);
+  if(!v)return;
+  editingVacId=id;
+  document.getElementById('vac-modal-title').textContent='Edit vacancy';
+  setVal('v-title',v.title);setVal('v-client',v.client);setVal('v-location',v.location);
+  setVal('v-state',v.state);setVal('v-role-type',v.role_type);setVal('v-start',v.start_date);
+  setVal('v-end',v.end_date);setVal('v-block-weeks',v.block_weeks);setVal('v-rate',v.rate);
+  setVal('v-dpa',v.dpa);setVal('v-rural',v.rural);setVal('v-travel',v.travel);
+  setVal('v-accom',v.accom);setVal('v-urgency',v.urgency||'normal');setVal('v-status',v.status||'Open');
+  setVal('v-notes',v.notes);
+  showModal('vac-modal');
+}
+
+function saveVacancy(){
+  const title=document.getElementById('v-title').value.trim();
+  if(!title){notify('Please enter a job title');return;}
+  const v={
+    id:editingVacId||uid(),
+    title,
+    client:document.getElementById('v-client').value.trim(),
+    location:document.getElementById('v-location').value.trim(),
+    state:document.getElementById('v-state').value,
+    role_type:document.getElementById('v-role-type').value,
+    start_date:document.getElementById('v-start').value,
+    end_date:document.getElementById('v-end').value,
+    block_weeks:document.getElementById('v-block-weeks').value,
+    rate:document.getElementById('v-rate').value,
+    dpa:document.getElementById('v-dpa').value,
+    rural:document.getElementById('v-rural').value,
+    travel:document.getElementById('v-travel').value,
+    accom:document.getElementById('v-accom').value,
+    urgency:document.getElementById('v-urgency').value,
+    status:document.getElementById('v-status').value,
+    notes:document.getElementById('v-notes').value.trim(),
+    created_at:editingVacId?(vacancies.find(x=>x.id===editingVacId)?.created_at||new Date().toISOString()):new Date().toISOString()
+  };
+  if(editingVacId){vacancies=vacancies.map(x=>x.id===editingVacId?v:x);}
+  else{vacancies.unshift(v);}
+  saveVacs();
+  closeModal('vac-modal');
+  notify(editingVacId?'Vacancy updated':'Vacancy added');
+  // Refresh current view
+  const active=document.querySelector('.view.active');
+  if(active?.id==='view-vacancies')renderVacanciesTable();
+  if(active?.id==='view-match')renderMatchView();
+  if(active?.id==='view-dash')renderDash();
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────
+function showModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+function setVal(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
+function notify(msg){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2500);}
+function initials(name){if(!name)return'?';const p=name.split(' ');return(p[0]?.[0]||'')+(p[1]?.[0]||'').toUpperCase();}
+function avColor(name){const colors=['#2563eb','#7c3aed','#059669','#d97706','#dc2626','#0891b2'];const i=name?name.charCodeAt(0)%colors.length:0;return colors[i];}
+function fmtDate(d){if(!d)return '';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}
+function urgencyBadge(u){
+  if(u==='critical')return'<span class="urgency-high">🚨 Critical</span>';
+  if(u==='high')return'<span class="urgency-high">⚡ Urgent</span>';
+  return'<span class="urgency-low">Normal</span>';
+}
+function statusBadge(s){
+  if(s==='Open')return'<span class="b b-grn">Open</span>';
+  if(s==='Filled')return'<span class="b b-blue">Filled</span>';
+  return'<span class="b b-gray">'+esc(s||'—')+'</span>';
+}
+function outcomeIcon(o){
+  if(o==='accepted')return'✅';
+  if(o==='declined')return'❌';
+  if(o==='ghosted')return'👻';
+  if(o==='pending')return'⏳';
+  return'📋';
+}
+function outcomeLabel(o){
+  if(o==='accepted')return'Accepted';
+  if(o==='declined')return'Declined';
+  if(o==='ghosted')return'Ghosted';
+  if(o==='pending')return'Sent — pending reply';
+  return o;
+}
+
+// ─── START ────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
