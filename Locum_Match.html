@@ -343,10 +343,10 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
             <div class="ch"><h3>Audience</h3></div>
             <div style="padding:12px;">
               <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastPreview()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list — ED + clinic roles</span></span></label>
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastPreview()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list — private clinic roles</span></span></label>
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="Interventional Radiologist" onchange="renderBroadcastPreview()"> <span><strong>Interventional Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">IR list</span></span></label>
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="General Radiologist" onchange="renderBroadcastPreview()"> <span><strong>General Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">Gen Rad list</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastView()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list — ED + clinic roles</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastView()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list — private clinic roles</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="Interventional Radiologist" onchange="renderBroadcastView()"> <span><strong>Interventional Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">IR list</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="General Radiologist" onchange="renderBroadcastView()"> <span><strong>General Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">Gen Rad list</span></span></label>
               </div>
             </div>
           </div>
@@ -1893,18 +1893,34 @@ function renderBroadcastView(){
   renderBroadcastPreview();
 }
 
+const AUDIENCE_ROLES={
+  'GP VMO':['GP VMO','ED VMO'],
+  'GP Only':['GP Only','UCC'],
+  'Interventional Radiologist':['Interventional Radiologist'],
+  'General Radiologist':['General Radiologist']
+};
+
 function renderBroadcastPicker(){
   const el=document.getElementById('bc-vac-picker');
+  const audience=getBroadcastAudience();
+  const allowedRoles=AUDIENCE_ROLES[audience]||[];
   const openVacs=vacancies.filter(v=>v.status==='Open');
+  const matching=openVacs.filter(v=>allowedRoles.includes(v.role_type));
+  const others=openVacs.filter(v=>!allowedRoles.includes(v.role_type));
   if(!openVacs.length){
     el.innerHTML='<div class="empty"><p>No open vacancies.<br>Add or import some first.</p></div>';
     return;
   }
-  el.innerHTML=openVacs.map(v=>`
+  if(!matching.length){
+    el.innerHTML=`<div class="empty"><p>No ${audience} vacancies found.<br>Import some first.</p></div>`;
+    return;
+  }
+  el.innerHTML=matching.map(v=>`
     <label style="display:flex;align-items:flex-start;gap:8px;padding:7px 4px;border-bottom:1px solid var(--g100);cursor:pointer;font-size:12px;">
       <input type="checkbox" class="bc-vac-cb" data-id="${v.id}" onchange="renderBroadcastPreview()" checked style="margin-top:2px;">
-      <span style="flex:1;"><strong>${esc(v.title)}</strong><br><span style="color:var(--g500);">${esc(v.state||'')} · ${esc(v.role_type||'')}</span></span>
-    </label>`).join('');
+      <span style="flex:1;"><strong>${esc(v.title)}</strong>${v.is_ams?'<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;margin-left:4px;">AMS</span>':''}<br><span style="color:var(--g500);">${esc(v.state||'')} · ${esc(v.role_type||'')}${v.rate_raw?' · '+esc(v.rate_raw):''}</span></span>
+    </label>`).join('')+
+  (others.length?`<div style="padding:6px 4px;font-size:11px;color:var(--g400);border-top:1px solid var(--g100);margin-top:4px;">${others.length} other-role vacancies hidden</div>`:'');
 }
 
 function getSelectedBroadcastVacs(){
