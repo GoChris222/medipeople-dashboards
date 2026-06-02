@@ -1671,7 +1671,7 @@ function smartExtract(raw,lines){
     const vac=extractBlockFields(raw,raw);
     vac.location=vac.location||a.displayName;
     vac.state=vac.state||a.state||detectState(raw);
-    vac.title=vac.title||(vac.location+(vac.role_type?' – '+vac.role_type:''));
+    vac.title=vac.title||vac.location;
     importedVacancies.push({id:uid(),client:'',status:'Open',urgency:'normal',created_at:new Date().toISOString(),...vac});
     return;
   }
@@ -1767,7 +1767,7 @@ function extractOnCall(text){
 function isValidLocation(name){
   if(!name||name.length>60)return false;
   // Reject lines containing descriptive/heading words
-  if(/\bvacancies\b|\bvacancy\b|\bopportunities\b|\bpermanent\b|\blocum\b|\bFIFO\b|\bavailable\b|\brequired\b|\bseeking\b|\bwe\s+are\b|\bplease\b|\bkind\s+regards\b|\bcontacts?\b|\bdetails\b|\bfees?\b|\brates?\b/i.test(name))return false;
+  if(/\bvacancies\b|\bvacancy\b|\bopportunities\b|\bpermanent\b|\blocum\b|\bFIFO\b|\bavailable\b|\brequired\b|\bseeking\b|\bwe\s+are\b|\bplease\b|\bkind\s+regards\b|\bcontacts?\b|\bdetails\b|\bfees?\b|\brates?\b|\bavailability\b|\bwaiting\b|\bongoing\b/i.test(name))return false;
   // Reject lines with email addresses or phone numbers
   if(/@|http|\d{8,}/.test(name))return false;
   return true;
