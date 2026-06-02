@@ -1584,7 +1584,7 @@ function buildBroadcastPlain(audience,vacs){
   vacs.forEach(v=>{const s=v.state||'Other';if(!byState[s])byState[s]=[];byState[s].push(v);});
   const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
   const audienceDesc={'GP VMO':'GP VMO locum opportunities','GP Only':'GP locum opportunities','Interventional Radiologist':'Interventional Radiology locum opportunities','General Radiologist':'Radiology locum opportunities'};
-  let txt=`Hi [First Name],\n\nI hope you're well. I have some ${audienceDesc[audience]||'locum opportunities'} available${states.length?' across '+states.join(', )+'.':'.'}  Please see the current vacancies below.\n\n`;
+  let txt=`Hi [First Name],\n\nI hope you're well. I have some ${audienceDesc[audience]||'locum opportunities'} available${states.length?' across '+states.join(', ')+'.':'.'}  Please see the current vacancies below.\n\n`;
   states.forEach(state=>{
     txt+=`${'─'.repeat(40)}\n${state}\n${'─'.repeat(40)}\n\n`;
     byState[state].forEach(v=>{
