@@ -1056,7 +1056,8 @@ function renderVacanciesTable(){
         <td>${urgencyBadge(v.urgency)}</td>
         <td>
           <button class="btn btn-sec btn-xs" onclick="openEditVacancy('${v.id}')" style="margin-right:4px;">Edit</button>
-          <button class="btn btn-xs" style="background:var(--pri-l);color:var(--pri);border:1px solid #bfdbfe;" onclick="openMatchForVac('${v.id}')">Match</button>
+          <button class="btn btn-xs" style="background:var(--pri-l);color:var(--pri);border:1px solid #bfdbfe;" onclick="openMatchForVac('${v.id}')" style="margin-right:4px;">Match</button>
+          <button class="btn btn-xs" style="background:var(--red-l);color:var(--red);border:1px solid #fecaca;" onclick="deleteVacancy('${v.id}')">Delete</button>
         </td>
       </tr>`).join('')}
     </tbody></table>`;
@@ -1270,6 +1271,14 @@ function deleteOutcome(id){
 }
 
 // ─── ADD/EDIT VACANCY ─────────────────────────────────────────────────────
+function deleteVacancy(id){
+  if(!confirm('Delete this vacancy?'))return;
+  vacancies=vacancies.filter(v=>v.id!==id);
+  saveVacs();
+  renderVacanciesTable();
+  notify('Vacancy deleted');
+}
+
 function openAddVacancy(){
   editingVacId=null;
   document.getElementById('vac-modal-title').textContent='Add vacancy';
@@ -1783,15 +1792,20 @@ function renderImportResults(){
     el.innerHTML='<div class="empty"><p>No vacancies detected.<br>Check the format and try again.</p></div>';
     bar.style.display='none';cnt.textContent='';return;
   }
+  // Tag duplicates
+  importedVacancies.forEach(v=>{v._existing=findExistingVacancy(v.location||v.title,v.state);});
+  const updates=importedVacancies.filter(v=>v._existing).length;
+  const news=importedVacancies.length-updates;
   cnt.textContent=importedVacancies.length+' found';
   bar.style.display='block';
-  document.getElementById('import-save-msg').textContent=importedVacancies.length+' vacancies ready to save';
+  document.getElementById('import-save-msg').textContent=(news?news+' new':'')+(news&&updates?' + ':'')+(updates?updates+' updates':'')+ ' ready to save';
   el.innerHTML=importedVacancies.map((v,idx)=>`
     <div style="border:1px solid var(--g200);border-radius:8px;overflow:hidden;margin-bottom:10px;">
       <div style="background:var(--g50);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--g200);">
         <span style="font-size:13px;font-weight:600;flex:1;">${esc(v.title)}</span>
         <input value="${esc(v.rate_raw||'')}" onchange="importedVacancies[${idx}].rate_raw=this.value;importedVacancies[${idx}].rate=parseRate(this.value);" placeholder="Rate e.g. $1,800/day" style="font-size:11px;padding:2px 6px;border:1px solid var(--g300);border-radius:4px;width:130px;color:var(--grn);font-weight:600;">
         <span class="b b-${v.role_type==='GP Only'?'grn':v.role_type==='Interventional Radiologist'||v.role_type==='General Radiologist'?'blue':'pur'}">${esc(v.role_type)}</span>
+        ${v._existing?'<span class="b" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;">UPDATE</span>':'<span class="b b-blue">NEW</span>'}
         ${v.is_ams?'<span class="b" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">AMS</span>':''}
         <label style="font-size:11px;color:var(--g500);display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="checkbox" ${v.is_ams?'checked':''} onchange="importedVacancies[${idx}].is_ams=this.checked;renderImportResults()"> AMS</label>
         <button class="btn btn-sec btn-xs" onclick="removeImported(${idx})">✕</button>
@@ -1841,19 +1855,35 @@ function clearImport(){
   document.getElementById('import-count').textContent='';
 }
 
+function findExistingVacancy(location,state){
+  if(!location)return null;
+  const loc=location.toLowerCase().trim();
+  return vacancies.find(v=>{
+    const vl=(v.location||v.title||'').toLowerCase().trim();
+    const sameState=!state||!v.state||v.state===state;
+    return sameState&&(vl===loc||vl.startsWith(loc)||loc.startsWith(vl));
+  })||null;
+}
+
 function saveAllImported(){
   if(!importedVacancies.length)return;
+  let added=0,updated=0;
   importedVacancies.forEach(v=>{
-    // Map parsed fields into vacancy format
-    const full={...v,
-      notes:[v.notes,v.dates_raw?'Dates: '+v.dates_raw:'',v.inclusions_raw?'Inclusions: '+v.inclusions_raw:''].filter(Boolean).join(' | ')
-    };
-    vacancies.unshift(full);
+    const full={...v};
+    delete full._existing;
+    const existing=findExistingVacancy(v.location||v.title,v.state);
+    if(existing){
+      // Update in place — preserve id and created_at, update everything else
+      Object.assign(existing,{...full,id:existing.id,created_at:existing.created_at,updated_at:new Date().toISOString()});
+      updated++;
+    } else {
+      vacancies.unshift(full);
+      added++;
+    }
   });
   saveVacs();
-  const n=importedVacancies.length;
   clearImport();
-  notify(n+' vacancies saved');
+  notify((added?added+' added':'')+(added&&updated?' · ':'')+(updated?updated+' updated':''));
   renderDash();
 }
 
