@@ -345,6 +345,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
               <div style="display:flex;flex-direction:column;gap:6px;">
                 <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastView()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list — ED + clinic roles</span></span></label>
                 <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastView()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list — private clinic roles</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="UCC" onchange="renderBroadcastView()"> <span><strong>UCC</strong><br><span style="font-size:11px;color:var(--g500);">Urgent Care Clinic list — ALS2 required</span></span></label>
                 <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="Interventional Radiologist" onchange="renderBroadcastView()"> <span><strong>Interventional Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">IR list</span></span></label>
                 <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="General Radiologist" onchange="renderBroadcastView()"> <span><strong>General Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">Gen Rad list</span></span></label>
               </div>
@@ -441,6 +442,15 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
             <option value="Open">Open</option>
             <option value="Filled">Filled</option>
             <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="fi"><label>Billings % (if applicable)</label>
+          <input id="v-billings" type="number" placeholder="e.g. 75" min="0" max="100" style="width:100%;">
+        </div>
+        <div class="fi"><label>ALS2 required?</label>
+          <select id="v-als2">
+            <option value="false">No</option>
+            <option value="true">Yes — ALS2 certificate required</option>
           </select>
         </div>
         <div class="fi"><label>AMS vacancy?</label>
@@ -1300,6 +1310,8 @@ function openEditVacancy(id){
   setVal('v-end',v.end_date);setVal('v-block-weeks',v.block_weeks);setVal('v-rate',v.rate);
   setVal('v-dpa',v.dpa);setVal('v-rural',v.rural);setVal('v-travel',v.travel);
   setVal('v-accom',v.accom);setVal('v-urgency',v.urgency||'normal');setVal('v-status',v.status||'Open');
+  setVal('v-billings',v.billings_pct||'');
+  setVal('v-als2',v.is_als2?'true':'false');
   setVal('v-ams',v.is_ams?'true':'false');
   setVal('v-sessions',v.sessions||'');setVal('v-min-weeks',v.min_weeks||'Open');setVal('v-on-call',v.on_call||'TBC');
   setVal('v-notes',v.notes);
@@ -1326,6 +1338,8 @@ function saveVacancy(){
     accom:document.getElementById('v-accom').value,
     urgency:document.getElementById('v-urgency').value,
     status:document.getElementById('v-status').value,
+    billings_pct:document.getElementById('v-billings').value||'',
+    is_als2:document.getElementById('v-als2').value==='true',
     is_ams:document.getElementById('v-ams').value==='true',
     sessions:document.getElementById('v-sessions').value,
     min_weeks:document.getElementById('v-min-weeks').value,
@@ -1683,6 +1697,15 @@ function isMainlySingleVacancy(text){
   return rateMatches<=1;
 }
 
+function detectALS2(text){
+  return /\bALS\s*2\b|ALS2\s*cert|advanced\s*life\s*support\s*2/i.test(text);
+}
+
+function extractBillingsPct(text){
+  const m=text.match(/(\d{2})\s*%\s*of\s*billings/i);
+  return m?m[1]:'';
+}
+
 function detectAMS(text){
   return /aboriginal\s*medical\s*service|aboriginal\s*health\s*service|ACCHS|ACCHO|aboriginal\s*community\s*controlled|aboriginal\s*corporation|first\s*nations.*health|indigenous.*health.*service|maari\s*ma|katungul|amsant|winnunga|galambila|tharawal|tobwabba|bila\s*muuji|awabakal|durri|penkah|walgett\s*aboriginal|\bAMS\b/i.test(text);
 }
@@ -1697,7 +1720,9 @@ function extractBlockFields(block,fullText){
   const min_weeks=extractMinWeeks(block)||extractMinWeeks(fullText);
   const on_call=extractOnCall(block)||extractOnCall(fullText);
   const is_ams=detectAMS(block)||detectAMS(fullText);
-  return{location:'',state,role_type:roleType,rate:parseRate(rate),rate_raw:rate,dates_raw:dates,inclusions_raw:inclusions,sessions,min_weeks,on_call,is_ams,notes:'',title:''};
+  const is_als2=detectALS2(block)||detectALS2(fullText);
+  const billings_pct=extractBillingsPct(block)||extractBillingsPct(fullText);
+  return{location:'',state,role_type:roleType,rate:parseRate(rate),rate_raw:rate,dates_raw:dates,inclusions_raw:inclusions,sessions,min_weeks,on_call,is_ams,is_als2,billings_pct,notes:'',title:''};
 }
 
 function extractSessions(text){
@@ -1807,6 +1832,7 @@ function renderImportResults(){
         <span class="b b-${v.role_type==='GP Only'?'grn':v.role_type==='Interventional Radiologist'||v.role_type==='General Radiologist'?'blue':'pur'}">${esc(v.role_type)}</span>
         ${v._existing?'<span class="b" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;">UPDATE</span>':'<span class="b b-blue">NEW</span>'}
         ${v.is_ams?'<span class="b" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">AMS</span>':''}
+        ${v.is_als2?'<span class="b b-blue">ALS2</span>':''}
         <label style="font-size:11px;color:var(--g500);display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="checkbox" ${v.is_ams?'checked':''} onchange="importedVacancies[${idx}].is_ams=this.checked;renderImportResults()"> AMS</label>
         <button class="btn btn-sec btn-xs" onclick="removeImported(${idx})">✕</button>
       </div>
@@ -1895,7 +1921,8 @@ function renderBroadcastView(){
 
 const AUDIENCE_ROLES={
   'GP VMO':['GP VMO','ED VMO'],
-  'GP Only':['GP Only','UCC'],
+  'GP Only':['GP Only'],
+  'UCC':['UCC'],
   'Interventional Radiologist':['Interventional Radiologist'],
   'General Radiologist':['General Radiologist']
 };
@@ -1945,6 +1972,7 @@ function renderBroadcastPreview(){
   const subjectMap={
     'GP VMO':`GP/ED & VMO Locum Opportunities – ${rateStr}${statesStr||'AU'}`,
     'GP Only':`GP Clinic Locum Opportunities – ${rateStr}${statesStr||'AU'}`,
+    'UCC':`Urgent Care Clinic (UCC) Locum Opportunities – ${rateStr}${statesStr||'AU'}`,
     'Interventional Radiologist':`Interventional Radiology Locum Opportunities – ${statesStr||'AU'}`,
     'General Radiologist':`Radiology Locum Opportunities – ${statesStr||'AU'}`
   };
@@ -1963,6 +1991,7 @@ function buildBroadcastHTML(audience,vacs){
   const audienceIntro={
     'GP VMO':`I have some great GP/ED and VMO locum opportunities available across ${stateList}. Please see the current vacancies below.`,
     'GP Only':`I have some great GP locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'UCC':`I have some great Urgent Care Clinic (UCC) locum opportunities available across ${stateList}. Please see the current vacancies below.`,
     'Interventional Radiologist':'I have some great Interventional Radiology locum opportunities available. Please see the current vacancies below.',
     'General Radiologist':'I have some great Radiology locum opportunities available. Please see the current vacancies below.'
   };
@@ -1988,8 +2017,12 @@ function buildBroadcastHTML(audience,vacs){
       const rateDisplay=v.rate_raw||(v.rate&&v.rate!=='0'?'$'+Number(v.rate).toLocaleString()+'/day':'');
       const datesDisplay=v.dates_raw||'';
       const inclDisplay=v.inclusions_raw||'';
-      const titleDisplay=esc(v.title)+(v.is_ams?' <span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:normal;border:1px solid #fcd34d;">AMS</span>':'');
-      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${titleDisplay}</span>${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
+      const billingsStr=v.billings_pct?` or ${v.billings_pct}% of billings`:'';
+      const fullRate=rateDisplay?(rateDisplay+billingsStr):'';
+      const titleDisplay=esc(v.title)
+        +(v.is_ams?' <span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:normal;border:1px solid #fcd34d;">AMS</span>':'')
+        +(v.is_als2?' <span style="background:#eff6ff;color:#1d4ed8;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:normal;border:1px solid #bfdbfe;">ALS2</span>':'');
+      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${titleDisplay}</span>${fullRate?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(fullRate)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
       if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(datesDisplay)}</p>`;
       if(v.role_type==='GP Only'||v.role_type==='UCC'){
         const sess=v.sessions||'Monday to Friday';
