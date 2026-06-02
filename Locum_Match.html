@@ -1457,7 +1457,7 @@ const TOWN_STATE={
 };
 
 function detectState(text){
-  const lower=text.toLowerCase();
+  const lower=text.replace(/[‘’‚‛′‵`]/g,"'").toLowerCase();
   const sorted=Object.keys(TOWN_STATE).sort((a,b)=>b.length-a.length);
   for(const town of sorted){
     const idx=lower.indexOf(town);
@@ -1534,10 +1534,9 @@ function parseImport(){
   importedVacancies=[];
   const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
 
-  // Format 1: Structured with state headers + "Location – Role" titles (e.g. GP VMO broadcast emails)
+  // Format 1: Structured — only if it has explicit state section headers (e.g. "SOUTH AUSTRALIA")
   const hasStateHdr=lines.some(l=>STATE_PATTERNS[l.toUpperCase()]);
-  const hasStructured=lines.some(l=>/^[A-Za-z].{3,50}\s*[–\-]\s*(GP|ED|VMO|Locum|Senior|SMO|Radiolog|Rural|Health)/i.test(l)&&!DATE_RX.test(l.slice(0,5)));
-  if(hasStateHdr||hasStructured){parseStructuredFormat(lines);renderImportResults();return;}
+  if(hasStateHdr){parseStructuredFormat(lines);renderImportResults();return;}
 
   // Format 2: Multi-location list (e.g. Katungul: town name then dates)
   // Format 3: Paragraph/single location (e.g. Corryong, RFDS, Maari Ma)
@@ -1585,7 +1584,9 @@ function parseStructuredFormat(lines){
 }
 
 function smartExtract(raw,lines){
-  // Find all known town anchors in the text
+  // Normalise curly apostrophes so "Galiwin'ku" matches lookup
+  raw=raw.replace(/[''‚‛′‵`]/g,"'");
+  lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
   const lower=raw.toLowerCase();
   const sorted=Object.keys(TOWN_STATE).sort((a,b)=>b.length-a.length);
   const anchors=[];
