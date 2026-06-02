@@ -443,6 +443,12 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
             <option value="Cancelled">Cancelled</option>
           </select>
         </div>
+        <div class="fi"><label>AMS vacancy?</label>
+          <select id="v-ams">
+            <option value="false">No</option>
+            <option value="true">Yes — Aboriginal Medical Service</option>
+          </select>
+        </div>
         <div class="fi" id="v-sessions-wrap"><label>Sessions (GP Only)</label>
           <select id="v-sessions">
             <option value="">Not specified</option>
@@ -1285,6 +1291,7 @@ function openEditVacancy(id){
   setVal('v-end',v.end_date);setVal('v-block-weeks',v.block_weeks);setVal('v-rate',v.rate);
   setVal('v-dpa',v.dpa);setVal('v-rural',v.rural);setVal('v-travel',v.travel);
   setVal('v-accom',v.accom);setVal('v-urgency',v.urgency||'normal');setVal('v-status',v.status||'Open');
+  setVal('v-ams',v.is_ams?'true':'false');
   setVal('v-sessions',v.sessions||'');setVal('v-min-weeks',v.min_weeks||'Open');setVal('v-on-call',v.on_call||'TBC');
   setVal('v-notes',v.notes);
   showModal('vac-modal');
@@ -1310,6 +1317,7 @@ function saveVacancy(){
     accom:document.getElementById('v-accom').value,
     urgency:document.getElementById('v-urgency').value,
     status:document.getElementById('v-status').value,
+    is_ams:document.getElementById('v-ams').value==='true',
     sessions:document.getElementById('v-sessions').value,
     min_weeks:document.getElementById('v-min-weeks').value,
     on_call:document.getElementById('v-on-call').value,
@@ -1536,12 +1544,11 @@ function parseImport(){
 
   // Format 1: Structured — only if it has explicit state section headers (e.g. "SOUTH AUSTRALIA")
   const hasStateHdr=lines.some(l=>STATE_PATTERNS[l.toUpperCase()]);
-  if(hasStateHdr){parseStructuredFormat(lines);renderImportResults();return;}
+  if(hasStateHdr){parseStructuredFormat(lines);applyZoneRates(raw);renderImportResults();return;}
 
-  // Format 2: Multi-location list (e.g. Katungul: town name then dates)
-  // Format 3: Paragraph/single location (e.g. Corryong, RFDS, Maari Ma)
-  // Use smart location-anchored extraction
+  // Format 2: Multi-location list / paragraph / single location
   smartExtract(raw,lines);
+  applyZoneRates(raw);
   renderImportResults();
 }
 
@@ -1665,6 +1672,10 @@ function isMainlySingleVacancy(text){
   return rateMatches<=1;
 }
 
+function detectAMS(text){
+  return /aboriginal\s*medical\s*service|aboriginal\s*health\s*service|ACCHS|ACCHO|aboriginal\s*community\s*controlled|aboriginal\s*corporation|first\s*nations.*health|indigenous.*health.*service|maari\s*ma|katungul|amsant|winnunga|galambila|tharawal|tobwabba|bila\s*muuji|awabakal|durri|penkah|walgett\s*aboriginal|\bAMS\b/i.test(text);
+}
+
 function extractBlockFields(block,fullText){
   const rate=extractRate(block)||extractRate(fullText.slice(0,500));
   const dates=extractDates(block);
@@ -1674,7 +1685,8 @@ function extractBlockFields(block,fullText){
   const sessions=extractSessions(block)||extractSessions(fullText);
   const min_weeks=extractMinWeeks(block)||extractMinWeeks(fullText);
   const on_call=extractOnCall(block)||extractOnCall(fullText);
-  return{location:'',state,role_type:roleType,rate:parseRate(rate),rate_raw:rate,dates_raw:dates,inclusions_raw:inclusions,sessions,min_weeks,on_call,notes:'',title:''};
+  const is_ams=detectAMS(block)||detectAMS(fullText);
+  return{location:'',state,role_type:roleType,rate:parseRate(rate),rate_raw:rate,dates_raw:dates,inclusions_raw:inclusions,sessions,min_weeks,on_call,is_ams,notes:'',title:''};
 }
 
 function extractSessions(text){
@@ -1716,6 +1728,27 @@ function extractOnCall(text){
   return'';
 }
 
+function applyZoneRates(text){
+  // Detect zone-based fee schedules e.g. "Zone 1 Nhulunbuy, Gunyangara $1600 per day"
+  const norm=text.replace(/[''‚‛′‵`]/g,"'");
+  const zoneMap={};
+  const zoneRx=/Zone\s*\d+\s+([^$\n]{5,80})\$\s*([\d,]+)/gi;
+  let m;
+  while((m=zoneRx.exec(norm))!==null){
+    const rate=m[2].replace(/,/g,'');
+    const rateRaw='$'+Number(rate).toLocaleString()+'/day';
+    const locs=m[1].split(/,|\band\b/i).map(l=>l.trim().toLowerCase()).filter(l=>l.length>2);
+    locs.forEach(loc=>zoneMap[loc]=rateRaw);
+  }
+  if(Object.keys(zoneMap).length===0)return;
+  importedVacancies.forEach(v=>{
+    if(v.rate_raw)return; // already has rate
+    const loc=v.location.toLowerCase();
+    const match=Object.keys(zoneMap).find(z=>loc.includes(z)||z.includes(loc));
+    if(match){v.rate_raw=zoneMap[match];v.rate=parseRate(zoneMap[match]);}
+  });
+}
+
 function detectRoleType(text){
   const t=text.toLowerCase();
   if(t.includes('interventional')||t.includes(' ir ')) return 'Interventional Radiologist';
@@ -1746,8 +1779,10 @@ function renderImportResults(){
     <div style="border:1px solid var(--g200);border-radius:8px;overflow:hidden;margin-bottom:10px;">
       <div style="background:var(--g50);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--g200);">
         <span style="font-size:13px;font-weight:600;flex:1;">${esc(v.title)}</span>
-        ${v.rate_raw?`<span style="font-size:12px;color:var(--grn);font-weight:600;">${esc(v.rate_raw)}</span>`:''}
+        <input value="${esc(v.rate_raw||'')}" onchange="importedVacancies[${idx}].rate_raw=this.value;importedVacancies[${idx}].rate=parseRate(this.value);" placeholder="Rate e.g. $1,800/day" style="font-size:11px;padding:2px 6px;border:1px solid var(--g300);border-radius:4px;width:130px;color:var(--grn);font-weight:600;">
         <span class="b b-${v.role_type==='GP Only'?'grn':v.role_type==='Interventional Radiologist'||v.role_type==='General Radiologist'?'blue':'pur'}">${esc(v.role_type)}</span>
+        ${v.is_ams?'<span class="b" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">AMS</span>':''}
+        <label style="font-size:11px;color:var(--g500);display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="checkbox" ${v.is_ams?'checked':''} onchange="importedVacancies[${idx}].is_ams=this.checked;renderImportResults()"> AMS</label>
         <button class="btn btn-sec btn-xs" onclick="removeImported(${idx})">✕</button>
       </div>
       <div style="padding:8px 12px;font-size:12px;">
@@ -1896,7 +1931,8 @@ function buildBroadcastHTML(audience,vacs){
       const rateDisplay=v.rate_raw||(v.rate&&v.rate!=='0'?'$'+Number(v.rate).toLocaleString()+'/day':'');
       const datesDisplay=v.dates_raw||'';
       const inclDisplay=v.inclusions_raw||'';
-      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${esc(v.title)}</span>${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
+      const titleDisplay=esc(v.title)+(v.is_ams?' <span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:normal;border:1px solid #fcd34d;">AMS</span>':'');
+      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${titleDisplay}</span>${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
       if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(datesDisplay)}</p>`;
       if(v.role_type==='GP Only'||v.role_type==='UCC'){
         const sess=v.sessions||'Monday to Friday';
