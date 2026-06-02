@@ -1336,67 +1336,308 @@ const STATE_PATTERNS={
   'NORTHERN TERRITORY':'NT','AUSTRALIAN CAPITAL TERRITORY':'ACT','ACT':'ACT'
 };
 
+// Town → State lookup (sorted longest first for matching)
+const TOWN_STATE={
+  // NSW
+  'broken hill':'NSW','wilcannia':'NSW','condobolin':'NSW','batemans bay':'NSW',
+  'bega':'NSW','narooma':'NSW','goulburn':'NSW','dubbo':'NSW','orange':'NSW',
+  'wagga wagga':'NSW','wagga':'NSW','albury':'NSW','tamworth':'NSW','armidale':'NSW',
+  'lismore':'NSW','coffs harbour':'NSW','newcastle':'NSW','wollongong':'NSW',
+  'moree':'NSW','lightning ridge':'NSW','bourke':'NSW','cobar':'NSW','griffith':'NSW',
+  'walgett':'NSW','narrabri':'NSW','glen innes':'NSW','grafton':'NSW','kempsey':'NSW',
+  'port macquarie':'NSW','scone':'NSW','singleton':'NSW','muswellbrook':'NSW',
+  'mudgee':'NSW','bathurst':'NSW','young':'NSW','cowra':'NSW','parkes':'NSW',
+  'forbes':'NSW','west wyalong':'NSW','cooma':'NSW','merimbula':'NSW','eden':'NSW',
+  'nowra':'NSW','ulladulla':'NSW','bowral':'NSW','lithgow':'NSW','inverell':'NSW',
+  'gunnedah':'NSW','tenterfield':'NSW','dorrigo':'NSW','taree':'NSW',
+  'tibooburra':'NSW','ivanhoe':'NSW','wentworth':'NSW','nyngan':'NSW',
+  'brewarrina':'NSW','narrandera':'NSW','finley':'NSW','deniliquin':'NSW',
+  'tocumwal':'NSW','tumut':'NSW','queanbeyan':'NSW','yass':'NSW',
+  'katoomba':'NSW','penrith':'NSW','maitland':'NSW','cessnock':'NSW',
+  'corowa':'NSW','hay':'NSW','balranald':'NSW','menindee':'NSW',
+  // VIC
+  'corryong':'VIC','bright':'VIC','wangaratta':'VIC','wodonga':'VIC',
+  'benalla':'VIC','shepparton':'VIC','echuca':'VIC','swan hill':'VIC',
+  'mildura':'VIC','horsham':'VIC','ballarat':'VIC','ararat':'VIC',
+  'hamilton':'VIC','warrnambool':'VIC','colac':'VIC','geelong':'VIC',
+  'bairnsdale':'VIC','sale':'VIC','morwell':'VIC','traralgon':'VIC',
+  'moe':'VIC','wonthaggi':'VIC','leongatha':'VIC','omeo':'VIC',
+  'mansfield':'VIC','alexandra':'VIC','seymour':'VIC','yarrawonga':'VIC',
+  'cobram':'VIC','kyabram':'VIC','maryborough':'VIC','st arnaud':'VIC',
+  'ouyen':'VIC','portland':'VIC','camperdown':'VIC','nhill':'VIC',
+  'dimboola':'VIC','donald':'VIC','stawell':'VIC','mt gambier':'VIC',
+  // QLD
+  'charleville':'QLD','cunnamulla':'QLD','roma':'QLD','st george':'QLD',
+  'dirranbandi':'QLD','surat':'QLD','injune':'QLD','mitchell':'QLD',
+  'longreach':'QLD','barcaldine':'QLD','blackall':'QLD','emerald':'QLD',
+  'moranbah':'QLD','bowen':'QLD','charters towers':'QLD','mount isa':'QLD',
+  'cloncurry':'QLD','burketown':'QLD','normanton':'QLD','karumba':'QLD',
+  'cooktown':'QLD','weipa':'QLD','cairns':'QLD','townsville':'QLD',
+  'mackay':'QLD','rockhampton':'QLD','gladstone':'QLD','bundaberg':'QLD',
+  'gin gin':'QLD','mundubbera':'QLD','gayndah':'QLD','biggenden':'QLD',
+  'monto':'QLD','murgon':'QLD','kingaroy':'QLD','boonah':'QLD',
+  'warwick':'QLD','stanthorpe':'QLD','goondiwindi':'QLD','dalby':'QLD',
+  'chinchilla':'QLD','miles':'QLD','biloela':'QLD','moura':'QLD',
+  'hervey bay':'QLD','gympie':'QLD','toowoomba':'QLD','brisbane':'QLD',
+  'atherton':'QLD','mareeba':'QLD','innisfail':'QLD','ingham':'QLD',
+  'ayr':'QLD','proserpine':'QLD','yeppoon':'QLD','thursday island':'QLD',
+  // WA
+  'perth':'WA','bunbury':'WA','busselton':'WA','margaret river':'WA',
+  'manjimup':'WA','albany':'WA','esperance':'WA','kalgoorlie':'WA',
+  'coolgardie':'WA','leonora':'WA','laverton':'WA','meekatharra':'WA',
+  'geraldton':'WA','carnarvon':'WA','exmouth':'WA','karratha':'WA',
+  'onslow':'WA','tom price':'WA','paraburdoo':'WA','newman':'WA',
+  'port hedland':'WA','hedland':'WA','south hedland':'WA','broome':'WA',
+  'derby':'WA','fitzroy crossing':'WA','halls creek':'WA','kununurra':'WA',
+  'wyndham':'WA','merredin':'WA','northam':'WA','moora':'WA',
+  'narrogin':'WA','katanning':'WA','collie':'WA','denmark':'WA',
+  'norseman':'WA','marble bar':'WA','dampier':'WA',
+  // SA
+  'naracoorte':'SA','mount gambier':'SA','bordertown':'SA','robe':'SA',
+  'victor harbor':'SA','goolwa':'SA','strathalbyn':'SA','nuriootpa':'SA',
+  'burra':'SA','jamestown':'SA','port pirie':'SA','port augusta':'SA',
+  'whyalla':'SA','port lincoln':'SA','ceduna':'SA','streaky bay':'SA',
+  'coober pedy':'SA','marree':'SA','leigh creek':'SA','roxby downs':'SA',
+  'hawker':'SA','quorn':'SA','orroroo':'SA','peterborough':'SA',
+  'kadina':'SA','wallaroo':'SA','moonta':'SA','minlaton':'SA',
+  'crystal brook':'SA','kapunda':'SA','tanunda':'SA','angaston':'SA',
+  'millicent':'SA','murray bridge':'SA','adelaide':'SA',
+  // TAS
+  'hobart':'TAS','launceston':'TAS','devonport':'TAS','burnie':'TAS',
+  'ulverstone':'TAS','wynyard':'TAS','smithton':'TAS','queenstown':'TAS',
+  'strahan':'TAS','zeehan':'TAS','scottsdale':'TAS','st helens':'TAS',
+  'swansea':'TAS','oatlands':'TAS','campbell town':'TAS','deloraine':'TAS',
+  'sheffield':'TAS','longford':'TAS',"st mary's":'TAS','st marys':'TAS',
+  'george town':'TAS','beaconsfield':'TAS',
+  // NT
+  'darwin':'NT','alice springs':'NT','tennant creek':'NT','katherine':'NT',
+  'nhulunbuy':'NT','nhulunby':'NT',"galiwin'ku":'NT','galiwinku':'NT',
+  'yirrkala':'NT','gunyangara':'NT','gapuwiyak':'NT','milingimbi':'NT',
+  'ramingining':'NT','maningrida':'NT','jabiru':'NT','pine creek':'NT',
+  'batchelor':'NT','palmerston':'NT','borroloola':'NT','ngukurr':'NT',
+  'beswick':'NT','barunga':'NT','bulman':'NT','lajamanu':'NT',
+  'yuendumu':'NT','papunya':'NT','hermannsburg':'NT','yulara':'NT',
+  'elliot':'NT','mataranka':'NT','daly waters':'NT','alyangula':'NT',
+  // ACT
+  'canberra':'ACT',
+};
+
+function detectState(text){
+  const lower=text.toLowerCase();
+  const sorted=Object.keys(TOWN_STATE).sort((a,b)=>b.length-a.length);
+  for(const town of sorted){
+    const idx=lower.indexOf(town);
+    if(idx>=0){
+      const b=idx>0?lower[idx-1]:' ';const a=idx+town.length<lower.length?lower[idx+town.length]:' ';
+      if(!/[a-z0-9]/.test(b)&&!/[a-z0-9]/.test(a))return TOWN_STATE[town];
+    }
+  }
+  const m=text.match(/\b(NSW|VIC|QLD|WA|SA|TAS|NT|ACT|NZ)\b/);
+  return m?m[1]:'';
+}
+
+function extractRate(text){
+  const p=[
+    /\$\s*[\d,]+\s*[-–]\s*\$\s*[\d,]+\s*(?:per\s*day|\/day|day\s*rate|pd)/i,
+    /\$\s*[\d,]+\s*\+?\s*(?:per\s*day|\/day|day\s*rate|pd)/i,
+    /\$\s*[\d,]+\s*[-–]\s*\$\s*[\d,]+\s*(?:per\s*hour|\/hr|\/hour)/i,
+    /\$\s*[\d,]+\s*(?:per\s*hour|\/hr|\/hour)/i,
+    /[\d]+%\s*of\s*billings(?:[^\n.]{0,40})?/i,
+    /SOA\s*rates?/i,
+  ];
+  for(const r of p){const m=text.match(r);if(m)return m[0].replace(/\s+/g,' ').trim();}
+  return'';
+}
+
+function extractInclusions(text){
+  const found=[];
+  if(/accommodation|self.contained|fully\s*furnished|unit\s*provided|housing\s*provided/i.test(text))found.push('Accommodation');
+  if(/flight|airfare|air\s*travel|return\s*flights|flights\s*capped/i.test(text))found.push('Flights');
+  if(/vehicle|hire\s*car|hire\s*vehicle|government.*car|car\s*provided|car\s*available|company\s*car|airport.*car/i.test(text))found.push('Vehicle');
+  if(found.length===0&&/travel\s*(provided|costs|covered|included|paid)/i.test(text))found.push('Travel');
+  return found.join(' • ');
+}
+
+function extractDates(text){
+  const found=[];const seen=new Set();
+  const month='(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)';
+  const day='\\d{1,2}(?:st|nd|rd|th)?';
+  const patterns=[
+    new RegExp(`${day}\\s*[-–]\\s*${day}\\s+${month}(?:\\s*\\d{4})?`,'gi'),
+    new RegExp(`${day}\\s+${month}\\s*[-–]\\s*${day}\\s+${month}(?:\\s*\\d{4})?`,'gi'),
+    new RegExp(`${day}\\s+${month}\\s*[-–]\\s*${day}\\s+${month}\\s+\\d{4}`,'gi'),
+    new RegExp(`(?:Monday|Tuesday|Wednesday|Thursday|Friday)\\s+${day}\\s+${month}\\s*[-–]\\s*(?:Monday|Tuesday|Wednesday|Thursday|Friday)\\s+${day}\\s+${month}(?:\\s+\\d{4})?`,'gi'),
+    /\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*[-–]\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?/g,
+    new RegExp(`All\\s+${month}`,'gi'),
+  ];
+  for(const p of patterns){
+    const re=new RegExp(p.source,p.flags);let m;
+    while((m=re.exec(text))!==null){
+      const d=m[0].trim();if(d.length>3&&!seen.has(d)){seen.add(d);found.push(d);}
+    }
+  }
+  if(found.length===0&&/\bASAP\b/i.test(text))found.push('ASAP — start immediately');
+  return found.join(' • ');
+}
+
+function detectRoleTypeFromText(text){
+  const t=text.toLowerCase();
+  if(/vmo\s*rights|on.call|after.hours|gp\/ed|gp\s*ed|credentialing|als\s*cert|apls|acem|facrrm|senior\s*ed|ed\s*locum|inpatient|24.hour|overnight/i.test(t))return'GP VMO';
+  if(/no\s*vmo|no\s*on.call|no\s*after.hours|clinic\s*only|mon.fri|monday\s*to\s*friday|bulk.bill|general\s*practice\s*only/i.test(t))return'GP Only';
+  if(/interventional\s*radiol/i.test(t))return'Interventional Radiologist';
+  if(/radiolog/i.test(t))return'General Radiologist';
+  return'GP Only';
+}
+
+function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
+
+const SKIP_RX=/^(hi |i hope|please |kind regards|regards|from:|to:|subject:|sent:|if any|you can earn|visit our|medipeople|tel:|mob:|email:|www\.|©|unsubscribe|refer a|earn \$|dear |good morning|good afternoon|happy monday|image)/i;
+const DATE_RX=/\d{1,2}[\/\.\-]\d{1,2}/;
+
 function parseImport(){
   const raw=document.getElementById('import-paste').value.trim();
   if(!raw){notify('Paste some email text first');return;}
   importedVacancies=[];
   const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
-  let currentState='';
-  let i=0;
+
+  // Format 1: Structured with state headers + "Location – Role" titles (e.g. GP VMO broadcast emails)
+  const hasStateHdr=lines.some(l=>STATE_PATTERNS[l.toUpperCase()]);
+  const hasStructured=lines.some(l=>/^[A-Za-z].{3,50}\s*[–\-]\s*(GP|ED|VMO|Locum|Senior|SMO|Radiolog|Rural|Health)/i.test(l)&&!DATE_RX.test(l.slice(0,5)));
+  if(hasStateHdr||hasStructured){parseStructuredFormat(lines);renderImportResults();return;}
+
+  // Format 2: Multi-location list (e.g. Katungul: town name then dates)
+  // Format 3: Paragraph/single location (e.g. Corryong, RFDS, Maari Ma)
+  // Use smart location-anchored extraction
+  smartExtract(raw,lines);
+  renderImportResults();
+}
+
+function parseStructuredFormat(lines){
+  let currentState='';let i=0;
   while(i<lines.length){
     const line=lines[i];
-    // Detect state header
     const stateKey=Object.keys(STATE_PATTERNS).find(k=>line.toUpperCase()===k);
     if(stateKey){currentState=STATE_PATTERNS[stateKey];i++;continue;}
-    // Detect vacancy title line: contains '–' or '-' and looks like a title
-    // Pattern: "Location – Role" optionally followed by rate on same line
-    const titleMatch=line.match(/^(.+?)\s*[–\-]\s*(.+?)(?:\s{2,}|\t)(\$[\d,./–\-]+.*)?$/);
-    if(titleMatch&&line.length>5&&!line.startsWith('$')){
-      const location=titleMatch[1].trim();
-      const roleRaw=titleMatch[2].trim();
-      // Rate might be on same line (after big space) or next line
+    const titleMatch=line.match(/^(.+?)\s*[–\-]\s*(.+?)(?:\s{3,}|\t)(\$[\d,./–\-]+.*)?$/);
+    if(titleMatch&&line.length>5&&!line.startsWith('$')&&!DATE_RX.test(line.slice(0,5))){
+      const location=titleMatch[1].trim();const roleRaw=titleMatch[2].trim();
       let rate=titleMatch[3]?titleMatch[3].trim():'';
-      // Check if next line looks like a rate
-      if(!rate&&i+1<lines.length&&lines[i+1].match(/^\$[\d,]|^SOA|^From \$/)){
-        rate=lines[i+1];i++;
-      }
-      // Determine role type
-      const roleType=detectRoleType(roleRaw+' '+line);
-      // Now collect fields until next vacancy or state
+      if(!rate&&i+1<lines.length&&lines[i+1].match(/^\$[\d,]|^SOA|^From \$/)){rate=lines[i+1];i++;}
+      const roleType=detectRoleTypeFromText(roleRaw+' '+line);
       let dates='',inclusions='',notes='',shiftHours='',suitableFor='';
       i++;
       while(i<lines.length){
         const fl=lines[i];
-        if(fl.toUpperCase()===fl&&fl.length>3&&Object.keys(STATE_PATTERNS).some(k=>fl.toUpperCase()===k)) break;
-        if(fl.match(/^(.+?)\s*[–\-]\s*(.+?)/) && fl.length>5 && !fl.startsWith('$') && !fl.match(/^\d/)) break;
-        // Label detection
+        if(STATE_PATTERNS[fl.toUpperCase()])break;
+        if(/^[A-Za-z].{3,50}\s*[–\-]\s*(GP|ED|VMO|Locum|Senior|SMO|Radiolog)/i.test(fl)&&!DATE_RX.test(fl.slice(0,5)))break;
         const llow=fl.toLowerCase();
-        if(llow==='dates'||llow==='key upcoming ed shifts'||llow==='gp/ed dates'||llow==='gpo dates'||llow==='gpa dates'){
-          i++;if(i<lines.length){dates=lines[i];}
-        } else if(llow==='inclusions'){
-          i++;if(i<lines.length){inclusions=lines[i];}
-        } else if(llow==='notes'){
-          i++;if(i<lines.length){notes=lines[i];}
-        } else if(llow==='shift hours'||llow==='shift types'){
-          i++;if(i<lines.length){shiftHours=lines[i];}
-        } else if(llow==='suitable for'){
-          i++;if(i<lines.length){suitableFor=lines[i];}
-        }
+        if(['dates','key upcoming ed shifts','gp/ed dates','gpo dates','gpa dates','day dates','afternoon dates'].includes(llow)){i++;if(i<lines.length)dates=lines[i];}
+        else if(llow==='inclusions'){i++;if(i<lines.length)inclusions=lines[i];}
+        else if(llow==='notes'){i++;if(i<lines.length)notes=lines[i];}
+        else if(llow==='shift hours'||llow==='shift types'){i++;if(i<lines.length)shiftHours=lines[i];}
+        else if(llow==='suitable for'){i++;if(i<lines.length)suitableFor=lines[i];}
         i++;
       }
       importedVacancies.push({
-        id:uid(),title:location+' – '+roleRaw,client:'',
-        location,state:currentState,role_type:roleType,
-        rate:parseRate(rate),rate_raw:rate,
-        dates_raw:dates,inclusions_raw:inclusions,
-        notes:(notes+(shiftHours?' Shift: '+shiftHours:'')+(suitableFor?' Suitable for: '+suitableFor:'')).trim(),
+        id:uid(),title:location+' – '+roleRaw,client:'',location,state:currentState,
+        role_type:roleType,rate:parseRate(rate),rate_raw:rate,dates_raw:dates,
+        inclusions_raw:inclusions,notes:notes+(shiftHours?' Shift: '+shiftHours:'')+(suitableFor?' Suitable for: '+suitableFor:''),
         status:'Open',urgency:'normal',created_at:new Date().toISOString()
       });
       continue;
     }
     i++;
   }
-  renderImportResults();
+}
+
+function smartExtract(raw,lines){
+  // Find all known town anchors in the text
+  const lower=raw.toLowerCase();
+  const sorted=Object.keys(TOWN_STATE).sort((a,b)=>b.length-a.length);
+  const anchors=[];
+  for(const town of sorted){
+    const idx=lower.indexOf(town);
+    if(idx>=0){
+      const b=idx>0?lower[idx-1]:' ';const a=idx+town.length<lower.length?lower[idx+town.length]:' ';
+      if(!/[a-z0-9]/.test(b)&&!/[a-z0-9]/.test(a)){
+        if(!anchors.some(an=>Math.abs(an.idx-idx)<3))
+          anchors.push({town,idx,state:TOWN_STATE[town],displayName:capFirst(town)});
+      }
+    }
+  }
+  // Also detect explicit location headers: short standalone lines (3-50 chars, no date, not skip)
+  const lineAnchors=[];
+  lines.forEach((line,li)=>{
+    if(line.length>=3&&line.length<=60&&!SKIP_RX.test(line)&&!DATE_RX.test(line.slice(0,6))&&!line.startsWith('$')&&!line.match(/^\d/)&&!line.includes('@')&&!line.includes('http')){
+      // Check next 3 lines for dates — if so, this is a location header
+      const nextLines=lines.slice(li+1,li+5).join(' ');
+      if(extractDates(nextLines).length>0||/ASAP/i.test(nextLines)){
+        const st=detectState(line)||detectState(raw);
+        lineAnchors.push({town:line,idx:raw.indexOf(line),state:st,displayName:line});
+      }
+    }
+  });
+
+  // Merge: prefer line anchors if they match town anchors, else use both
+  let allAnchors=[...anchors];
+  lineAnchors.forEach(la=>{
+    if(!allAnchors.some(a=>a.displayName.toLowerCase().includes(la.town.toLowerCase())||la.town.toLowerCase().includes(a.displayName.toLowerCase())))
+      allAnchors.push(la);
+  });
+  // Deduplicate by proximity
+  allAnchors.sort((a,b)=>a.idx-b.idx);
+  const deduped=[];
+  allAnchors.forEach(a=>{
+    if(!deduped.some(d=>Math.abs(d.idx-a.idx)<50))deduped.push(a);
+  });
+
+  if(deduped.length===0){
+    // No known locations — extract as single vacancy from full text
+    const vac=extractBlockFields(raw,raw);
+    if(vac.dates_raw||vac.rate_raw){importedVacancies.push({id:uid(),title:'Unknown location',client:'',location:'',state:'',role_type:detectRoleTypeFromText(raw),...vac,status:'Open',urgency:'normal',created_at:new Date().toISOString()});}
+    return;
+  }
+
+  if(deduped.length===1||isMainlySingleVacancy(raw)){
+    // Single location
+    const a=deduped[0];
+    const vac=extractBlockFields(raw,raw);
+    vac.location=vac.location||a.displayName;
+    vac.state=vac.state||a.state||detectState(raw);
+    vac.title=vac.title||(vac.location+(vac.role_type?' – '+vac.role_type:''));
+    importedVacancies.push({id:uid(),client:'',status:'Open',urgency:'normal',created_at:new Date().toISOString(),...vac});
+    return;
+  }
+
+  // Multi-location: split around each anchor
+  deduped.forEach((anchor,i)=>{
+    const blockStart=Math.max(0,anchor.idx-20);
+    const blockEnd=i+1<deduped.length?deduped[i+1].idx:raw.length;
+    const block=raw.slice(blockStart,blockEnd);
+    const vac=extractBlockFields(block,raw);
+    vac.location=vac.location||anchor.displayName;
+    vac.state=vac.state||anchor.state;
+    vac.title=vac.location;
+    vac.role_type=vac.role_type||detectRoleTypeFromText(raw);
+    if(vac.dates_raw||vac.rate_raw||vac.location)
+      importedVacancies.push({id:uid(),client:'',status:'Open',urgency:'normal',created_at:new Date().toISOString(),...vac});
+  });
+}
+
+function isMainlySingleVacancy(text){
+  // Heuristic: if only one rate and the locations are just mentioned (not section headers)
+  const rateMatches=(text.match(/\$\s*[\d,]+\s*(?:per\s*day|\/day|day\s*rate)/gi)||[]).length;
+  return rateMatches<=1;
+}
+
+function extractBlockFields(block,fullText){
+  const rate=extractRate(block)||extractRate(fullText.slice(0,500));
+  const dates=extractDates(block);
+  const inclusions=extractInclusions(block)||extractInclusions(fullText);
+  const roleType=detectRoleTypeFromText(block)||detectRoleTypeFromText(fullText);
+  const state=detectState(block);
+  const location='';
+  return{location,state,role_type:roleType,rate:parseRate(rate),rate_raw:rate,dates_raw:dates,inclusions_raw:inclusions,notes:'',title:''};
 }
 
 function detectRoleType(text){
@@ -1513,68 +1754,66 @@ function renderBroadcastPreview(){
   const selected=getSelectedBroadcastVacs();
   const month=new Date().toLocaleDateString('en-AU',{month:'long',year:'numeric'});
   // Subject
+  // Find max rate for subject line
+  const maxRate=selected.reduce((max,v)=>{const r=parseInt((v.rate_raw||'').replace(/[^\d]/g,''));return r>max?r:max;},0);
+  const rateStr=maxRate>=1000?'Up to $'+maxRate.toLocaleString()+'/day – ':'';
+  const statesStr=[...new Set(selected.map(v=>v.state).filter(Boolean))].join(', ');
   const subjectMap={
-    'GP VMO':'GP VMO Locum Opportunities — '+month,
-    'GP Only':'GP Locum Opportunities — '+month,
-    'Interventional Radiologist':'Interventional Radiology Locum Opportunities — '+month,
-    'General Radiologist':'Radiology Locum Opportunities — '+month
+    'GP VMO':`GP/ED & VMO Locum Opportunities – ${rateStr}${statesStr||'AU'}`,
+    'GP Only':`GP Clinic Locum Opportunities – ${rateStr}${statesStr||'AU'}`,
+    'Interventional Radiologist':`Interventional Radiology Locum Opportunities – ${statesStr||'AU'}`,
+    'General Radiologist':`Radiology Locum Opportunities – ${statesStr||'AU'}`
   };
-  document.getElementById('bc-subject').value=subjectMap[audience]||'Locum Opportunities — '+month;
+  document.getElementById('bc-subject').value=subjectMap[audience]||'Locum Opportunities – '+month;
   // Build HTML
   document.getElementById('bc-preview').innerHTML=buildBroadcastHTML(audience,selected);
 }
 
 function buildBroadcastHTML(audience,vacs){
-  // Group by state
-  const stateOrder=['QLD','NSW','VIC','SA','WA','TAS','NT','ACT','NZ'];
+  const stateOrder=['SA','WA','QLD','NSW','VIC','TAS','NT','ACT','NZ'];
   const byState={};
-  vacs.forEach(v=>{
-    const s=v.state||'Other';
-    if(!byState[s])byState[s]=[];
-    byState[s].push(v);
-  });
-  const stateFullName={'NSW':'NEW SOUTH WALES','VIC':'VICTORIA','QLD':'QUEENSLAND','WA':'WESTERN AUSTRALIA','SA':'SOUTH AUSTRALIA','TAS':'TASMANIA','NT':'NORTHERN TERRITORY','ACT':'AUSTRALIAN CAPITAL TERRITORY','NZ':'NEW ZEALAND'};
-  const audienceDesc={
-    'GP VMO':'great GP VMO locum opportunities',
-    'GP Only':'great GP locum opportunities',
-    'Interventional Radiologist':'Interventional Radiology locum opportunities',
-    'General Radiologist':'Radiology locum opportunities'
-  };
+  vacs.forEach(v=>{const s=v.state||'Other';if(!byState[s])byState[s]=[];byState[s].push(v);});
+  const stateFullName={'NSW':'NEW SOUTH WALES','VIC':'VICTORIA','QLD':'QUEENSLAND','WA':'WESTERN AUSTRALIA','SA':'SOUTH AUSTRALIA','TAS':'TASMANIA','NT':'NORTHERN TERRITORY','ACT':'AUSTRALIAN CAPITAL TERRITORY','NZ':'NEW ZEALAND','Other':'OTHER'};
   const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
-  let html=`<p style="margin:0 0 12px;">Hi [First Name],</p>
-<p style="margin:0 0 16px;">I hope you're well. I have some ${audienceDesc[audience]||'locum opportunities'} available${states.length?` across ${states.join(', ')}.`:'.'}  Please see the current vacancies below.</p>`;
+  const stateList=states.join(', ');
+  const audienceIntro={
+    'GP VMO':`I have some great GP/ED and VMO locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'GP Only':`I have some great GP locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'Interventional Radiologist':'I have some great Interventional Radiology locum opportunities available. Please see the current vacancies below.',
+    'General Radiologist':'I have some great Radiology locum opportunities available. Please see the current vacancies below.'
+  };
+  // Featured: rate >= $3000 or urgency critical
+  const featured=vacs.filter(v=>{const r=parseInt((v.rate_raw||'').replace(/[^\d]/g,''));return r>=3000||v.urgency==='critical';});
+  let html=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 16px 0;">Hi $first name$,</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 20px 0;">${audienceIntro[audience]||'I have some great locum opportunities available. Please see the current vacancies below.'}</p>`;
+  if(featured.length>0){
+    html+=`<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:12px 16px;margin-bottom:20px;font-family:Arial,Helvetica,sans-serif;"><p style="color:#16a34a;font-weight:bold;font-size:14px;margin:0 0 8px 0;">Featured Roles – $3,000+/day</p>`;
+    featured.forEach(v=>{
+      const loc=v.title.includes('–')?v.title.split('–')[0].trim():v.title;
+      const role=v.title.includes('–')?v.title.split('–').slice(1).join('–').trim():'';
+      const dateShort=v.dates_raw?v.dates_raw.split('•')[0].trim():'Multiple blocks available';
+      html+=`<p style="font-size:13px;margin:3px 0;font-family:Arial,Helvetica,sans-serif;">• <strong>${esc(loc)}${v.state?', '+v.state:''}</strong> – ${esc(role||v.role_type||'')} – ${esc(dateShort)}${v.rate_raw?' – '+esc(v.rate_raw):''}</p>`;
+    });
+    html+=`</div>`;
+  }
 
   states.forEach(state=>{
     const svacs=byState[state];
-    html+=`<p style="font-weight:700;font-size:13px;margin:20px 0 8px;letter-spacing:0.03em;">${stateFullName[state]||state}</p>`;
+    html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:13px;margin:20px 0 10px 0;letter-spacing:0.02em;">${stateFullName[state]||state}</p>`;
     svacs.forEach(v=>{
-      // Parse notes for inclusions/dates/notes
-      const noteParts=v.notes?v.notes.split('|').map(p=>p.trim()):{};
-      const datesPart=noteParts.find?.(p=>p.startsWith('Dates:'))||'';
-      const inclPart=noteParts.find?.(p=>p.startsWith('Inclusions:'))||'';
-      const notesPart=noteParts.filter?.(p=>!p.startsWith('Dates:')&&!p.startsWith('Inclusions:')).join(' ')||'';
-      const datesDisplay=v.dates_raw||datesPart.replace('Dates:','').trim();
-      const inclDisplay=v.inclusions_raw||inclPart.replace('Inclusions:','').trim();
-      const notesDisplay=v.notes&&!v.notes.includes('|')?v.notes:notesPart;
-      const rateDisplay=v.rate_raw||(v.rate?'$'+Number(v.rate).toLocaleString()+'/day':'');
-      html+=`<div style="border:1.5px solid #d0d0d0;border-radius:8px;overflow:hidden;margin-bottom:10px;">
-  <div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
-    <span style="font-weight:bold;font-size:14px;">${esc(v.title)}</span>
-    ${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}
-  </div>
-  <div style="padding:10px 14px;">`;
-      if(datesDisplay) html+=`<p style="color:#888;font-size:11px;margin:0 0 1px;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 8px;">${esc(datesDisplay)}</p>`;
-      if(inclDisplay) html+=`<p style="color:#888;font-size:11px;margin:0 0 1px;">Inclusions</p><p style="font-size:13px;margin:0 0 8px;">${esc(inclDisplay)}</p>`;
-      if(notesDisplay) html+=`<p style="color:#888;font-size:11px;margin:0 0 1px;">Notes</p><p style="font-size:12px;color:#555;margin:0;">${esc(notesDisplay)}</p>`;
+      const rateDisplay=v.rate_raw||(v.rate&&v.rate!=='0'?'$'+Number(v.rate).toLocaleString()+'/day':'');
+      const datesDisplay=v.dates_raw||'';
+      const inclDisplay=v.inclusions_raw||'';
+      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${esc(v.title)}</span>${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
+      if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(datesDisplay)}</p>`;
+      if(inclDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Inclusions</p><p style="font-size:13px;margin:0;color:#111827;">${esc(inclDisplay)}</p>`;
       html+=`</div></div>`;
     });
   });
-
-  if(!vacs.length) html+='<p style="color:#888;font-style:italic;">No vacancies selected.</p>';
-
-  html+=`<p style="margin:20px 0 6px;">If any of these interest you, please reply to this email or give me a call on <strong>0410 547 011</strong> and I'll get you across all the details.</p>
-<p style="color:#2e7d32;font-size:13px;margin:0 0 16px;">You can earn $1,000 for referring a colleague! Visit our <a href="https://www.medipeople.com.au/rewards" style="color:#2e7d32;">Rewards Page</a> for more details.</p>
-<p style="margin:0;font-size:13px;">Kind regards,<br><strong>Chris Tsolakis</strong> | Director<br>MediPeople<br>T: +61 2 8001 6272 | M: +61 410 547 011<br><a href="mailto:chris.t@medipeople.com.au" style="color:#2e7d32;">chris.t@medipeople.com.au</a> | <a href="https://www.medipeople.com.au" style="color:#2e7d32;">www.medipeople.com.au</a></p>`;
+  if(!vacs.length)html+=`<p style="color:#9ca3af;font-style:italic;font-family:Arial,Helvetica,sans-serif;">No vacancies selected.</p>`;
+  html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:20px 0 6px 0;">If any of these interest you, please reply to this email or give me a call on <strong>0410 547 011</strong> and I'll get you across all the details.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#16a34a;margin:0 0 20px 0;">You can earn $1,000 for referring a colleague! Visit our <a href="https://www.medipeople.com.au/rewards" style="color:#16a34a;">Rewards Page</a> for more details.</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;margin:0;">Kind regards,<br><strong>Chris Tsolakis</strong> | Director<br>MediPeople<br>T: +61 2 8001 6272 &nbsp;|&nbsp; M: +61 410 547 011<br><a href="mailto:chris.t@medipeople.com.au" style="color:#2e7d32;">chris.t@medipeople.com.au</a> &nbsp;|&nbsp; <a href="https://www.medipeople.com.au" style="color:#2e7d32;">www.medipeople.com.au</a></p>`;
   return html;
 }
 
