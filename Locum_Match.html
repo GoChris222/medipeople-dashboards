@@ -200,6 +200,14 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <span class="ico">👨‍⚕️</span> Candidates
   </div>
   <div class="sb-divider"></div>
+  <div class="sb-sec">Tools</div>
+  <div class="sb-item" data-view="import" onclick="nav(this,'import')">
+    <span class="ico">📥</span> Import vacancies
+  </div>
+  <div class="sb-item" data-view="broadcast" onclick="nav(this,'broadcast')">
+    <span class="ico">📣</span> Broadcast
+  </div>
+  <div class="sb-divider"></div>
   <div class="sb-sec">History</div>
   <div class="sb-item" data-view="outcomes" onclick="nav(this,'outcomes')">
     <span class="ico">📋</span> Outcome log
@@ -294,6 +302,78 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       </div>
     </div>
 
+    <!-- IMPORT VIEW -->
+    <div id="view-import" class="view">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+        <div class="card">
+          <div class="ch"><h3>Paste vacancy email</h3></div>
+          <div style="padding:14px;">
+            <p style="font-size:12px;color:var(--g500);margin-bottom:10px;">Paste the plain text of your vacancy email below. The system will extract each vacancy automatically.</p>
+            <textarea id="import-paste" style="width:100%;height:320px;padding:10px;border:1px solid var(--g300);border-radius:8px;font-size:12px;font-family:inherit;resize:vertical;" placeholder="Paste email text here...&#10;&#10;e.g.&#10;SOUTH AUSTRALIA&#10;&#10;Naracoorte – GP/ED On-Call    $3,000/24hr&#10;Dates&#10;12–15 Jun • 26–29 Jun&#10;Inclusions&#10;Flights • Accommodation&#10;Notes&#10;ALS required."></textarea>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button class="btn btn-pri" onclick="parseImport()">Extract vacancies</button>
+              <button class="btn btn-sec" onclick="document.getElementById('import-paste').value=''">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="ch"><h3>Extracted vacancies</h3><div class="sp"></div><span id="import-count" style="font-size:12px;color:var(--g500);"></span></div>
+            <div id="import-results" style="padding:10px;">
+              <div class="empty"><p>Paste an email and click<br>"Extract vacancies" to begin.</p></div>
+            </div>
+          </div>
+          <div id="import-save-bar" style="display:none;background:#fff;border:1px solid var(--g200);border-radius:10px;padding:14px;margin-top:0;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:13px;flex:1;" id="import-save-msg"></span>
+              <button class="btn btn-sec" onclick="clearImport()">Clear</button>
+              <button class="btn btn-pri" onclick="saveAllImported()">Save all to vacancies</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BROADCAST VIEW -->
+    <div id="view-broadcast" class="view">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start;">
+        <!-- Left: controls -->
+        <div>
+          <div class="card" style="margin-bottom:12px;">
+            <div class="ch"><h3>Audience</h3></div>
+            <div style="padding:12px;">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastPreview()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list — ED + clinic roles</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastPreview()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list — private clinic roles</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="Interventional Radiologist" onchange="renderBroadcastPreview()"> <span><strong>Interventional Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">IR list</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="General Radiologist" onchange="renderBroadcastPreview()"> <span><strong>General Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">Gen Rad list</span></span></label>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ch"><h3>Select vacancies</h3></div>
+            <div id="bc-vac-picker" style="padding:10px;max-height:340px;overflow-y:auto;"></div>
+          </div>
+        </div>
+        <!-- Right: preview + copy -->
+        <div class="card">
+          <div class="ch">
+            <h3>Broadcast preview</h3>
+            <div class="sp"></div>
+            <button class="btn btn-sec btn-sm" onclick="copyBroadcastHTML()">Copy HTML</button>
+            <button class="btn btn-pri btn-sm" onclick="copyBroadcastPlain()">Copy plain text</button>
+          </div>
+          <div style="padding:14px;">
+            <div style="margin-bottom:10px;">
+              <label style="font-size:11px;font-weight:600;color:var(--g600);">Subject line</label>
+              <input id="bc-subject" style="width:100%;margin-top:4px;padding:7px 9px;border:1px solid var(--g300);border-radius:7px;font-size:13px;" readonly>
+            </div>
+            <div id="bc-preview" style="border:1px solid var(--g200);border-radius:8px;padding:16px;background:#fff;min-height:200px;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -318,8 +398,8 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
             <option value="">Select type</option>
             <option value="GP Only">GP Only</option>
             <option value="GP VMO">GP VMO</option>
-            <option value="IR">IR</option>
-            <option value="Gen Radiologist">Gen Radiologist</option>
+            <option value="Interventional Radiologist">Interventional Radiologist</option>
+            <option value="General Radiologist">General Radiologist</option>
             <option value="ED VMO">ED VMO</option>
             <option value="UCC">UCC</option>
             <option value="Either">Either</option>
@@ -480,7 +560,7 @@ function nav(el,view){
   el.classList.add('active');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
-  const titles={dash:'Dashboard',match:'Match engine',vacancies:'Vacancies',candidates:'Candidates',outcomes:'Outcome log'};
+  const titles={dash:'Dashboard',match:'Match engine',vacancies:'Vacancies',candidates:'Candidates',outcomes:'Outcome log',import:'Import vacancies',broadcast:'Broadcast'};
   document.getElementById('tb-title').textContent=titles[view]||view;
   document.getElementById('tb-actions').innerHTML='';
   if(view==='dash') renderDash();
@@ -488,7 +568,9 @@ function nav(el,view){
   if(view==='vacancies') renderVacanciesTable();
   if(view==='candidates') renderCandidatesTable();
   if(view==='outcomes') renderOutcomeLog();
+  if(view==='broadcast') renderBroadcastView();
 }
+
 
 // ─── LOAD CANDIDATES FROM SUPABASE ────────────────────────────────────────
 async function loadCandidates(){
@@ -806,7 +888,7 @@ function toggleCold(headerEl){
 function matchCard(s,vac){
   const c=s.cand;
   const prefs=candPrefs[c.id]||{};
-  const roleColor={'GP Only':'grn','GP VMO':'pur','ED VMO':'pur','UCC':'amb','IR':'blue','Gen Radiologist':'blue'}[prefs.role_types]||'gray';
+  const roleColor={'GP Only':'grn','GP VMO':'pur','ED VMO':'pur','UCC':'amb','Interventional Radiologist':'blue','General Radiologist':'blue'}[prefs.role_types]||'gray';
   const roleTag=prefs.role_types&&prefs.role_types!=='both'?`<span class="b b-${roleColor}">${esc(prefs.role_types)}</span>`:'<span class="b b-gray">Type not set</span>';
   const allSignals=[
     ...s.reasons.map(r=>`<span class="sig sig-ok">${esc(r)}</span>`),
@@ -1006,8 +1088,8 @@ function openCandProfile(candId){
           <option value="both" ${(!prefs.role_types||prefs.role_types==='both')?'selected':''}>Any / not set</option>
           <option value="GP Only" ${prefs.role_types==='GP Only'?'selected':''}>GP Only</option>
           <option value="GP VMO" ${prefs.role_types==='GP VMO'||prefs.role_types==='GPM VMO'?'selected':''}>GP VMO</option>
-          <option value="IR" ${prefs.role_types==='IR'?'selected':''}>IR</option>
-          <option value="Gen Radiologist" ${prefs.role_types==='Gen Radiologist'?'selected':''}>Gen Radiologist</option>
+          <option value="Interventional Radiologist" ${prefs.role_types==='Interventional Radiologist'||prefs.role_types==='IR'?'selected':''}>Interventional Radiologist</option>
+          <option value="General Radiologist" ${prefs.role_types==='General Radiologist'||prefs.role_types==='Gen Radiologist'?'selected':''}>General Radiologist</option>
           <option value="ED VMO" ${prefs.role_types==='ED VMO'?'selected':''}>ED VMO</option>
           <option value="UCC" ${prefs.role_types==='UCC'?'selected':''}>UCC</option>
         </select>
@@ -1243,6 +1325,296 @@ function outcomeLabel(o){
   if(o==='ghosted')return'Ghosted';
   if(o==='pending')return'Sent — pending reply';
   return o;
+}
+
+// ─── IMPORT / PARSE ───────────────────────────────────────────────────────
+let importedVacancies=[];
+
+const STATE_PATTERNS={
+  'SOUTH AUSTRALIA':'SA','WESTERN AUSTRALIA':'WA','QUEENSLAND':'QLD',
+  'NEW SOUTH WALES':'NSW','TASMANIA':'TAS','VICTORIA':'VIC',
+  'NORTHERN TERRITORY':'NT','AUSTRALIAN CAPITAL TERRITORY':'ACT','ACT':'ACT'
+};
+
+function parseImport(){
+  const raw=document.getElementById('import-paste').value.trim();
+  if(!raw){notify('Paste some email text first');return;}
+  importedVacancies=[];
+  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  let currentState='';
+  let i=0;
+  while(i<lines.length){
+    const line=lines[i];
+    // Detect state header
+    const stateKey=Object.keys(STATE_PATTERNS).find(k=>line.toUpperCase()===k);
+    if(stateKey){currentState=STATE_PATTERNS[stateKey];i++;continue;}
+    // Detect vacancy title line: contains '–' or '-' and looks like a title
+    // Pattern: "Location – Role" optionally followed by rate on same line
+    const titleMatch=line.match(/^(.+?)\s*[–\-]\s*(.+?)(?:\s{2,}|\t)(\$[\d,./–\-]+.*)?$/);
+    if(titleMatch&&line.length>5&&!line.startsWith('$')){
+      const location=titleMatch[1].trim();
+      const roleRaw=titleMatch[2].trim();
+      // Rate might be on same line (after big space) or next line
+      let rate=titleMatch[3]?titleMatch[3].trim():'';
+      // Check if next line looks like a rate
+      if(!rate&&i+1<lines.length&&lines[i+1].match(/^\$[\d,]|^SOA|^From \$/)){
+        rate=lines[i+1];i++;
+      }
+      // Determine role type
+      const roleType=detectRoleType(roleRaw+' '+line);
+      // Now collect fields until next vacancy or state
+      let dates='',inclusions='',notes='',shiftHours='',suitableFor='';
+      i++;
+      while(i<lines.length){
+        const fl=lines[i];
+        if(fl.toUpperCase()===fl&&fl.length>3&&Object.keys(STATE_PATTERNS).some(k=>fl.toUpperCase()===k)) break;
+        if(fl.match(/^(.+?)\s*[–\-]\s*(.+?)/) && fl.length>5 && !fl.startsWith('$') && !fl.match(/^\d/)) break;
+        // Label detection
+        const llow=fl.toLowerCase();
+        if(llow==='dates'||llow==='key upcoming ed shifts'||llow==='gp/ed dates'||llow==='gpo dates'||llow==='gpa dates'){
+          i++;if(i<lines.length){dates=lines[i];}
+        } else if(llow==='inclusions'){
+          i++;if(i<lines.length){inclusions=lines[i];}
+        } else if(llow==='notes'){
+          i++;if(i<lines.length){notes=lines[i];}
+        } else if(llow==='shift hours'||llow==='shift types'){
+          i++;if(i<lines.length){shiftHours=lines[i];}
+        } else if(llow==='suitable for'){
+          i++;if(i<lines.length){suitableFor=lines[i];}
+        }
+        i++;
+      }
+      importedVacancies.push({
+        id:uid(),title:location+' – '+roleRaw,client:'',
+        location,state:currentState,role_type:roleType,
+        rate:parseRate(rate),rate_raw:rate,
+        dates_raw:dates,inclusions_raw:inclusions,
+        notes:(notes+(shiftHours?' Shift: '+shiftHours:'')+(suitableFor?' Suitable for: '+suitableFor:'')).trim(),
+        status:'Open',urgency:'normal',created_at:new Date().toISOString()
+      });
+      continue;
+    }
+    i++;
+  }
+  renderImportResults();
+}
+
+function detectRoleType(text){
+  const t=text.toLowerCase();
+  if(t.includes('interventional')||t.includes(' ir ')) return 'Interventional Radiologist';
+  if(t.includes('radiolog')) return 'General Radiologist';
+  if(t.includes('gp vmo')||t.includes('gpvmo')||t.includes('vmo')||t.includes('gp/ed')||t.includes('gped')||t.includes('ed locum')||t.includes('ed registrar')||t.includes('on-call')||t.includes('senior ed')||t.includes('inpatient')||t.includes('smo')) return 'GP VMO';
+  if(t.includes('ucc')||t.includes('urgent care')) return 'UCC';
+  return 'GP VMO'; // default for these rural/ED emails
+}
+
+function parseRate(rateStr){
+  if(!rateStr)return '';
+  const m=rateStr.match(/\$?([\d,]+)/);
+  return m?m[1].replace(/,/g,''):'';
+}
+
+function renderImportResults(){
+  const el=document.getElementById('import-results');
+  const bar=document.getElementById('import-save-bar');
+  const cnt=document.getElementById('import-count');
+  if(importedVacancies.length===0){
+    el.innerHTML='<div class="empty"><p>No vacancies detected.<br>Check the format and try again.</p></div>';
+    bar.style.display='none';cnt.textContent='';return;
+  }
+  cnt.textContent=importedVacancies.length+' found';
+  bar.style.display='block';
+  document.getElementById('import-save-msg').textContent=importedVacancies.length+' vacancies ready to save';
+  el.innerHTML=importedVacancies.map((v,idx)=>`
+    <div style="border:1px solid var(--g200);border-radius:8px;overflow:hidden;margin-bottom:10px;">
+      <div style="background:var(--g50);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--g200);">
+        <span style="font-size:13px;font-weight:600;flex:1;">${esc(v.title)}</span>
+        ${v.rate_raw?`<span style="font-size:12px;color:var(--grn);font-weight:600;">${esc(v.rate_raw)}</span>`:''}
+        <span class="b b-${v.role_type==='GP Only'?'grn':v.role_type==='Interventional Radiologist'||v.role_type==='General Radiologist'?'blue':'pur'}">${esc(v.role_type)}</span>
+        <button class="btn btn-sec btn-xs" onclick="removeImported(${idx})">✕</button>
+      </div>
+      <div style="padding:8px 12px;font-size:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:var(--g500);">State: </span><strong>${esc(v.state||'—')}</strong></div>
+          <div><span style="color:var(--g500);">Role: </span>
+            <select onchange="importedVacancies[${idx}].role_type=this.value" style="font-size:11px;padding:1px 4px;border:1px solid var(--g300);border-radius:4px;">
+              ${['GP Only','GP VMO','ED VMO','UCC','Interventional Radiologist','General Radiologist'].map(r=>`<option ${r===v.role_type?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        ${v.dates_raw?`<div style="margin-top:4px;"><span style="color:var(--g500);">Dates: </span>${esc(v.dates_raw)}</div>`:''}
+        ${v.inclusions_raw?`<div style="margin-top:2px;"><span style="color:var(--g500);">Inclusions: </span>${esc(v.inclusions_raw)}</div>`:''}
+        ${v.notes?`<div style="margin-top:2px;color:var(--g500);font-size:11px;">${esc(v.notes.slice(0,120))}${v.notes.length>120?'…':''}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function removeImported(idx){
+  importedVacancies.splice(idx,1);
+  renderImportResults();
+}
+
+function clearImport(){
+  importedVacancies=[];
+  document.getElementById('import-paste').value='';
+  document.getElementById('import-results').innerHTML='<div class="empty"><p>Paste an email and click<br>"Extract vacancies" to begin.</p></div>';
+  document.getElementById('import-save-bar').style.display='none';
+  document.getElementById('import-count').textContent='';
+}
+
+function saveAllImported(){
+  if(!importedVacancies.length)return;
+  importedVacancies.forEach(v=>{
+    // Map parsed fields into vacancy format
+    const full={...v,
+      notes:[v.notes,v.dates_raw?'Dates: '+v.dates_raw:'',v.inclusions_raw?'Inclusions: '+v.inclusions_raw:''].filter(Boolean).join(' | ')
+    };
+    vacancies.unshift(full);
+  });
+  saveVacs();
+  const n=importedVacancies.length;
+  clearImport();
+  notify(n+' vacancies saved');
+  renderDash();
+}
+
+// ─── BROADCAST ────────────────────────────────────────────────────────────
+function renderBroadcastView(){
+  renderBroadcastPicker();
+  renderBroadcastPreview();
+}
+
+function renderBroadcastPicker(){
+  const el=document.getElementById('bc-vac-picker');
+  const openVacs=vacancies.filter(v=>v.status==='Open');
+  if(!openVacs.length){
+    el.innerHTML='<div class="empty"><p>No open vacancies.<br>Add or import some first.</p></div>';
+    return;
+  }
+  el.innerHTML=openVacs.map(v=>`
+    <label style="display:flex;align-items:flex-start;gap:8px;padding:7px 4px;border-bottom:1px solid var(--g100);cursor:pointer;font-size:12px;">
+      <input type="checkbox" class="bc-vac-cb" data-id="${v.id}" onchange="renderBroadcastPreview()" checked style="margin-top:2px;">
+      <span style="flex:1;"><strong>${esc(v.title)}</strong><br><span style="color:var(--g500);">${esc(v.state||'')} · ${esc(v.role_type||'')}</span></span>
+    </label>`).join('');
+}
+
+function getSelectedBroadcastVacs(){
+  const checked=Array.from(document.querySelectorAll('.bc-vac-cb:checked')).map(cb=>cb.dataset.id);
+  return vacancies.filter(v=>checked.includes(v.id));
+}
+
+function getBroadcastAudience(){
+  const r=document.querySelector('input[name="bc-audience"]:checked');
+  return r?r.value:'GP VMO';
+}
+
+function renderBroadcastPreview(){
+  const audience=getBroadcastAudience();
+  const selected=getSelectedBroadcastVacs();
+  const month=new Date().toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+  // Subject
+  const subjectMap={
+    'GP VMO':'GP VMO Locum Opportunities — '+month,
+    'GP Only':'GP Locum Opportunities — '+month,
+    'Interventional Radiologist':'Interventional Radiology Locum Opportunities — '+month,
+    'General Radiologist':'Radiology Locum Opportunities — '+month
+  };
+  document.getElementById('bc-subject').value=subjectMap[audience]||'Locum Opportunities — '+month;
+  // Build HTML
+  document.getElementById('bc-preview').innerHTML=buildBroadcastHTML(audience,selected);
+}
+
+function buildBroadcastHTML(audience,vacs){
+  // Group by state
+  const stateOrder=['QLD','NSW','VIC','SA','WA','TAS','NT','ACT','NZ'];
+  const byState={};
+  vacs.forEach(v=>{
+    const s=v.state||'Other';
+    if(!byState[s])byState[s]=[];
+    byState[s].push(v);
+  });
+  const stateFullName={'NSW':'NEW SOUTH WALES','VIC':'VICTORIA','QLD':'QUEENSLAND','WA':'WESTERN AUSTRALIA','SA':'SOUTH AUSTRALIA','TAS':'TASMANIA','NT':'NORTHERN TERRITORY','ACT':'AUSTRALIAN CAPITAL TERRITORY','NZ':'NEW ZEALAND'};
+  const audienceDesc={
+    'GP VMO':'great GP VMO locum opportunities',
+    'GP Only':'great GP locum opportunities',
+    'Interventional Radiologist':'Interventional Radiology locum opportunities',
+    'General Radiologist':'Radiology locum opportunities'
+  };
+  const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
+  let html=`<p style="margin:0 0 12px;">Hi [First Name],</p>
+<p style="margin:0 0 16px;">I hope you're well. I have some ${audienceDesc[audience]||'locum opportunities'} available${states.length?` across ${states.join(', ')}.`:'.'}  Please see the current vacancies below.</p>`;
+
+  states.forEach(state=>{
+    const svacs=byState[state];
+    html+=`<p style="font-weight:700;font-size:13px;margin:20px 0 8px;letter-spacing:0.03em;">${stateFullName[state]||state}</p>`;
+    svacs.forEach(v=>{
+      // Parse notes for inclusions/dates/notes
+      const noteParts=v.notes?v.notes.split('|').map(p=>p.trim()):{};
+      const datesPart=noteParts.find?.(p=>p.startsWith('Dates:'))||'';
+      const inclPart=noteParts.find?.(p=>p.startsWith('Inclusions:'))||'';
+      const notesPart=noteParts.filter?.(p=>!p.startsWith('Dates:')&&!p.startsWith('Inclusions:')).join(' ')||'';
+      const datesDisplay=v.dates_raw||datesPart.replace('Dates:','').trim();
+      const inclDisplay=v.inclusions_raw||inclPart.replace('Inclusions:','').trim();
+      const notesDisplay=v.notes&&!v.notes.includes('|')?v.notes:notesPart;
+      const rateDisplay=v.rate_raw||(v.rate?'$'+Number(v.rate).toLocaleString()+'/day':'');
+      html+=`<div style="border:1.5px solid #d0d0d0;border-radius:8px;overflow:hidden;margin-bottom:10px;">
+  <div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-weight:bold;font-size:14px;">${esc(v.title)}</span>
+    ${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}
+  </div>
+  <div style="padding:10px 14px;">`;
+      if(datesDisplay) html+=`<p style="color:#888;font-size:11px;margin:0 0 1px;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 8px;">${esc(datesDisplay)}</p>`;
+      if(inclDisplay) html+=`<p style="color:#888;font-size:11px;margin:0 0 1px;">Inclusions</p><p style="font-size:13px;margin:0 0 8px;">${esc(inclDisplay)}</p>`;
+      if(notesDisplay) html+=`<p style="color:#888;font-size:11px;margin:0 0 1px;">Notes</p><p style="font-size:12px;color:#555;margin:0;">${esc(notesDisplay)}</p>`;
+      html+=`</div></div>`;
+    });
+  });
+
+  if(!vacs.length) html+='<p style="color:#888;font-style:italic;">No vacancies selected.</p>';
+
+  html+=`<p style="margin:20px 0 6px;">If any of these interest you, please reply to this email or give me a call on <strong>0410 547 011</strong> and I'll get you across all the details.</p>
+<p style="color:#2e7d32;font-size:13px;margin:0 0 16px;">You can earn $1,000 for referring a colleague! Visit our <a href="https://www.medipeople.com.au/rewards" style="color:#2e7d32;">Rewards Page</a> for more details.</p>
+<p style="margin:0;font-size:13px;">Kind regards,<br><strong>Chris Tsolakis</strong> | Director<br>MediPeople<br>T: +61 2 8001 6272 | M: +61 410 547 011<br><a href="mailto:chris.t@medipeople.com.au" style="color:#2e7d32;">chris.t@medipeople.com.au</a> | <a href="https://www.medipeople.com.au" style="color:#2e7d32;">www.medipeople.com.au</a></p>`;
+  return html;
+}
+
+function buildBroadcastPlain(audience,vacs){
+  const stateOrder=['QLD','NSW','VIC','SA','WA','TAS','NT','ACT','NZ'];
+  const byState={};
+  vacs.forEach(v=>{const s=v.state||'Other';if(!byState[s])byState[s]=[];byState[s].push(v);});
+  const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
+  const audienceDesc={'GP VMO':'GP VMO locum opportunities','GP Only':'GP locum opportunities','Interventional Radiologist':'Interventional Radiology locum opportunities','General Radiologist':'Radiology locum opportunities'};
+  let txt=`Hi [First Name],\n\nI hope you're well. I have some ${audienceDesc[audience]||'locum opportunities'} available${states.length?' across '+states.join(', )+'.':'.'}  Please see the current vacancies below.\n\n`;
+  states.forEach(state=>{
+    txt+=`${'─'.repeat(40)}\n${state}\n${'─'.repeat(40)}\n\n`;
+    byState[state].forEach(v=>{
+      const rateDisplay=v.rate_raw||(v.rate?'$'+Number(v.rate).toLocaleString()+'/day':'');
+      txt+=`${v.title}${rateDisplay?'   '+rateDisplay:''}\n`;
+      if(v.dates_raw)txt+=`Dates: ${v.dates_raw}\n`;
+      if(v.inclusions_raw)txt+=`Inclusions: ${v.inclusions_raw}\n`;
+      if(v.notes&&!v.notes.includes('|'))txt+=`${v.notes}\n`;
+      txt+='\n';
+    });
+  });
+  txt+=`If any of these interest you, please reply or give me a call on 0410 547 011 and I'll get you across all the details.\n\nYou can earn $1,000 for referring a colleague! Visit medipeople.com.au/rewards for more details.\n\nKind regards,\nChris Tsolakis | Director\nMediPeople\nT: +61 2 8001 6272 | M: +61 410 547 011\nchris.t@medipeople.com.au | www.medipeople.com.au`;
+  return txt;
+}
+
+function copyBroadcastHTML(){
+  const audience=getBroadcastAudience();
+  const vacs=getSelectedBroadcastVacs();
+  const subject=document.getElementById('bc-subject').value;
+  const html=buildBroadcastHTML(audience,vacs);
+  const full=`<strong>Subject:</strong> ${subject}<br><br>`+html;
+  navigator.clipboard.writeText(full).then(()=>notify('HTML copied — paste into Bullhorn'));
+}
+
+function copyBroadcastPlain(){
+  const audience=getBroadcastAudience();
+  const vacs=getSelectedBroadcastVacs();
+  const subject=document.getElementById('bc-subject').value;
+  const txt='Subject: '+subject+'\n\n'+buildBroadcastPlain(audience,vacs);
+  navigator.clipboard.writeText(txt).then(()=>notify('Plain text copied — paste into Bullhorn'));
 }
 
 // ─── START ────────────────────────────────────────────────────────────────
