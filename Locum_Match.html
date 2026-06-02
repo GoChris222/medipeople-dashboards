@@ -1544,11 +1544,13 @@ function parseImport(){
 
   // Format 1: Structured — only if it has explicit state section headers (e.g. "SOUTH AUSTRALIA")
   const hasStateHdr=lines.some(l=>STATE_PATTERNS[l.toUpperCase()]);
-  if(hasStateHdr){parseStructuredFormat(lines);applyZoneRates(raw);renderImportResults();return;}
+  if(hasStateHdr){parseStructuredFormat(lines);applyZoneRates(raw);importedVacancies=importedVacancies.filter(v=>isValidLocation(v.location||v.title));renderImportResults();return;}
 
   // Format 2: Multi-location list / paragraph / single location
   smartExtract(raw,lines);
   applyZoneRates(raw);
+  // Remove false-positive "vacancies" that are clearly email headers/descriptors
+  importedVacancies=importedVacancies.filter(v=>isValidLocation(v.location||v.title));
   renderImportResults();
 }
 
@@ -1726,6 +1728,15 @@ function extractOnCall(text){
   if(/on[- ]?call.*entire.*block|entire.*block.*on[- ]?call/i.test(text))return'Entire block';
   if(/as\s*per\s*roster/i.test(text))return'As per roster';
   return'';
+}
+
+function isValidLocation(name){
+  if(!name||name.length>60)return false;
+  // Reject lines containing descriptive/heading words
+  if(/\bvacancies\b|\bvacancy\b|\bopportunities\b|\bpermanent\b|\blocum\b|\bFIFO\b|\bavailable\b|\brequired\b|\bseeking\b|\bwe\s+are\b|\bplease\b|\bkind\s+regards\b|\bcontacts?\b|\bdetails\b|\bfees?\b|\brates?\b/i.test(name))return false;
+  // Reject lines with email addresses or phone numbers
+  if(/@|http|\d{8,}/.test(name))return false;
+  return true;
 }
 
 function applyZoneRates(text){
