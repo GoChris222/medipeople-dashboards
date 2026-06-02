@@ -2086,5 +2086,79 @@ function copyBroadcastPlain(){
 // ─── START ────────────────────────────────────────────────────────────────
 init();
 </script>
+
+<script>
+/* === Import parser fix: robust town/role split for hyphen, en-dash, em-dash, dots; single-line + multi-state support === */
+
+function __normDashes(t){return t.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212\u2043\uFE58\uFE63\uFF0D]/g,'-');}
+function __isStateHdr(line){return !!STATE_PATTERNS[line.trim().toUpperCase()];}
+function __isSubHdr(line){return /^(dates?|inclusions?|notes?|requirements?|details?|role|position)\s*:?\s*$/i.test(line.trim());}
+function __subKey(line){var l=line.trim().toLowerCase().replace(/[:\s]+$/,'');if(/^date/.test(l))return 'dates';if(/^inclusion/.test(l))return 'inclusions';if(/^note/.test(l))return 'notes';if(/^requirement/.test(l))return 'notes';if(/^detail/.test(l))return 'notes';return 'notes';}
+var __TOWNS_SORTED = Object.keys(TOWN_STATE).sort(function(a,b){return b.length-a.length;});
+function __splitTownRole(line){
+  var norm = __normDashes(line).replace(/\s+/g,' ').trim();
+  var lower = norm.toLowerCase();
+  for(var i=0;i<__TOWNS_SORTED.length;i++){
+    var t=__TOWNS_SORTED[i];
+    if(lower.indexOf(t)===0){
+      var nxt = norm.charAt(t.length);
+      if(nxt===''||/[^a-z0-9']/i.test(nxt)){
+        var town = norm.substring(0,t.length);
+        var role = norm.substring(t.length).replace(/^[\s\-.:|·,]+/,'').trim();
+        return {town:town, role:role||town};
+      }
+    }
+  }
+  var m = norm.match(/^(.+?)\s*[-:|·]\s*(.+)$/) || norm.match(/^(.+?)\s+\.\s+(.+)$/);
+  if(m) return {town:m[1].trim(), role:m[2].trim()};
+  return {town:norm, role:norm};
+}
+function __looksHeadline(line){
+  if(__isStateHdr(line)||__isSubHdr(line))return false;
+  if(SKIP_RX.test(line.trim()))return false;
+  if(extractRate(line))return true;
+  var norm=__normDashes(line).replace(/\s+/g,' ').trim().toLowerCase();
+  for(var i=0;i<__TOWNS_SORTED.length;i++){var t=__TOWNS_SORTED[i];if(norm.indexOf(t)===0){var nxt=norm.charAt(t.length);if(nxt===''||/[^a-z0-9']/i.test(nxt))return true;}}
+  return false;
+}
+function __mkVac(headline, currentState){
+  var sr = __splitTownRole(headline);
+  var rate_raw = extractRate(headline) || (headline.match(/\$\s*[\d,]+(?:\s*[\/]\s*\d*\s*(?:hr|hour|day|24hr|shift|wk|week|pd))?\+?/i)||[''])[0].trim();
+  var loc = sr.town;
+  var st = detectState(headline) || currentState || '';
+  var role = sr.role && sr.role!==sr.town ? sr.role : '';
+  var cleanTitle = role ? (sr.town + ' – ' + role) : sr.town;
+  cleanTitle = cleanTitle.replace(/\s*\$[\s\S]*$/,'').replace(/\s+/g,' ').trim();
+  var v={id:'mp'+Math.random().toString(36).slice(2,12),title:cleanTitle,client:'',location:loc,state:st,role_type:detectRoleTypeFromText(headline),rate:(rate_raw.match(/[\d,]+/)||[''])[0].replace(/,/g,''),rate_raw:rate_raw,dates_raw:'',inclusions_raw:'',notes:'',status:'Open',urgency:'normal',created_at:new Date().toISOString(),_existing:null};
+  return v;
+}
+function parseImport(){
+  var raw=document.getElementById('import-paste').value.trim();
+  if(!raw){notify('Paste some email text first');return;}
+  importedVacancies.length=0;
+  var rawLines=raw.split('\n');
+  var currentState='';var cur=null;var mode='notes';
+  for(var i=0;i<rawLines.length;i++){
+    var line=rawLines[i].replace(/\s+$/,'').trim();
+    if(!line)continue;
+    if(__isStateHdr(line)){currentState=STATE_PATTERNS[line.toUpperCase()];cur=null;continue;}
+    if(__isSubHdr(line)){if(cur)mode=__subKey(line);continue;}
+    if(__looksHeadline(line)){cur=__mkVac(line,currentState);if(!cur.state)cur.state=currentState;importedVacancies.push(cur);mode='notes';continue;}
+    if(cur){
+      var nl=__normDashes(line);
+      if(mode==='dates'){cur.dates_raw=cur.dates_raw?cur.dates_raw+' • '+nl:nl;}
+      else if(mode==='inclusions'){cur.inclusions_raw=cur.inclusions_raw?cur.inclusions_raw+' • '+nl:nl;}
+      else {cur.notes=cur.notes?cur.notes+' '+line:line;}
+      if(!cur.rate_raw){var rr=extractRate(line);if(rr){cur.rate_raw=rr;cur.rate=(rr.match(/[\d,]+/)||[''])[0].replace(/,/g,'');}}
+    }
+  }
+  var hadStructure = importedVacancies.length>0;
+  if(!hadStructure){ try{smartExtract(raw, raw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;}));}catch(e){} }
+  try{applyZoneRates(raw);}catch(e){}
+  importedVacancies = importedVacancies.filter(function(v){return isValidLocation(v.location||v.title);});
+  renderImportResults();
+}
+
+</script>
 </body>
 </html>
