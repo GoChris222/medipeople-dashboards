@@ -2222,70 +2222,60 @@ function parseTrackerTable(){
 
 </script>
 
+
 <script>
-/* === Add candidate feature: manual add form + browser persistence (mp_locum_candidates) === */
+/* === Add candidate feature v8: manual add form WITH matching preferences (role type, block, rural, FIFO, preferred/avoided states) writing to mp_locum_candidates + mp_locum_cand_prefs + candPrefs; async-safe sync; dpa_areas array === */
 
 function __cesc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
-function __loadStoredCands(){var s=[];try{s=JSON.parse(localStorage.getItem('mp_locum_candidates')||'[]');}catch(e){}return s;}
-(function(){
-  if(window.__origLoadCandidates)return;
-  window.__origLoadCandidates = window.loadCandidates;
-  window.loadCandidates = function(){
-    try{window.__origLoadCandidates();}catch(e){}
-    var tbody=document.querySelector('#cand-table-wrap tbody');if(!tbody)return;
-    __loadStoredCands().forEach(function(c){
-      if(typeof candidates!=='undefined'&&!candidates.some(function(x){return x.id===c.id;}))candidates.push(c);
-      var rate=c.daily_rate_min?('$'+c.daily_rate_min+(c.daily_rate_max&&c.daily_rate_max!=c.daily_rate_min?'–$'+c.daily_rate_max:'')+'/day'):(c.hourly_rate_min?('$'+c.hourly_rate_min+'/hr'):'—');
-      var avail=c.available_from?(__cesc(c.available_from)+(c.available_to?(' – '+__cesc(c.available_to)):'')):'Not set';
-      var tr=document.createElement('tr');
-      tr.innerHTML='<td style="font-weight:600;">'+__cesc(c.name)+'</td><td>'+__cesc(c.current_location||'—')+'</td><td>'+rate+'</td><td>'+avail+'</td><td>'+__cesc(c.dpa_areas||'—')+'</td><td>—</td><td>—</td><td style="text-align:right;"><button class="btn btn-sec btn-xs" onclick="openCandProfile(\''+c.id+'\')">Prefs →</button></td>';
-      tbody.appendChild(tr);
-    });
-  };
-})();
+function __loadStoredCands(){var s=[];try{s=JSON.parse(localStorage.getItem('mp_locum_candidates')||'[]');}catch(e){}s.forEach(function(c){if(typeof c.dpa_areas==='string')c.dpa_areas=c.dpa_areas?c.dpa_areas.split(/[,;]/).map(function(x){return x.trim();}).filter(Boolean):[];if(c.dpa_areas==null)c.dpa_areas=[];});return s;}
+function __candPrefs(){try{return JSON.parse(localStorage.getItem('mp_locum_cand_prefs')||'{}');}catch(e){return {};}}
+window.__syncing=false;
+function __syncCands(){if(window.__syncing)return;var stored=__loadStoredCands();if(!stored.length)return;var tbody=document.querySelector('#cand-table-wrap tbody');if(!tbody)return;window.__syncing=true;var P=__candPrefs();if(typeof candPrefs!=='undefined'&&candPrefs){for(var pk in P){if(!candPrefs[pk])candPrefs[pk]=P[pk];}}stored.forEach(function(c){if(typeof candidates!=='undefined'&&!candidates.some(function(x){return x.id===c.id;}))candidates.push(c);if(!tbody.querySelector('tr[data-cid="'+c.id+'"]')){var rate=c.daily_rate_min?('$'+c.daily_rate_min+(c.daily_rate_max&&c.daily_rate_max!=c.daily_rate_min?'–$'+c.daily_rate_max:'')+'/day'):(c.hourly_rate_min?('$'+c.hourly_rate_min+'/hr'):'—');var avail=c.available_from?(__cesc(c.available_from)+(c.available_to?(' – '+__cesc(c.available_to)):'')):'Not set';var dpa=Array.isArray(c.dpa_areas)?c.dpa_areas.join(', '):(c.dpa_areas||'');var ps=P[c.id]?'✓':'—';var tr=document.createElement('tr');tr.setAttribute('data-cid',c.id);tr.innerHTML='<td style="font-weight:600;">'+__cesc(c.name)+'</td><td>'+__cesc(c.current_location||'—')+'</td><td>'+rate+'</td><td>'+avail+'</td><td>'+__cesc(dpa||'—')+'</td><td>'+ps+'</td><td>—</td><td style="text-align:right;"><button class="btn btn-sec btn-xs" onclick="openCandProfile(\''+c.id+'\')">Prefs →</button></td>';tbody.appendChild(tr);}});window.__syncing=false;}
+(function(){if(!window.__origLoadCandidates)window.__origLoadCandidates=window.loadCandidates;window.loadCandidates=function(){try{window.__origLoadCandidates();}catch(e){}setTimeout(__syncCands,0);setTimeout(__syncCands,250);setTimeout(__syncCands,800);};var wrap=document.getElementById('cand-table-wrap');if(wrap&&!wrap.__obs){var mo=new MutationObserver(function(){__syncCands();});mo.observe(wrap,{childList:true,subtree:true});wrap.__obs=mo;}})();
 function openAddCandidate(){var m=document.getElementById('addcand-modal');if(m)m.style.display='flex';}
 function closeAddCand(){var m=document.getElementById('addcand-modal');if(m)m.style.display='none';}
-function saveNewCandidate(){
-  function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
-  var name=g('ac-name');if(!name){notify('Enter a candidate name');return;}
-  var now=new Date().toISOString();
-  var c={id:'cand'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:name,email:g('ac-email'),phone:g('ac-phone'),type:g('ac-type'),specialty:g('ac-type'),sub_specialty:'',years_experience:'',current_location:g('ac-loc'),state:g('ac-state'),country:'Australia',dpa_areas:g('ac-dpa'),mm_level:g('ac-mm'),willing_to_relocate:g('ac-relocate'),visa_type:g('ac-visa'),registration_status:g('ac-reg'),ahpra_number:'',available_from:g('ac-from'),available_to:g('ac-to'),daily_rate_min:g('ac-dmin'),daily_rate_max:g('ac-dmax'),hourly_rate_min:g('ac-hmin'),hourly_rate_max:g('ac-hmax'),pipeline_stage:'New',referral_source:'',referral_split_pct:'',status:'Active',source:'Manual',cv_text:'',follow_up_date:'',notes:g('ac-notes'),created_at:now,updated_at:now};
-  var stored=__loadStoredCands();stored.push(c);localStorage.setItem('mp_locum_candidates',JSON.stringify(stored));
-  closeAddCand();
-  ['ac-name','ac-email','ac-phone','ac-type','ac-loc','ac-dpa','ac-from','ac-to','ac-dmin','ac-dmax','ac-hmin','ac-hmax','ac-notes'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  if(typeof loadCandidates==='function')loadCandidates();
-  notify('Candidate added: '+name);
-}
-(function(){
-  var cv=document.getElementById('view-candidates');if(!cv)return;
-  var ch=cv.querySelector('.ch');
-  if(ch&&!document.getElementById('add-cand-btn')){var b=document.createElement('button');b.id='add-cand-btn';b.className='btn btn-pri btn-sm';b.style.marginLeft='8px';b.textContent='+ Add candidate';b.setAttribute('onclick','openAddCandidate()');ch.appendChild(b);}
-  if(!document.getElementById('addcand-modal')){
-    var st='width:100%;padding:8px;border:1px solid var(--g300);border-radius:6px;font-size:13px;font-family:inherit;box-sizing:border-box;';
-    var lab='display:block;font-size:11px;color:var(--g600,#666);margin:8px 0 3px;font-weight:600;';
-    function f(l,id,ph){return '<label style="'+lab+'">'+l+'</label><input id="'+id+'" placeholder="'+(ph||'')+'" style="'+st+'">';}
-    var states='<label style="'+lab+'">State</label><select id="ac-state" style="'+st+'"><option value=""></option>'+['NSW','VIC','QLD','WA','SA','TAS','NT','ACT'].map(function(s){return '<option>'+s+'</option>';}).join('')+'</select>';
-    var d=document.createElement('div');d.id='addcand-modal';
-    d.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 12px;';
-    d.innerHTML='<div style="background:#fff;border-radius:12px;max-width:640px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.2);">'
-      +'<div style="display:flex;align-items:center;margin-bottom:6px;"><h3 style="margin:0;flex:1;">Add candidate</h3><button class="btn btn-sec btn-xs" onclick="closeAddCand()">✕</button></div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">'
-      +'<div style="grid-column:1/3;">'+f('Name *','ac-name','Dr Jane Smith')+'</div>'
-      +f('Email','ac-email','')+f('Phone','ac-phone','')
-      +f('Type / specialty','ac-type','GP, GP/ED, Anaesthetist…')+f('Current location','ac-loc','Town/suburb')
-      +states+f('DPA / eligible areas','ac-dpa','e.g. DPA, MM3+')
-      +f('Daily rate min ($)','ac-dmin','1600')+f('Daily rate max ($)','ac-dmax','2000')
-      +f('Hourly rate min ($)','ac-hmin','')+f('Hourly rate max ($)','ac-hmax','')
-      +f('Available from','ac-from','e.g. ASAP or 1 Jul 2026')+f('Available to','ac-to','')
-      +f('Registration status','ac-reg','e.g. FRACGP, General')+f('Visa type','ac-visa','e.g. Citizen, 482')
-      +f('MM level','ac-mm','e.g. MM3')+f('Willing to relocate','ac-relocate','Yes/No')
-      +'<div style="grid-column:1/3;"><label style="'+lab+'">Notes</label><textarea id="ac-notes" style="'+st+'height:60px;resize:vertical;"></textarea></div>'
-      +'</div>'
-      +'<div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-sec" onclick="closeAddCand()">Cancel</button><button class="btn btn-pri" onclick="saveNewCandidate()">Save candidate</button></div>'
-      +'</div>';
-    document.body.appendChild(d);
-  }
-})();
+function saveNewCandidate(){function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}var name=g('ac-name');if(!name){notify('Enter a candidate name');return;}var now=new Date().toISOString();var id='cand'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);var c={id:id,name:name,email:g('ac-email'),phone:g('ac-phone'),type:g('ac-type'),specialty:g('ac-type'),sub_specialty:'',years_experience:'',current_location:g('ac-loc'),state:g('ac-state'),country:'Australia',dpa_areas:g('ac-dpa')?g('ac-dpa').split(/[,;]/).map(function(x){return x.trim();}).filter(Boolean):[],mm_level:g('ac-mm'),willing_to_relocate:g('ac-relocate'),visa_type:g('ac-visa'),registration_status:g('ac-reg'),ahpra_number:'',available_from:g('ac-from'),available_to:g('ac-to'),daily_rate_min:g('ac-dmin'),daily_rate_max:g('ac-dmax'),hourly_rate_min:g('ac-hmin'),hourly_rate_max:g('ac-hmax'),pipeline_stage:'New',referral_source:'',referral_split_pct:'',status:'Active',source:'Manual',cv_text:'',follow_up_date:'',notes:g('ac-notes'),created_at:now,updated_at:now};
+var pref=function(sel){return Array.prototype.map.call(document.querySelectorAll('#addcand-modal '+sel+':checked'),function(x){return x.getAttribute('data-state');});};
+var prefs={role_types:g('ac-role')||'both',block_pref:g('ac-block')||'any',rural_ok:g('ac-rural'),fifo:g('ac-fifo'),last_contact:'',preferred_states:pref('input.acp'),avoided_states:pref('input.aca')};
+var stored=__loadStoredCands();stored.push(c);localStorage.setItem('mp_locum_candidates',JSON.stringify(stored));
+var P=__candPrefs();P[id]=prefs;localStorage.setItem('mp_locum_cand_prefs',JSON.stringify(P));if(typeof candPrefs!=='undefined'&&candPrefs)candPrefs[id]=prefs;
+closeAddCand();
+var f=document.getElementById('addcand-modal');if(f){Array.prototype.forEach.call(f.querySelectorAll('input,textarea'),function(e){if(e.type==='checkbox')e.checked=false;else e.value='';});Array.prototype.forEach.call(f.querySelectorAll('select'),function(s){s.selectedIndex=0;});}
+if(typeof candidates!=='undefined')candidates.push(c);__syncCands();notify('Candidate added: '+name);}
+(function(){var cv=document.getElementById('view-candidates');if(!cv)return;var ch=cv.querySelector('.ch');if(ch&&!document.getElementById('add-cand-btn')){var b=document.createElement('button');b.id='add-cand-btn';b.className='btn btn-pri btn-sm';b.style.marginLeft='8px';b.textContent='+ Add candidate';b.setAttribute('onclick','openAddCandidate()');ch.appendChild(b);}
+if(!document.getElementById('addcand-modal')){var st='width:100%;padding:8px;border:1px solid var(--g300);border-radius:6px;font-size:13px;font-family:inherit;box-sizing:border-box;';var lab='display:block;font-size:11px;color:var(--g600,#666);margin:8px 0 3px;font-weight:600;';function f(l,id,ph){return '<label style="'+lab+'">'+l+'</label><input id="'+id+'" placeholder="'+(ph||'')+'" style="'+st+'">';}
+function sel(l,id,opts){return '<label style="'+lab+'">'+l+'</label><select id="'+id+'" style="'+st+'">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join('')+'</select>';}
+var STATES=['NSW','VIC','QLD','WA','SA','TAS','NT','ACT'];
+function cbs(cls){return '<div style="display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:4px;">'+STATES.map(function(s){return '<label style="font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:3px;"><input type="checkbox" class="'+cls+'" data-state="'+s+'"> '+s+'</label>';}).join('')+'</div>';}
+var stateSel='<label style="'+lab+'">State</label><select id="ac-state" style="'+st+'"><option value=""></option>'+STATES.map(function(s){return '<option>'+s+'</option>';}).join('')+'</select>';
+var d=document.createElement('div');d.id='addcand-modal';d.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 12px;';
+d.innerHTML='<div style="background:#fff;border-radius:12px;max-width:660px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.2);">'
++'<div style="display:flex;align-items:center;margin-bottom:6px;"><h3 style="margin:0;flex:1;">Add candidate</h3><button class="btn btn-sec btn-xs" onclick="closeAddCand()">✕</button></div>'
++'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">'
++'<div style="grid-column:1/3;">'+f('Name *','ac-name','Dr Jane Smith')+'</div>'
++f('Email','ac-email','')+f('Phone','ac-phone','')
++f('Type / specialty','ac-type','GP, GP/ED, Anaesthetist…')+f('Current location','ac-loc','Town/suburb')
++stateSel+f('DPA / eligible areas','ac-dpa','e.g. DPA, MM3+')
++f('Daily rate min ($)','ac-dmin','1600')+f('Daily rate max ($)','ac-dmax','2000')
++f('Hourly rate min ($)','ac-hmin','')+f('Hourly rate max ($)','ac-hmax','')
++f('Available from','ac-from','e.g. ASAP or 1 Jul 2026')+f('Available to','ac-to','')
++f('Registration status','ac-reg','e.g. FRACGP')+f('Visa type','ac-visa','e.g. Citizen, 482')
++f('MM level','ac-mm','e.g. MM3')+f('Willing to relocate','ac-relocate','Yes/No')
++'</div>'
++'<div style="margin-top:14px;border-top:1px solid var(--g200,#eee);padding-top:6px;"><div style="font-size:12px;font-weight:700;color:var(--pri,#2563eb);text-transform:uppercase;letter-spacing:.04em;">Matching preferences</div>'
++'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">'
++sel('Role type','ac-role',[['both','Both / any'],['GP Only','GP Only'],['GP VMO','GP VMO'],['ED VMO','ED VMO'],['UCC','UCC'],['Interventional Radiologist','Interventional Radiologist'],['General Radiologist','General Radiologist']])
++sel('Block length preference','ac-block',[['any','Any'],['short','Short (1–2 weeks)'],['long','Long (3+ weeks)']])
++sel('Rural / remote OK?','ac-rural',[['','—'],['true','Yes'],['false','No — metro/regional only']])
++sel('FIFO willing?','ac-fifo',[['','—'],['true','Yes'],['false','No']])
++'</div>'
++'<label style="'+lab+'">Preferred states (tick all that apply)</label>'+cbs('acp')
++'<label style="'+lab+'">Avoided states (will reduce match score)</label>'+cbs('aca')
++'</div>'
++'<div style="grid-column:1/3;"><label style="'+lab+'">Notes</label><textarea id="ac-notes" style="'+st+'height:55px;resize:vertical;"></textarea></div>'
++'<div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-sec" onclick="closeAddCand()">Cancel</button><button class="btn btn-pri" onclick="saveNewCandidate()">Save candidate</button></div>'
++'</div>';
+document.body.appendChild(d);}})();
 
 </script>
 </body>
