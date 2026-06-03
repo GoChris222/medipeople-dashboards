@@ -2087,77 +2087,138 @@ function copyBroadcastPlain(){
 init();
 </script>
 
-<script>
-/* === Import parser fix: robust town/role split for hyphen, en-dash, em-dash, dots; single-line + multi-state support === */
 
-function __normDashes(t){return t.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212\u2043\uFE58\uFE63\uFF0D]/g,'-');}
-function __isStateHdr(line){return !!STATE_PATTERNS[line.trim().toUpperCase()];}
-function __isSubHdr(line){return /^(dates?|inclusions?|notes?|requirements?|details?|role|position)\s*:?\s*$/i.test(line.trim());}
-function __subKey(line){var l=line.trim().toLowerCase().replace(/[:\s]+$/,'');if(/^date/.test(l))return 'dates';if(/^inclusion/.test(l))return 'inclusions';if(/^note/.test(l))return 'notes';if(/^requirement/.test(l))return 'notes';if(/^detail/.test(l))return 'notes';return 'notes';}
-var __TOWNS_SORTED = Object.keys(TOWN_STATE).sort(function(a,b){return b.length-a.length;});
-function __splitTownRole(line){
-  var norm = __normDashes(line).replace(/\s+/g,' ').trim();
-  var lower = norm.toLowerCase();
-  for(var i=0;i<__TOWNS_SORTED.length;i++){
-    var t=__TOWNS_SORTED[i];
-    if(lower.indexOf(t)===0){
-      var nxt = norm.charAt(t.length);
-      if(nxt===''||/[^a-z0-9']/i.test(nxt)){
-        var town = norm.substring(0,t.length);
-        var role = norm.substring(t.length).replace(/^[\s\-.:|·,]+/,'').trim();
-        return {town:town, role:role||town};
-      }
-    }
-  }
-  var m = norm.match(/^(.+?)\s*[-:|·]\s*(.+)$/) || norm.match(/^(.+?)\s+\.\s+(.+)$/);
-  if(m) return {town:m[1].trim(), role:m[2].trim()};
-  return {town:norm, role:norm};
+<script>
+/* === Import parser v5 (email): town-anchored; dash/dot safe; multi-town; suburb+signature state autodetect; agency-fee -10%; hourly/period rates; paired date columns; on_call autodetect; shift notes === */
+
+Object.assign(TOWN_STATE,{'mount morgan':'QLD','kimba':'SA','cleve':'SA','maroubra':'NSW','mittagong':'NSW','toongabbie':'NSW','childers':'QLD','eidsvold':'QLD','esperance':'WA','queenstown':'TAS'});
+var __TS=Object.keys(TOWN_STATE).sort(function(a,b){return b.length-a.length;});
+var __FULLRAW='';
+function __nd(t){return t.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212\u2043\uFE58\uFE63\uFF0D]/g,'-');}
+function __isState(l){return !!STATE_PATTERNS[l.trim().toUpperCase()];}
+function __incl(line){return /all[-\s]?inclusive/i.test(line)||(/inclusiv/i.test(line)&&/agency/i.test(line));}
+function __rateFromLine(line){
+  if(/(accommodation|car hire|hire car|flights?|travel|mileage|fuel|taxi|allowance|reimburs|capped|up to)/i.test(line)&&!/\brate\b|per day|\/day|per hour|\/hr|ph\b/i.test(line))return null;
+  var m,num=null;
+  if(m=line.match(/\$\s*([\d,]+(?:\.\d+)?)\s*(?:per\s*hour|\/\s*hr|\/\s*hour|ph\b|p\/h|per\s*hr)/i))num=m[1];
+  else if(m=line.match(/\$\s*([\d,]+(?:\.\d+)?)\s*(?:per\s*day|\/\s*day|p\s*\/?\s*day|pd\b|day\s*rate)/i))num=m[1];
+  else if(m=line.match(/\$?\s*([\d,]+(?:\.\d+)?)\s*for\s+the\s+\d+\s*hour/i))num=m[1];
+  else if(/\brate\b/i.test(line)&&(m=line.match(/\$\s*([\d,]+(?:\.\d+)?)/)))num=m[1];
+  else if((m=line.match(/\$\s*([\d,]+(?:\.\d+)?)/))&&parseFloat(m[1].replace(/,/g,''))>=1000)num=m[1];
+  if(num===null)return null;var n=parseFloat(num.replace(/,/g,''));
+  return {n:n,agency:__incl(line),raw:(line.match(/\$\s*[\d,]+(?:\.\d+)?[^\n]{0,18}/)||['$'+num])[0].trim()};
 }
-function __looksHeadline(line){
-  if(__isStateHdr(line)||__isSubHdr(line))return false;
-  if(SKIP_RX.test(line.trim()))return false;
-  if(extractRate(line))return true;
-  var norm=__normDashes(line).replace(/\s+/g,' ').trim().toLowerCase();
-  for(var i=0;i<__TOWNS_SORTED.length;i++){var t=__TOWNS_SORTED[i];if(norm.indexOf(t)===0){var nxt=norm.charAt(t.length);if(nxt===''||/[^a-z0-9']/i.test(nxt))return true;}}
-  return false;
+function __applyRate(vac,info){if(!info||vac.rate)return;var n=info.agency?Math.round(info.n*0.9):Math.round(info.n);vac.rate=String(n);vac.rate_raw=info.raw;if(info.agency)vac.notes=(vac.notes?vac.notes+' ':'')+'[advertised $'+info.n+' incl. agency fee → broadcast -10% = $'+n+']';}
+function __stFallback(line,cur){return detectState(line)||cur||detectState(__FULLRAW)||'';}
+function __tc(s){return /[a-z]/.test(s)?s:s.replace(/\b([A-Z])([A-Z']*)/g,function(m,a,b){return a+b.toLowerCase();});}
+function __newVac(town,state){town=__tc(town);return {id:'mp'+Math.random().toString(36).slice(2,12),title:town,client:'',location:town,state:state||'',role_type:'',rate:'',rate_raw:'',dates_raw:'',inclusions_raw:'',notes:'',on_call:'TBC',status:'Open',urgency:'normal',created_at:new Date().toISOString(),_existing:null};}
+function __townHeader(line){
+  var raw=__nd(line).replace(/^[\s•*]+/,'').replace(/^\d{1,2}[.)]\s+/,'').replace(/\s+/g,' ').trim();
+  var lower=raw.toLowerCase().replace(/[‘’]/g,"'");
+  for(var i=0;i<__TS.length;i++){var t=__TS[i];if(lower.indexOf(t)===0){var a=raw.charAt(t.length);if(a===''||/[^a-z0-9']/i.test(a))return {town:raw.substr(0,t.length),state:TOWN_STATE[t],rest:raw.substr(t.length).replace(/^[\s\-:.,|]+/,'').trim()};}}
+  var mon='(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)';
+  var gm=raw.match(/^([A-Z][A-Za-z']+(?:\s[A-Z][A-Za-z']+){0,2})\s*[-–:]?\s+(.+)$/);
+  if(gm){var pfx=gm[1],rest=gm[2],pl=pfx.toLowerCase();
+    if(!/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\b/.test(pl)&&!new RegExp('^'+mon).test(pl)&&!/^(start|date|rate|inclusion|note|session|system|must|the|we|please|locum|all|attn|available|working|gp|about|what|detail|hi|hello|good|each|every|exclusively|no|return|flight|travel|accommodation|vehicle|commute|weekend|nurse|aboriginal|receptionist|before|gps|required|category|contact|professional|forms|driver|medical|ahpra|abn|immunisation|our|this|various|urgent|official|speciality|hbmp|ed |rosters|goldfields|end|shift|image|key|when|telephone|email|hotel|hire)/.test(pl)&&/\d/.test(rest)&&new RegExp(mon).test(rest.toLowerCase())){return {town:pfx,state:detectState(raw)||'',rest:''};}}
+  return null;
 }
-function __mkVac(headline, currentState){
-  var sr = __splitTownRole(headline);
-  var rate_raw = extractRate(headline) || (headline.match(/\$\s*[\d,]+(?:\s*[\/]\s*\d*\s*(?:hr|hour|day|24hr|shift|wk|week|pd))?\+?/i)||[''])[0].trim();
-  var loc = sr.town;
-  var st = detectState(headline) || currentState || '';
-  var role = sr.role && sr.role!==sr.town ? sr.role : '';
-  var cleanTitle = role ? (sr.town + ' – ' + role) : sr.town;
-  cleanTitle = cleanTitle.replace(/\s*\$[\s\S]*$/,'').replace(/\s+/g,' ').trim();
-  var v={id:'mp'+Math.random().toString(36).slice(2,12),title:cleanTitle,client:'',location:loc,state:st,role_type:detectRoleTypeFromText(headline),rate:(rate_raw.match(/[\d,]+/)||[''])[0].replace(/,/g,''),rate_raw:rate_raw,dates_raw:'',inclusions_raw:'',notes:'',status:'Open',urgency:'normal',created_at:new Date().toISOString(),_existing:null};
-  return v;
+function __multiTown(line){
+  var seg=__nd(line).replace(/\s+/g,' ').trim();var head=seg.split(/\s[-–]\s/)[0];if(head.length>70)return null;
+  var parts=head.split(/,|\s&\s|\band\b|\bor\b/).map(function(p){return p.trim();}).filter(Boolean);if(parts.length<2)return null;
+  var found=[];for(var i=0;i<parts.length;i++){var pl=parts[i].toLowerCase().replace(/[‘’]/g,"'");for(var j=0;j<__TS.length;j++){var t=__TS[j];if(pl===t||pl.indexOf(t)===0){found.push({town:parts[i].replace(/[‘’]/g,"'"),state:TOWN_STATE[t]});break;}}}
+  return found.length>=2?found:null;
 }
+function __dates(line){var d=extractDates(line);if(d)return d;var m=line.trim().match(/^\d{1,2}\/\d{1,2}(?:\/\d{2,4})?$/);return m?m[0]:'';}
+function __oncall(t){if(/\b1\s*(?::|in)\s*2\b/i.test(t))return '1:2';if(/\b1\s*(?::|in)\s*3\b/i.test(t))return '1:3';if(/\b1\s*(?::|in)\s*4\b/i.test(t))return '1:4';if(/24\s*hour|entire block|on.?call period/i.test(t))return 'Entire block';if(/as per roster|per the roster|roster requirements|full details of the roster/i.test(t))return 'As per roster';if(/no on.?call|no after.?hours|not on call|no vmo/i.test(t))return 'None';return '';}
+function __shift(line){var m=line.match(/\d{1,2}[.:]\d{2}\s*(?:to|-|–|—)\s*\d{1,2}[.:]\d{2}[^\n]*/i);if(m)return m[0].trim();if(/night shift|day shift|varied.*shift|various shift|overnight|weekend on/i.test(line))return line.trim();return '';}
+function __flush(v){if(!v||!v.__db||!v.__db.length)return;var b=v.__db;v.__db=[];var out;if(b.length>=2&&b.length%2===0){var h=b.length/2,p=[];for(var i=0;i<h;i++)p.push(b[i]+' – '+b[i+h]);out=p.join(' • ');}else out=b.join(' • ');v.dates_raw=v.dates_raw?v.dates_raw+' • '+out:out;}
 function parseImport(){
   var raw=document.getElementById('import-paste').value.trim();
   if(!raw){notify('Paste some email text first');return;}
-  importedVacancies.length=0;
-  var rawLines=raw.split('\n');
-  var currentState='';var cur=null;var mode='notes';
+  __FULLRAW=raw;importedVacancies.length=0;
+  var all=raw.split('\n');var cut=all.length;
+  for(var i=0;i<all.length;i++){if(/^(kind regards|best regards|regards,|with thanks|many thanks|thanks,|cheers,|warm regards)/i.test(all[i].trim())){cut=i;break;}}
+  var rawLines=all.slice(0,cut);
+  var currentState='';var vac=null;var seen={};var blockText={};
+  function reg(v){var k=(v.location+'|'+v.state).toLowerCase();if(seen[k])return seen[k];seen[k]=v;blockText[k]='';importedVacancies.push(v);return v;}
+  function isBareDate(l){return /^\d{1,2}\/\d{1,2}(?:\/\d{2,4})?$/.test(l.trim());}
+  function attach(v,line){__flush(v);var k=(v.location+'|'+v.state).toLowerCase();blockText[k]=(blockText[k]||'')+' '+line;__applyRate(v,__rateFromLine(line));var oc=__oncall(line);if(oc&&(!v.on_call||v.on_call==='TBC'))v.on_call=oc;var sh=__shift(line);if(sh&&(' '+(v.notes||'')).indexOf(sh)<0)v.notes=(v.notes?v.notes+' ':'')+sh;var d=extractDates(line);if(d)v.dates_raw=v.dates_raw?v.dates_raw+' • '+d:d;}
   for(var i=0;i<rawLines.length;i++){
-    var line=rawLines[i].replace(/\s+$/,'').trim();
-    if(!line)continue;
-    if(__isStateHdr(line)){currentState=STATE_PATTERNS[line.toUpperCase()];cur=null;continue;}
-    if(__isSubHdr(line)){if(cur)mode=__subKey(line);continue;}
-    if(__looksHeadline(line)){cur=__mkVac(line,currentState);if(!cur.state)cur.state=currentState;importedVacancies.push(cur);mode='notes';continue;}
-    if(cur){
-      var nl=__normDashes(line);
-      if(mode==='dates'){cur.dates_raw=cur.dates_raw?cur.dates_raw+' • '+nl:nl;}
-      else if(mode==='inclusions'){cur.inclusions_raw=cur.inclusions_raw?cur.inclusions_raw+' • '+nl:nl;}
-      else {cur.notes=cur.notes?cur.notes+' '+line:line;}
-      if(!cur.rate_raw){var rr=extractRate(line);if(rr){cur.rate_raw=rr;cur.rate=(rr.match(/[\d,]+/)||[''])[0].replace(/,/g,'');}}
-    }
+    var line=rawLines[i].trim();if(!line)continue;
+    if(__isState(line)){__flush(vac);currentState=STATE_PATTERNS[line.toUpperCase()];continue;}
+    if(SKIP_RX.test(line))continue;
+    if(vac&&isBareDate(line)){(vac.__db=vac.__db||[]).push(line.trim());continue;}
+    var mt=__multiTown(line);
+    if(mt){__flush(vac);var info=__rateFromLine(line);var dd=__dates(line);var made=null;
+      mt.forEach(function(f){var v=reg(__newVac(f.town,f.state||currentState||detectState(__FULLRAW)));__applyRate(v,info);if(dd&&!v.dates_raw)v.dates_raw=dd;var oc=__oncall(line);if(oc)v.on_call=oc;blockText[(v.location+'|'+v.state).toLowerCase()]+=' '+line;made=v;});
+      vac=made;continue;}
+    var th=__townHeader(line);
+    if(th){__flush(vac);vac=reg(__newVac(th.town,th.state||currentState||__stFallback(line,currentState)));
+      if(th.rest&&/\b(gp|vmo|ed|locum|smo|registrar|generalist|anaesth)\b/i.test(th.rest)&&!/^\d/.test(th.rest)){var rr=th.rest.replace(/\$[\s\S]*$/,'').replace(/\s*[-–]\s*(SA|VIC|QLD|NSW|WA|TAS|NT|ACT)\b.*$/i,'').trim();if(rr&&rr.length<40)vac.title=th.town+' – '+rr;}
+      attach(vac,line);continue;}
+    if(vac)attach(vac,line);
   }
-  var hadStructure = importedVacancies.length>0;
-  if(!hadStructure){ try{smartExtract(raw, raw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;}));}catch(e){} }
+  __flush(vac);for(var k in seen){__flush(seen[k]);}
+  var gInfo=null;for(var i=0;i<rawLines.length;i++){var gi=__rateFromLine(rawLines[i]);if(gi){gInfo=gi;break;}}
+  for(var k in seen){var v=seen[k];var bt=blockText[k]||v.location;if(!v.rate&&gInfo)__applyRate(v,gInfo);v.role_type=detectRoleTypeFromText(bt+' '+raw.slice(0,300));v.inclusions_raw=extractInclusions(bt+' '+raw);if(!v.state)v.state=detectState(__FULLRAW)||'';var goc=__oncall(bt);if(goc&&(!v.on_call||v.on_call==='TBC'))v.on_call=goc;delete v.__db;}
+  if(importedVacancies.length===0){try{smartExtract(raw,rawLines.map(function(l){return l.trim();}).filter(function(l){return l.length>0;}));}catch(e){}
+    importedVacancies.forEach(function(v){if(!v.rate&&gInfo)__applyRate(v,gInfo);if(!v.state)v.state=detectState(__FULLRAW)||'';v.on_call=v.on_call||__oncall(raw)||'TBC';});}
   try{applyZoneRates(raw);}catch(e){}
-  importedVacancies = importedVacancies.filter(function(v){return isValidLocation(v.location||v.title);});
+  importedVacancies=importedVacancies.filter(function(v){return isValidLocation(v.location||v.title);});
   renderImportResults();
 }
+
+/* === Tracker table tab: paste TSV tracker rows; column-mapped; rates as-is; UCC support === */
+
+function __navTab(){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  var view=document.getElementById('view-tabimport');if(view){view.classList.add('active');view.style.display='';}
+  document.querySelectorAll('.sb-item').forEach(function(s){s.classList.remove('active');});
+  var sb=document.getElementById('sb-tabimport');if(sb)sb.classList.add('active');
+  var h=document.querySelector('.tb h2,.tb .tt,.tb h1,header h2,.topbar h2');if(h)h.textContent='Paste tracker table';
+}
+function parseTrackerTable(){
+  var raw=(document.getElementById('tbl-paste').value||'').replace(/\r/g,'').trim();
+  if(!raw){notify('Paste the tracker table first');return;}
+  var lines=raw.split('\n').filter(function(l){return l.trim().length;});
+  var hi=-1;for(var i=0;i<lines.length;i++){if(/\blocation\b/i.test(lines[i])&&/\brate\b/i.test(lines[i])){hi=i;break;}}
+  if(hi<0){notify('Could not find a header row (needs Location and Rate columns)');return;}
+  var headers=lines[hi].split('\t').map(function(h){return h.trim().toLowerCase();});
+  function col(row,name){var idx=headers.indexOf(name);return idx>=0?(row[idx]||'').trim():'';}
+  importedVacancies.length=0;
+  for(var i=hi+1;i<lines.length;i++){
+    var row=lines[i].split('\t');if(row.length<3)continue;
+    var loc=col(row,'location');if(!loc)continue;
+    var rateRaw=col(row,'rate');
+    var rn=(rateRaw.match(/\$?\s*([\d,]+(?:\.\d+)?)/)||['',''])[1].replace(/,/g,'');
+    if(/tbc/i.test(rateRaw)&&!rn)rn='';
+    var vt=col(row,'vacancy type');
+    var role=/ucc/i.test(vt)?'UCC':(/ed\s*vmo/i.test(vt)?'ED VMO':(/\bvmo\b/i.test(vt)?'GP VMO':'GP Only'));
+    var notes=col(row,'notes');
+    var extra=[];['hours','software','min block','billing','solo gp','end date','mm'].forEach(function(c){var val=col(row,c);if(val&&!/^(n\/a|no|tbc)$/i.test(val))extra.push(c.replace(/\b\w/g,function(m){return m.toUpperCase();})+': '+val);});
+    var fullNotes=[notes].concat(extra).filter(Boolean).join(' | ');
+    var oc=__oncall(notes)||'TBC';
+    importedVacancies.push({id:'mp'+Math.random().toString(36).slice(2,12),title:loc,client:col(row,'client'),location:loc,state:col(row,'state').toUpperCase(),role_type:role,rate:rn,rate_raw:rateRaw,dates_raw:col(row,'date range'),inclusions_raw:col(row,'inclusions'),notes:fullNotes,on_call:oc,ams:/yes/i.test(col(row,'ams')),featured:/yes/i.test(col(row,'featured')),status:'Open',urgency:'normal',created_at:new Date().toISOString(),_existing:null});
+  }
+  var imp=document.querySelector('.sb-item[data-view="import"]');
+  if(imp&&typeof nav==='function'){try{nav(imp,'import');}catch(e){}}
+  renderImportResults();
+  notify(importedVacancies.length+' vacancies loaded — review & Save all');
+}
+(function(){
+  if(document.getElementById('sb-tabimport'))return;
+  var impSb=document.querySelector('.sb-item[data-view="import"]');
+  if(impSb){var nb=document.createElement('div');nb.className='sb-item';nb.id='sb-tabimport';nb.setAttribute('data-view','tabimport');nb.setAttribute('onclick','__navTab()');nb.innerHTML='<span class="ico">📋</span> Paste tracker table';impSb.parentNode.insertBefore(nb,impSb.nextSibling);}
+  var impView=document.getElementById('view-import');
+  if(impView){var v=document.createElement('div');v.id='view-tabimport';v.className='view';
+    v.innerHTML='<div style="background:#fff;border:1px solid var(--g200);border-radius:10px;padding:16px;max-width:980px;">'
+    +'<h3 style="margin:0 0 6px;">Paste tracker table</h3>'
+    +'<p style="font-size:12px;color:var(--g500);margin:0 0 10px;">Paste rows copied from your vacancy tracker (tab-separated, including the header row with Location, Rate, etc.). Each row becomes a vacancy. Rates are taken exactly as written.</p>'
+    +'<textarea id="tbl-paste" style="width:100%;height:300px;padding:10px;border:1px solid var(--g300);border-radius:8px;font-size:12px;font-family:monospace;resize:vertical;" placeholder="Status&#9;Featured&#9;Broadcast&#9;State&#9;Location&#9;Client&#9;...&#10;Active&#9;Yes&#9;&#9;NSW&#9;Broken Hill&#9;Maari Ma&#9;..."></textarea>'
+    +'<div style="margin-top:10px;display:flex;gap:8px;"><button class="btn btn-pri" onclick="parseTrackerTable()">Load table</button><button class="btn btn-sec" onclick="document.getElementById(\'tbl-paste\').value=\'\'">Clear</button></div>'
+    +'<p style="font-size:11px;color:var(--g400);margin-top:8px;">After loading, you\'ll jump to the Import vacancies preview to review and Save all.</p></div>';
+    impView.parentNode.appendChild(v);}
+})();
 
 </script>
 </body>
