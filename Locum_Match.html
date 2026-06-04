@@ -2245,8 +2245,9 @@ function saveNewCandidate(){function g(id){var e=document.getElementById(id);ret
 
 </script>
 
+
 <script>
-/* === Broadcast select-all/clear-all + selected count (per-vacancy checkboxes already filter the preview) === */
+/* === Broadcast select-all/clear-all + count === */
 
 (function(){
  function init(){
@@ -2269,6 +2270,18 @@ function saveNewCandidate(){function g(id){var e=document.getElementById(id);ret
  }
  if(document.getElementById('view-broadcast'))init();
  document.addEventListener('click',function(e){var t=e.target&&e.target.closest&&e.target.closest('.sb-item[data-view="broadcast"]');if(t)setTimeout(init,150);});
+})();
+
+/* === Broadcast extra-message box === */
+
+(function(){
+ function injectExtra(){var pv=document.getElementById('bc-preview');var ta=document.getElementById('bc-extra');if(!pv||!ta)return;var txt=(ta.value||'').trim();var prev=pv.querySelector('#__bc_extra_block');if(prev)prev.remove();if(!txt)return;var block=document.createElement('div');block.id='__bc_extra_block';block.style.cssText='background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;margin:0 0 16px;font-size:14px;line-height:1.5;color:#92400e;white-space:pre-wrap;';block.textContent=txt;var anchor=null;Array.prototype.forEach.call(pv.children,function(el){if(!anchor&&/opportunities available|please see the current|locum opportunities/i.test(el.textContent||''))anchor=el;});if(anchor&&anchor.nextSibling)pv.insertBefore(block,anchor.nextSibling);else if(anchor)pv.appendChild(block);else pv.insertBefore(block,pv.firstChild);}
+ if(typeof renderBroadcastPreview==='function'&&!window.__origRBP){window.__origRBP=renderBroadcastPreview;window.renderBroadcastPreview=function(){var r;try{r=window.__origRBP.apply(this,arguments);}catch(e){}injectExtra();return r;};}
+ window.copyBroadcastHTML=function(){var pv=document.getElementById('bc-preview');if(!pv)return;try{renderBroadcastPreview();}catch(e){}navigator.clipboard.writeText(pv.innerHTML).then(function(){if(typeof notify==='function')notify('Broadcast HTML copied (incl. extra message)');}).catch(function(){});};
+ window.copyBroadcastPlain=function(){var pv=document.getElementById('bc-preview');if(!pv)return;try{renderBroadcastPreview();}catch(e){}navigator.clipboard.writeText(pv.innerText).then(function(){if(typeof notify==='function')notify('Broadcast text copied (incl. extra message)');}).catch(function(){});};
+ function addCard(){var bv=document.getElementById('view-broadcast');if(!bv)return;if(document.getElementById('bc-extra'))return;var hdr=null;Array.prototype.forEach.call(bv.querySelectorAll('h3'),function(h){if(/select vacancies/i.test(h.textContent))hdr=h;});if(!hdr)return;var selCard=hdr.closest('.card');if(!selCard)return;var leftCol=selCard.parentElement;var card=document.createElement('div');card.className='card';card.style.cssText='margin-top:14px;padding:14px;';card.innerHTML='<div style="font-size:14px;font-weight:600;margin-bottom:4px;">Extra message (optional)</div><div style="font-size:12px;color:var(--g500,#6b7280);margin-bottom:8px;">Shown near the top of the broadcast and included when you Copy.</div><textarea id="bc-extra" placeholder="e.g. Resending with updated rates — please reply ASAP if interested." style="width:100%;height:90px;padding:8px;border:1px solid var(--g300,#d1d5db);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>';leftCol.insertBefore(card,selCard.nextSibling);document.getElementById('bc-extra').addEventListener('input',function(){if(typeof renderBroadcastPreview==='function')renderBroadcastPreview();});}
+ if(document.getElementById('view-broadcast'))addCard();
+ document.addEventListener('click',function(e){var t=e.target&&e.target.closest&&e.target.closest('.sb-item[data-view="broadcast"]');if(t)setTimeout(addCard,150);});
 })();
 
 </script>
