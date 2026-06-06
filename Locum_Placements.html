@@ -25,6 +25,10 @@
   --blue-light: #e8f0fc;
   --red: #c0392b;
   --red-light: #fdecea;
+  --teal: #0d7a73;
+  --teal-light: #e3f5f4;
+  --purple: #7b4ea0;
+  --purple-light: #f0e8fc;
   --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
   --radius: 10px;
@@ -159,11 +163,17 @@ tr.selected td { background: var(--accent-light); }
 .badge-available::before { background: var(--accent); }
 .badge-pending { background: var(--amber-light); color: var(--amber); }
 .badge-pending::before { background: var(--amber); }
+.badge-interested { background: var(--amber-light); color: var(--amber); }
+.badge-interested::before { background: var(--amber); }
+.badge-awaiting-dates { background: var(--teal-light); color: var(--teal); }
+.badge-awaiting-dates::before { background: var(--teal); }
+.badge-in-registration { background: var(--purple-light); color: var(--purple); }
+.badge-in-registration::before { background: var(--purple); }
 .badge-placed { background: var(--blue-light); color: var(--blue); }
 .badge-placed::before { background: var(--blue); }
 
 .kanban-board { display: flex; gap: 16px; padding: 20px; flex: 1; overflow-x: auto; overflow-y: hidden; }
-.kanban-col { display: flex; flex-direction: column; min-width: 260px; max-width: 300px; flex: 1; }
+.kanban-col { display: flex; flex-direction: column; min-width: 220px; max-width: 260px; flex: 1; }
 .kanban-col-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px; border-radius: var(--radius) var(--radius) 0 0;
@@ -176,6 +186,12 @@ tr.selected td { background: var(--accent-light); }
 .kcol-available .kanban-col-header .count { background: var(--accent); color: #fff; }
 .kcol-pending .kanban-col-header { background: var(--amber-light); color: var(--amber); }
 .kcol-pending .kanban-col-header .count { background: var(--amber); color: #fff; }
+.kcol-interested .kanban-col-header { background: var(--amber-light); color: var(--amber); }
+.kcol-interested .kanban-col-header .count { background: var(--amber); color: #fff; }
+.kcol-awaiting-dates .kanban-col-header { background: var(--teal-light); color: var(--teal); }
+.kcol-awaiting-dates .kanban-col-header .count { background: var(--teal); color: #fff; }
+.kcol-in-registration .kanban-col-header { background: var(--purple-light); color: var(--purple); }
+.kcol-in-registration .kanban-col-header .count { background: var(--purple); color: #fff; }
 .kcol-placed .kanban-col-header { background: var(--blue-light); color: var(--blue); }
 .kcol-placed .kanban-col-header .count { background: var(--blue); color: #fff; }
 .kanban-cards { flex: 1; overflow-y: auto; padding: 8px; background: var(--surface2); border-radius: 0 0 var(--radius) var(--radius); display: flex; flex-direction: column; gap: 8px; }
@@ -256,14 +272,17 @@ tr.selected td { background: var(--accent-light); }
 .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,107,74,0.1); }
 .form-textarea { resize: vertical; min-height: 70px; }
 
-.status-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.status-toggle { display: flex; flex-wrap: wrap; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
 .status-opt {
-  flex: 1; padding: 7px; text-align: center; font-size: 12px; font-weight: 500;
+  flex: 1; min-width: 80px; padding: 7px; text-align: center; font-size: 12px; font-weight: 500;
   cursor: pointer; border: none; background: transparent; font-family: var(--font);
   color: var(--text2); transition: all 0.15s;
 }
 .status-opt.sel-available { background: var(--accent-light); color: var(--accent); }
 .status-opt.sel-pending { background: var(--amber-light); color: var(--amber); }
+.status-opt.sel-interested { background: var(--amber-light); color: var(--amber); }
+.status-opt.sel-awaiting-dates { background: var(--teal-light); color: var(--teal); }
+.status-opt.sel-in-registration { background: var(--purple-light); color: var(--purple); }
 .status-opt.sel-placed { background: var(--blue-light); color: var(--blue); }
 
 .flag-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--amber-light); border-radius: var(--radius-sm); border: 1px solid #fcd8a0; }
@@ -357,8 +376,16 @@ tr.selected td { background: var(--accent-light); }
             <div class="metric-label">Available</div>
           </div>
           <div class="metric-card amber">
-            <div class="metric-val" id="mv-pending">0</div>
-            <div class="metric-label">Pending</div>
+            <div class="metric-val" id="mv-interested">0</div>
+            <div class="metric-label">Interested</div>
+          </div>
+          <div class="metric-card" style="background:var(--teal-light);">
+            <div class="metric-val" id="mv-awaiting-dates" style="color:var(--teal)">0</div>
+            <div class="metric-label">Awaiting Dates</div>
+          </div>
+          <div class="metric-card" style="background:var(--purple-light);">
+            <div class="metric-val" id="mv-in-registration" style="color:var(--purple)">0</div>
+            <div class="metric-label">In Registration</div>
           </div>
           <div class="metric-card blue">
             <div class="metric-val" id="mv-placed">0</div>
@@ -401,7 +428,9 @@ tr.selected td { background: var(--accent-light); }
             <select class="filter-select" id="f-status" onchange="applyFilters()">
               <option value="">All</option>
               <option value="available">Available</option>
-              <option value="pending">Pending</option>
+              <option value="interested">Interested</option>
+              <option value="awaiting-dates">Awaiting Dates</option>
+              <option value="in-registration">In Registration</option>
               <option value="placed">Placed</option>
             </select>
           </div>
@@ -473,9 +502,17 @@ tr.selected td { background: var(--accent-light); }
             <div class="kanban-col-header">Available <span class="count" id="k-count-available">0</span></div>
             <div class="kanban-cards" id="k-available"></div>
           </div>
-          <div class="kanban-col kcol-pending">
-            <div class="kanban-col-header">Pending <span class="count" id="k-count-pending">0</span></div>
-            <div class="kanban-cards" id="k-pending"></div>
+          <div class="kanban-col kcol-interested">
+            <div class="kanban-col-header">Interested <span class="count" id="k-count-interested">0</span></div>
+            <div class="kanban-cards" id="k-interested"></div>
+          </div>
+          <div class="kanban-col kcol-awaiting-dates">
+            <div class="kanban-col-header">Awaiting Dates <span class="count" id="k-count-awaiting-dates">0</span></div>
+            <div class="kanban-cards" id="k-awaiting-dates"></div>
+          </div>
+          <div class="kanban-col kcol-in-registration">
+            <div class="kanban-col-header">In Registration <span class="count" id="k-count-in-registration">0</span></div>
+            <div class="kanban-cards" id="k-in-registration"></div>
           </div>
           <div class="kanban-col kcol-placed">
             <div class="kanban-col-header">Placed <span class="count" id="k-count-placed">0</span></div>
@@ -619,9 +656,11 @@ tr.selected td { background: var(--accent-light); }
     <div class="form-section">
       <div class="form-section-title">Status</div>
       <div class="status-toggle" id="status-toggle">
-        <button class="status-opt" onclick="selectStatus('available')">Available</button>
-        <button class="status-opt" onclick="selectStatus('pending')">Pending</button>
-        <button class="status-opt" onclick="selectStatus('placed')">Placed</button>
+        <button class="status-opt" data-status="available" onclick="selectStatus('available')">Available</button>
+        <button class="status-opt" data-status="interested" onclick="selectStatus('interested')">Interested</button>
+        <button class="status-opt" data-status="awaiting-dates" onclick="selectStatus('awaiting-dates')">Awaiting Dates</button>
+        <button class="status-opt" data-status="in-registration" onclick="selectStatus('in-registration')">In Registration</button>
+        <button class="status-opt" data-status="placed" onclick="selectStatus('placed')">Placed</button>
       </div>
     </div>
 
@@ -667,6 +706,12 @@ const SUPABASE_URL      = 'https://qoyokyuzkpfvaakdkmxg.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ── Status helpers ────────────────────────────────────────
+// Normalise legacy 'pending' records to 'interested'
+function normaliseStatus(s) {
+  return s === 'pending' ? 'interested' : (s || 'interested');
+}
+
 // ── Field mapping ─────────────────────────────────────────
 function fromDb(row) {
   return {
@@ -680,7 +725,7 @@ function fromDb(row) {
     rate:          row.rate           != null ? Number(row.rate)           : null,
     rateType:      row.rate_type      || 'daily',
     commissionPct: row.commission_pct != null ? Number(row.commission_pct) : null,
-    status:        row.status         || 'pending',
+    status:        normaliseStatus(row.status),
     notes:         row.notes          || '',
     flag:          row.flag           || false
   };
@@ -697,7 +742,7 @@ function toDb(p) {
     rate:           p.rate          != null ? Number(p.rate)          : null,
     rate_type:      p.rateType      || 'daily',
     commission_pct: p.commissionPct != null ? Number(p.commissionPct) : null,
-    status:         p.status        || 'pending',
+    status:         p.status        || 'interested',
     notes:          p.notes         || '',
     flag:           p.flag          || false
   };
@@ -709,7 +754,7 @@ let filtered   = [];
 let sortKey    = 'date_available';
 let sortDir    = 1;
 let editingId  = null;
-let selectedStatus = 'pending';
+let selectedStatus = 'interested';
 
 // ── Load from Supabase ────────────────────────────────────
 async function loadPlacements() {
@@ -776,10 +821,12 @@ function calcComm(p) {
 // ── Sidebar ───────────────────────────────────────────────
 function updateSidebar() {
   const all = placements;
-  document.getElementById('mv-total').textContent     = all.length;
-  document.getElementById('mv-available').textContent = all.filter(p => p.status === 'available').length;
-  document.getElementById('mv-pending').textContent   = all.filter(p => p.status === 'pending').length;
-  document.getElementById('mv-placed').textContent    = all.filter(p => p.status === 'placed').length;
+  document.getElementById('mv-total').textContent          = all.length;
+  document.getElementById('mv-available').textContent      = all.filter(p => p.status === 'available').length;
+  document.getElementById('mv-interested').textContent     = all.filter(p => p.status === 'interested').length;
+  document.getElementById('mv-awaiting-dates').textContent = all.filter(p => p.status === 'awaiting-dates').length;
+  document.getElementById('mv-in-registration').textContent= all.filter(p => p.status === 'in-registration').length;
+  document.getElementById('mv-placed').textContent         = all.filter(p => p.status === 'placed').length;
 
   // Populate filter dropdowns
   const specs = [...new Set(all.map(p => p.specialty).filter(Boolean))].sort();
@@ -865,6 +912,11 @@ function renderTable() {
     return fmtDate(dt.toISOString().slice(0, 10));
   }
 
+  function statusLabel(s) {
+    const labels = { available: 'Available', interested: 'Interested', 'awaiting-dates': 'Awaiting Dates', 'in-registration': 'In Registration', placed: 'Placed' };
+    return labels[s] || s;
+  }
+
   tbody.innerHTML = filtered.map(p => {
     const rateStr = p.rate != null ? `$${Number(p.rate).toLocaleString()}/${p.rateType === 'hourly' ? 'hr' : 'day'}` : '—';
     const commStr = (p.commissionPct != null && p.rate != null && p.durationDays != null) ? '$' + Math.round(p.rate * p.durationDays * p.commissionPct / 100).toLocaleString() : '—';
@@ -874,7 +926,7 @@ function renderTable() {
       <td class="td-doctor">${p.doctor || '—'}${p.flag ? ' <span style="color:var(--amber)">⚑</span>' : ''}</td>
       <td>${p.facility || '—'}</td>
       <td>${p.specialty || '—'}</td>
-      <td><span class="badge badge-${p.status || 'pending'}">${p.status || 'pending'}</span></td>
+      <td><span class="badge badge-${p.status || 'interested'}">${statusLabel(p.status)}</span></td>
       <td style="font-size:12px">${startDate}</td>
       <td style="font-size:12px">${endDate}</td>
       <td style="font-size:12px;white-space:nowrap">${fmtDur(p.durationDays)}</td>
@@ -888,10 +940,19 @@ function renderTable() {
 
 // ── Kanban ────────────────────────────────────────────────
 function renderKanban() {
-  ['available', 'pending', 'placed'].forEach(status => {
+  const statusLabels = {
+    available: 'Available',
+    interested: 'Interested',
+    'awaiting-dates': 'Awaiting Dates',
+    'in-registration': 'In Registration',
+    placed: 'Placed'
+  };
+  ['available', 'interested', 'awaiting-dates', 'in-registration', 'placed'].forEach(status => {
     const cards = placements.filter(p => p.status === status);
-    document.getElementById('k-count-' + status).textContent = cards.length;
+    const countEl = document.getElementById('k-count-' + status);
     const el = document.getElementById('k-' + status);
+    if (!countEl || !el) return;
+    countEl.textContent = cards.length;
     if (!cards.length) {
       el.innerHTML = `<div style="font-size:12px;color:var(--text3);text-align:center;padding:20px">No placements</div>`;
       return;
@@ -934,11 +995,27 @@ function renderCharts() {
       </div>
     </div>`).join('') || '<div style="font-size:12px;color:var(--text3)">No data</div>';
 
-  // Donut
-  const statusCounts = { available: 0, pending: 0, placed: 0 };
-  all.forEach(p => { if (p.status) statusCounts[p.status]++; });
+  // Donut — all 5 statuses
+  const statusCounts = { available: 0, interested: 0, 'awaiting-dates': 0, 'in-registration': 0, placed: 0 };
+  all.forEach(p => {
+    const s = p.status;
+    if (s && statusCounts.hasOwnProperty(s)) statusCounts[s]++;
+  });
   const total = all.length || 1;
-  const donutColors = { available: '#1a6b4a', pending: '#b85c00', placed: '#1a4b8c' };
+  const donutColors = {
+    available: '#1a6b4a',
+    interested: '#b85c00',
+    'awaiting-dates': '#0d7a73',
+    'in-registration': '#7b4ea0',
+    placed: '#1a4b8c'
+  };
+  const statusLabels = {
+    available: 'Available',
+    interested: 'Interested',
+    'awaiting-dates': 'Awaiting Dates',
+    'in-registration': 'In Registration',
+    placed: 'Placed'
+  };
   const canvas = document.getElementById('donut-canvas');
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, 120, 120);
@@ -959,7 +1036,7 @@ function renderCharts() {
   document.getElementById('donut-legend').innerHTML = Object.entries(statusCounts).map(([s, c]) => `
     <div class="legend-item">
       <div class="legend-dot" style="background:${donutColors[s]}"></div>
-      <span style="text-transform:capitalize">${s}</span>
+      <span>${statusLabels[s]}</span>
       <span class="legend-val">${c}</span>
     </div>`).join('');
 
@@ -1076,7 +1153,7 @@ function openPanel(id) {
   document.getElementById('f-notes').value        = p?.notes         || '';
   document.getElementById('f-flag').checked       = p?.flag          || false;
 
-  selectStatus(p?.status || 'pending');
+  selectStatus(p?.status || 'interested');
   updateCalc();
 
   document.getElementById('panel-overlay').classList.add('open');
@@ -1094,7 +1171,7 @@ function selectStatus(s) {
   selectedStatus = s;
   document.querySelectorAll('.status-opt').forEach(btn => {
     btn.className = 'status-opt';
-    if (btn.textContent.trim().toLowerCase() === s) btn.classList.add('sel-' + s);
+    if (btn.dataset.status === s) btn.classList.add('sel-' + s);
   });
 }
 
@@ -1228,7 +1305,7 @@ async function runMigration() {
     rate:           p.rate          != null ? Number(p.rate)          : null,
     rate_type:      p.rateType      || 'daily',
     commission_pct: p.commissionPct != null ? Number(p.commissionPct) : null,
-    status:         p.status        || 'pending',
+    status:         normaliseStatus(p.status),
     notes:          p.notes         || '',
     flag:           p.flag          || false
   }));
