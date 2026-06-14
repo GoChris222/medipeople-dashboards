@@ -285,15 +285,22 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     </div>
 
     <!-- FOLLOW-UPS -->
-    <div id="v-followups" class="vw hidden">
-      <div class="card">
-        <div class="ch"><h3>Follow-ups</h3></div>
-        <div style="padding:14px;" id="fu-list"></div>
-      </div>
-    </div>
-
-    <!-- SEARCH -->
-    <div id="v-search" class="vw hidden">
+    <div <section id="v-followups" class="view" style="display:none">
+  <div class="view-header" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px">
+    <h2 style="margin:0">Follow-ups</h2>
+    <select id="fu-filter-stage" onchange="renderFollowups()" style="padding:5px 8px;border:1px solid #ddd;border-radius:4px"><option value="">All Stages</option></select>
+    <select id="fu-filter-period" onchange="renderFollowups()" style="padding:5px 8px;border:1px solid #ddd;border-radius:4px">
+      <option value="">All</option>
+      <option value="overdue">Overdue</option>
+      <option value="today">Today</option>
+      <option value="week">This Week</option>
+    </select>
+    <button onclick="loadFollowups()" style="padding:5px 10px;border:1px solid #ccc;border-radius:4px;cursor:pointer">&#8635; Refresh</button>
+  </div>
+  <div id="fu-stats" style="padding:4px 20px 10px;font-size:13px;color:#666"></div>
+  <div id="fu-list"></div>
+</section>
+id="v-search" class="vw hidden">
       <div class="card">
         <div class="ch"><h3>Search Results</h3><span id="s-count" style="font-size:12px;color:var(--g500);margin-left:6px;"></span></div>
         <table><thead><tr><th>Name</th><th>Category</th><th>Specialty</th><th>Location</th><th>Status</th><th></th></tr></thead>
@@ -1252,6 +1259,86 @@ function stageBadge(s){const m={New:'b-gray',Contacted:'b-blue',Qualified:'b-amb
 
 // Close on overlay click
 document.querySelectorAll('.ov').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.add('hidden');}));
+
+// ── FOLLOW-UPS ───────────────────────────────────────────────────────────────
+async function loadFollowups() {
+  const list = document.getElementById('fu-list');
+  if (list) list.innerHTML = '<p style="padding:24px 20px;color:#888">Loading…</p>';
+  const r = await fetch("https://qoyokyuzkpfvaakdkmxg.supabase.co/rest/v1/crm_profiles?follow_up_date=not.is.null&select=id,name,specialty,pipeline_stage,contact_status,follow_up_date,notes,state&order=follow_up_date.asc&limit=500", {
+    headers: { apikey: "sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W", Authorization: "Bearer sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W" }
+  });
+  if (!r.ok) { if (list) list.innerHTML = '<p style="padding:20px;color:red">Error loading follow-ups: ' + r.status + '</p>'; return; }
+  window._fuData = await r.json();
+  // Populate stage filter
+  const stages = [...new Set(window._fuData.map(c => c.pipeline_stage).filter(Boolean))].sort();
+  const sel = document.getElementById('fu-filter-stage');
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">All Stages</option>' + stages.map(s => '<option value="' + s + '"' + (s===cur?' selected':'') + '>' + s + '</option>').join('');
+  }
+  renderFollowups();
+}
+
+function renderFollowups() {
+  const data = window._fuData || [];
+  const stage  = (document.getElementById('fu-filter-stage')  || {}).value || '';
+  const period = (document.getElementById('fu-filter-period') || {}).value || '';
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const weekEnd = new Date(today); weekEnd.setDate(today.getDate() + 7);
+
+  const rows = data.filter(c => {
+    if (stage && c.pipeline_stage !== stage) return false;
+    if (!period) return true;
+    const d = new Date(c.follow_up_date); d.setHours(0,0,0,0);
+    if (period === 'overdue') return d < today;
+    if (period === 'today')   return d.getTime() === today.getTime();
+    if (period === 'week')    return d >= today && d <= weekEnd;
+    return true;
+  });
+
+  const overdueCt  = rows.filter(c => { const d = new Date(c.follow_up_date); d.setHours(0,0,0,0); return d < today; }).length;
+  const todayCt    = rows.filter(c => { const d = new Date(c.follow_up_date); d.setHours(0,0,0,0); return d.getTime() === today.getTime(); }).length;
+  const stats = document.getElementById('fu-stats');
+  if (stats) stats.innerHTML = rows.length + ' follow-ups &nbsp;|&nbsp; <span style="color:#c0392b;font-weight:600">' + overdueCt + ' overdue</span> &nbsp;|&nbsp; <span style="color:#e67e22;font-weight:600">' + todayCt + ' today</span>';
+
+  const list = document.getElementById('fu-list');
+  if (!list) return;
+  if (!rows.length) { list.innerHTML = '<p style="padding:40px;text-align:center;color:#aaa">No follow-ups found.</p>'; return; }
+
+  const tbl = '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f5f5f5;text-align:left">'
+    + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Candidate</th>'
+    + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Specialty</th>'
+    + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Pipeline Stage</th>'
+    + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Contact Status</th>'
+    + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Follow-up Date</th>'
+    + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Notes</th>'
+    + '</tr></thead><tbody>'
+    + rows.map(function(c) {
+        const d = new Date(c.follow_up_date); d.setHours(0,0,0,0);
+        const ds = (c.follow_up_date || '').slice(0, 10);
+        const isOverdue = d < today;
+        const isToday   = d.getTime() === today.getTime();
+        const rowBg  = isOverdue ? '#fdecea' : isToday ? '#fef9e7' : '';
+        const dateCl = isOverdue ? 'color:#c0392b;font-weight:600' : isToday ? 'color:#e67e22;font-weight:600' : '';
+        const badge  = isOverdue
+          ? ' <span style="background:#c0392b;color:#fff;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:4px">OVERDUE</span>'
+          : isToday
+          ? ' <span style="background:#e67e22;color:#fff;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:4px">TODAY</span>'
+          : '';
+        const notePreview = (c.notes || '').replace(/</g, '&lt;').slice(0, 180);
+        return '<tr style="border-bottom:1px solid #eee;background:' + rowBg + '">'
+          + '<td style="padding:9px 12px;font-weight:600">' + (c.name || '') + '</td>'
+          + '<td style="padding:9px 12px">' + (c.specialty || '') + '</td>'
+          + '<td style="padding:9px 12px">' + (c.pipeline_stage || '') + '</td>'
+          + '<td style="padding:9px 12px">' + (c.contact_status || '') + '</td>'
+          + '<td style="padding:9px 12px;' + dateCl + '">' + ds + badge + '</td>'
+          + '<td style="padding:9px 12px;max-width:280px;white-space:pre-wrap;font-size:12px;color:#555">' + notePreview + '</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table>';
+  list.innerHTML = tbl;
+}
+
 </script>
 </body>
 </html>
