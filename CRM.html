@@ -1140,7 +1140,27 @@ async function savePlace(){
   if(error){toast('Error: '+error.message);return;}
   // Update candidate stage to Placed
   await sb.from('crm_profiles').update({pipeline_stage:'Placed',status:'Placed'}).eq('id',candId);
-  closeM('m-place');toast('Placement saved ✓');loadDashboard();if(currentView==='placements')loadPlacements();
+  
+  // Save to Supabase locum_placements
+  try {
+    await fetch("https://qoyokyuzkpfvaakdkmxg.supabase.co/rest/v1/locum_placements", {
+      method: "POST",
+      headers: { apikey: "sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W", Authorization: "Bearer sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W", "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify({
+        doctor: cand ? cand.name : candId,
+        facility: client ? client.name : clientId,
+        specialty: cand ? cand.specialty : '',
+        date_placed: val('p-start') || null,
+        date_available: val('p-end') || null,
+        rate: parseFloat(val('p-rate')) || null,
+        commission_pct: parseFloat(val('p-pct')) || null,
+        rate_type: val('p-type') || '',
+        status: val('p-status') || 'Active',
+        notes: val('p-notes') || ''
+      })
+    });
+  } catch(e) { console.warn('Supabase placement save:', e); }
+    closeM('m-place');toast('Placement saved ✓');loadDashboard();if(currentView==='placements')loadPlacements();
 }
 
 async function populateJobs(){loadJobs();}
