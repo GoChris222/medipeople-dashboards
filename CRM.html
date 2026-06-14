@@ -147,21 +147,21 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
 <!-- SIDEBAR -->
 <div id="sb">
   <div class="sb-logo">
-    <h1>Ã°ÂÂÂ¥ MediPeople</h1>
+    <h1>🏥 MediPeople</h1>
     <p>Recruitment CRM</p>
   </div>
   <div class="sb-sec">Overview</div>
-  <div class="sb-item active" data-v="dashboard" onclick="nav('dashboard')"><span class="ico">Ã°ÂÂÂ</span>Dashboard</div>
-  <div class="sb-item" data-v="followups" onclick="nav('followups')"><span class="ico">Ã°ÂÂÂ</span>Follow-ups<span class="bdg" id="fu-bdg">0</span></div>
+  <div class="sb-item active" data-v="dashboard" onclick="nav('dashboard')"><span class="ico">📊</span>Dashboard</div>
+  <div class="sb-item" data-v="followups" onclick="nav('followups')"><span class="ico">🔔</span>Follow-ups<span class="bdg" id="fu-bdg">0</span></div>
   <div class="sb-sec">People</div>
-  <div class="sb-item" data-v="candidates" onclick="nav('candidates')"><span class="ico">Ã°ÂÂÂ¨Ã¢ÂÂÃ¢ÂÂÃ¯Â¸Â</span>Candidates</div>
-  <div class="sb-item" data-v="clients" onclick="nav('clients')"><span class="ico">Ã°ÂÂÂ¨</span>Clients</div>
+  <div class="sb-item" data-v="candidates" onclick="nav('candidates')"><span class="ico">👨‍⚕️</span>Candidates</div>
+  <div class="sb-item" data-v="clients" onclick="nav('clients')"><span class="ico">🏨</span>Clients</div>
   <div class="sb-sec">Work</div>
-  <div class="sb-item" data-v="jobs" onclick="nav('jobs')"><span class="ico">Ã°ÂÂÂ¼</span>Jobs</div>
-  <div class="sb-item" data-v="placements" onclick="nav('placements')"><span class="ico">Ã°ÂÂÂ</span>Placements</div>
+  <div class="sb-item" data-v="jobs" onclick="nav('jobs')"><span class="ico">💼</span>Jobs</div>
+  <div class="sb-item" data-v="placements" onclick="nav('placements')"><span class="ico">🎉</span>Placements</div>
   <div class="sb-sec">Tools</div>
-  <div class="sb-item" data-v="pipeline" onclick="nav('pipeline')"><span class="ico">Ã°ÂÂÂ</span>Pipeline</div>
-  <div class="sb-item" data-v="match" onclick="nav('match')"><span class="ico">Ã°ÂÂÂ¯</span>Match Engine</div>
+  <div class="sb-item" data-v="pipeline" onclick="nav('pipeline')"><span class="ico">📋</span>Pipeline</div>
+  <div class="sb-item" data-v="match" onclick="nav('match')"><span class="ico">🎯</span>Match Engine</div>
 </div>
 
 <!-- MAIN -->
@@ -169,7 +169,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
   <div id="topbar">
     <h2 id="view-title">Dashboard</h2>
     <div class="sp"></div>
-    <div class="srch"><span class="si">Ã°ÂÂÂ</span><input type="text" id="gsearch" placeholder="Search name, specialty, suburbÃ¢ÂÂ¦" oninput="doSearch(this.value)"></div>
+    <div class="srch"><span class="si">🔍</span><input type="text" id="gsearch" placeholder="Search name, specialty, suburb…" oninput="doSearch(this.value)"></div>
     <button class="btn btn-pri" id="add-btn" onclick="openAdd()">+ Add</button>
   </div>
 
@@ -183,7 +183,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
         <div id="dash-recent"></div>
       </div>
       <div class="card">
-        <div class="ch"><h3>Ã°ÂÂÂ Upcoming Follow-ups</h3><div class="sp"></div><button class="btn btn-sec btn-sm" onclick="nav('followups')">View All</button></div>
+        <div class="ch"><h3>🔔 Upcoming Follow-ups</h3><div class="sp"></div><button class="btn btn-sec btn-sm" onclick="nav('followups')">View All</button></div>
         <div id="dash-fu"></div>
       </div>
     </div>
@@ -315,12 +315,12 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
   </div><!-- /content -->
 </div><!-- /main -->
 
-<!-- Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ MODALS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ -->
+<!-- ═══════════════════ MODALS ═══════════════════ -->
 
 <!-- CANDIDATE MODAL -->
 <div class="ov hidden" id="m-cand">
 <div class="modal">
-  <div class="mh"><h3 id="mc-title">Add Candidate</h3><button class="x" onclick="closeM('m-cand')">Ã¢ÂÂ</button></div>
+  <div class="mh"><h3 id="mc-title">Add Candidate</h3><button class="x" onclick="closeM('m-cand')">✕</button></div>
   <div class="mb" style="max-height:75vh;overflow-y:auto;">
     <div class="fg">
       <div class="fi"><label>Full Name *</label><input id="c-name" placeholder="Dr. Jane Smith"></div>
@@ -346,10 +346,10 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <div class="fg fg3">
       <div class="fi"><label>Suburb / Location</label><input id="c-loc" placeholder="e.g. Parramatta"></div>
       <div class="fi"><label>State</label>
-        <select id="c-state"><option value="">Ã¢ÂÂ</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
+        <select id="c-state"><option value="">—</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
       </div>
       <div class="fi"><label>MM Level (1=Metro, 7=Remote)</label>
-        <select id="c-mm"><option value="">Ã¢ÂÂ</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select>
+        <select id="c-mm"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select>
       </div>
       <div class="fi s3"><label>DPA Areas (comma-separated)</label><input id="c-dpa" placeholder="e.g. Blacktown, Penrith, Liverpool"></div>
       <div class="fi"><label>Willing to Relocate?</label><select id="c-reloc"><option value="false">No</option><option value="true">Yes</option></select></div>
@@ -372,7 +372,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="fg fg3">
         <div class="fi"><label>Visa Type</label><input id="c-visa" placeholder="e.g. 482, 189, Citizen"></div>
         <div class="fi"><label>Registration Status</label>
-          <select id="c-reg"><option value="">Ã¢ÂÂ</option><option>Provisional</option><option>Full</option><option>Pending</option><option>Not Applied</option></select>
+          <select id="c-reg"><option value="">—</option><option>Provisional</option><option>Full</option><option>Pending</option><option>Not Applied</option></select>
         </div>
         <div class="fi"><label>AHPRA Number</label><input id="c-ahpra" placeholder="MED0001234567"></div>
       </div>
@@ -400,10 +400,10 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <div class="sec-title">CV / Notes</div>
     <div class="fi" style="margin-bottom:10px;">
       <label>Paste CV Text</label>
-      <div class="cv-area"><textarea id="c-cv" placeholder="Paste CV here Ã¢ÂÂ key details auto-detectedÃ¢ÂÂ¦" onblur="parseCV()"></textarea></div>
+      <div class="cv-area"><textarea id="c-cv" placeholder="Paste CV here — key details auto-detected…" onblur="parseCV()"></textarea></div>
       <div id="cv-hint" class="parse-hint hidden"></div>
     </div>
-    <div class="fi"><label>Notes</label><textarea id="c-notes" rows="2" placeholder="Any additional notesÃ¢ÂÂ¦"></textarea></div>
+    <div class="fi"><label>Notes</label><textarea id="c-notes" rows="2" placeholder="Any additional notes…"></textarea></div>
   </div>
   <div class="mf">
     <button class="btn btn-sec" onclick="closeM('m-cand')">Cancel</button>
@@ -415,7 +415,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
 <!-- CLIENT MODAL -->
 <div class="ov hidden" id="m-client">
 <div class="modal">
-  <div class="mh"><h3 id="ml-title">Add Client</h3><button class="x" onclick="closeM('m-client')">Ã¢ÂÂ</button></div>
+  <div class="mh"><h3 id="ml-title">Add Client</h3><button class="x" onclick="closeM('m-client')">✕</button></div>
   <div class="mb" style="max-height:75vh;overflow-y:auto;">
     <div class="fg">
       <div class="fi"><label>Name *</label><input id="l-name" placeholder="e.g. Blacktown Medical Centre"></div>
@@ -426,7 +426,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="fi"><label>Phone</label><input id="l-phone"></div>
       <div class="fi"><label>Suburb</label><input id="l-suburb" placeholder="e.g. Blacktown"></div>
       <div class="fi"><label>State</label>
-        <select id="l-state"><option value="">Ã¢ÂÂ</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
+        <select id="l-state"><option value="">—</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
       </div>
       <div class="fi"><label>Country</label>
         <select id="l-country"><option value="Australia">Australia</option><option value="New Zealand">New Zealand</option></select>
@@ -439,7 +439,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="fg">
         <div class="fi"><label>Practice Manager</label><input id="l-pm" placeholder="Name of practice manager"></div>
         <div class="fi"><label>Billing Type</label>
-          <select id="l-billing"><option value="">Ã¢ÂÂ</option><option>Bulk Billing</option><option>Mixed Billing</option><option>Private</option></select>
+          <select id="l-billing"><option value="">—</option><option>Bulk Billing</option><option>Mixed Billing</option><option>Private</option></select>
         </div>
       </div>
     </div>
@@ -448,7 +448,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="sec-title">Hospital Details</div>
       <div class="fg fg3">
         <div class="fi"><label>Public / Private</label>
-          <select id="l-htype"><option value="">Ã¢ÂÂ</option><option value="Public">Public</option><option value="Private">Private</option></select>
+          <select id="l-htype"><option value="">—</option><option value="Public">Public</option><option value="Private">Private</option></select>
         </div>
         <div class="fi"><label>Specialty Department</label><input id="l-dept" placeholder="e.g. Emergency, Cardiology"></div>
         <div class="fi"><label>Health District (LHD/DHB)</label><input id="l-district" placeholder="e.g. Western Sydney LHD"></div>
@@ -474,16 +474,16 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
 <!-- JOB MODAL -->
 <div class="ov hidden" id="m-job">
 <div class="modal" style="max-width:620px;">
-  <div class="mh"><h3 id="mj-title">Add Job</h3><button class="x" onclick="closeM('m-job')">Ã¢ÂÂ</button></div>
+  <div class="mh"><h3 id="mj-title">Add Job</h3><button class="x" onclick="closeM('m-job')">✕</button></div>
   <div class="mb">
     <div class="fg">
-      <div class="fi s2"><label>Job Title *</label><input id="j-title" placeholder="e.g. GP Required Ã¢ÂÂ Blacktown DPA"></div>
-      <div class="fi"><label>Client</label><select id="j-client"><option value="">Ã¢ÂÂ None Ã¢ÂÂ</option></select></div>
+      <div class="fi s2"><label>Job Title *</label><input id="j-title" placeholder="e.g. GP Required – Blacktown DPA"></div>
+      <div class="fi"><label>Client</label><select id="j-client"><option value="">— None —</option></select></div>
       <div class="fi"><label>Job Type</label><select id="j-type"><option value="Locum">Locum</option><option value="Permanent">Permanent</option><option value="OTD">OTD</option></select></div>
       <div class="fi"><label>Specialty</label><input id="j-spec" list="spec-dl" placeholder="e.g. General Practice"></div>
       <div class="fi"><label>Sub-specialty</label><input id="j-subspec"></div>
       <div class="fi"><label>Suburb</label><input id="j-suburb"></div>
-      <div class="fi"><label>State</label><select id="j-state"><option value="">Ã¢ÂÂ</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select></div>
+      <div class="fi"><label>State</label><select id="j-state"><option value="">—</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select></div>
       <div class="fi"><label>Country</label><select id="j-country"><option value="Australia">Australia</option><option value="New Zealand">New Zealand</option></select></div>
       <div class="fi"><label>DPA Required?</label><select id="j-dpa"><option value="false">No</option><option value="true">Yes</option></select></div>
       <div class="fi"><label>MM Level</label><select id="j-mm"><option value="">Any</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
@@ -505,18 +505,18 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
 <!-- PLACEMENT MODAL -->
 <div class="ov hidden" id="m-place">
 <div class="modal" style="max-width:620px;">
-  <div class="mh"><h3 id="mp-title">Add Placement</h3><button class="x" onclick="closeM('m-place')">Ã¢ÂÂ</button></div>
+  <div class="mh"><h3 id="mp-title">Add Placement</h3><button class="x" onclick="closeM('m-place')">✕</button></div>
   <div class="mb">
     <div class="fg">
-      <div class="fi"><label>Candidate *</label><select id="p-cand"><option value="">Ã¢ÂÂ Select Ã¢ÂÂ</option></select></div>
-      <div class="fi"><label>Client *</label><select id="p-client" onchange="populateJobsByClient()"><option value="">Ã¢ÂÂ Select Ã¢ÂÂ</option></select></div>
-      <div class="fi"><label>Job (optional)</label><select id="p-job"><option value="">Ã¢ÂÂ Select Ã¢ÂÂ</option></select></div>
+      <div class="fi"><label>Candidate *</label><select id="p-cand"><option value="">— Select —</option></select></div>
+      <div class="fi"><label>Client *</label><select id="p-client" onchange="populateJobsByClient()"><option value="">— Select —</option></select></div>
+      <div class="fi"><label>Job (optional)</label><select id="p-job"><option value="">— Select —</option></select></div>
       <div class="fi"><label>Placement Type</label>
         <select id="p-type" onchange="calcFee()">
-          <option value="Locum">Locum GP (AU) Ã¢ÂÂ 15% of daily rate</option>
-          <option value="Permanent OTD">Permanent OTD GP Ã¢ÂÂ Flat fee</option>
-          <option value="Permanent Specialist AU">Perm Hospital Specialist AU Ã¢ÂÂ 15Ã¢ÂÂ17%</option>
-          <option value="Permanent Specialist NZ">Perm Hospital Specialist NZ Ã¢ÂÂ 8%</option>
+          <option value="Locum">Locum GP (AU) — 15% of daily rate</option>
+          <option value="Permanent OTD">Permanent OTD GP — Flat fee</option>
+          <option value="Permanent Specialist AU">Perm Hospital Specialist AU — 15–17%</option>
+          <option value="Permanent Specialist NZ">Perm Hospital Specialist NZ — 8%</option>
         </select>
       </div>
       <div class="fi"><label>Start Date</label><input type="date" id="p-start"></div>
@@ -551,7 +551,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <button class="btn btn-sec btn-sm" onclick="editCand(currentProfileId)">Edit</button>
     <button class="btn btn-sec btn-sm" onclick="openActivityModal(currentProfileId,'profile')">+ Note</button>
     <div class="sp"></div>
-    <button class="x" onclick="closeM('m-profile')">Ã¢ÂÂ</button>
+    <button class="x" onclick="closeM('m-profile')">✕</button>
   </div>
   <div class="mb" id="prof-body" style="max-height:78vh;overflow-y:auto;"></div>
 </div>
@@ -565,7 +565,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <button class="btn btn-sec btn-sm" onclick="editClient(currentClientId)">Edit</button>
     <button class="btn btn-sec btn-sm" onclick="openActivityModal(currentClientId,'client')">+ Note</button>
     <div class="sp"></div>
-    <button class="x" onclick="closeM('m-cprofile')">Ã¢ÂÂ</button>
+    <button class="x" onclick="closeM('m-cprofile')">✕</button>
   </div>
   <div class="mb" id="cp-body" style="max-height:78vh;overflow-y:auto;"></div>
 </div>
@@ -574,15 +574,15 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
 <!-- ACTIVITY MODAL -->
 <div class="ov hidden" id="m-act">
 <div class="modal" style="max-width:500px;">
-  <div class="mh"><h3>Log Activity</h3><button class="x" onclick="closeM('m-act')">Ã¢ÂÂ</button></div>
+  <div class="mh"><h3>Log Activity</h3><button class="x" onclick="closeM('m-act')">✕</button></div>
   <div class="mb">
     <div class="fg">
       <div class="fi"><label>Type</label>
-        <select id="a-type"><option value="call">Ã°ÂÂÂ Call</option><option value="email">Ã¢ÂÂÃ¯Â¸Â Email</option><option value="note">Ã°ÂÂÂ Note</option><option value="follow_up">Ã°ÂÂÂ Follow-up</option></select>
+        <select id="a-type"><option value="call">📞 Call</option><option value="email">✉️ Email</option><option value="note">📝 Note</option><option value="follow_up">🔔 Follow-up</option></select>
       </div>
       <div class="fi"><label>Follow-up Date</label><input type="date" id="a-fu"></div>
-      <div class="fi s2"><label>Subject</label><input id="a-subj" placeholder="e.g. Initial call, sent offerÃ¢ÂÂ¦"></div>
-      <div class="fi s2"><label>Notes</label><textarea id="a-body" rows="3" placeholder="DetailsÃ¢ÂÂ¦"></textarea></div>
+      <div class="fi s2"><label>Subject</label><input id="a-subj" placeholder="e.g. Initial call, sent offer…"></div>
+      <div class="fi s2"><label>Notes</label><textarea id="a-body" rows="3" placeholder="Details…"></textarea></div>
     </div>
   </div>
   <div class="mf">
@@ -615,7 +615,7 @@ let allCands=[];
 let contactRows=[];
 let srchTimer=null;
 
-// Ã¢ÂÂÃ¢ÂÂ INIT Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── INIT ──────────────────────────────────────────────────────
 window.onload=async()=>{
   await Promise.all([loadDashboard(),loadJobsData(),loadClientsData(),loadCandsData()]);
   populateJobSelect();
@@ -623,7 +623,7 @@ window.onload=async()=>{
   populateCandSelect();
 };
 
-// Ã¢ÂÂÃ¢ÂÂ NAV Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── NAV ───────────────────────────────────────────────────────
 function nav(v){
   document.querySelectorAll('.vw').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
@@ -641,7 +641,7 @@ function nav(v){
   if(v==='match')populateMatchJobSel();
 }
 
-// Ã¢ÂÂÃ¢ÂÂ DASHBOARD Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── DASHBOARD ─────────────────────────────────────────────────
 async function loadDashboard(){
   const [{data:cands},{data:places},{data:fus}]=await Promise.all([
     sb.from('crm_profiles').select('id,name,type,specialty,state,pipeline_stage,status,created_at').order('created_at',{ascending:false}),
@@ -662,9 +662,9 @@ async function loadDashboard(){
     <table><thead><tr><th>Name</th><th>Type</th><th>Specialty</th><th>Stage</th><th></th></tr></thead><tbody>
     ${recent.map(c=>`<tr class="clk" onclick="openProfile('${c.id}')">
       <td><strong>${esc(c.name)}</strong></td><td>${typeBadge(c.type)}</td>
-      <td>${esc(c.specialty||'Ã¢ÂÂ')}</td><td>${stageBadge(c.pipeline_stage)}</td>
+      <td>${esc(c.specialty||'—')}</td><td>${stageBadge(c.pipeline_stage)}</td>
       <td><button class="btn btn-sec btn-sm" onclick="event.stopPropagation();openProfile('${c.id}')">View</button></td>
-    </tr>`).join('')}</tbody></table>`:'<div class="empty"><div class="ei">Ã°ÂÂÂ</div><p>No candidates yet.</p></div>';
+    </tr>`).join('')}</tbody></table>`:'<div class="empty"><div class="ei">👋</div><p>No candidates yet.</p></div>';
   // Dashboard follow-ups
   const {data:fuItems}=await sb.from('crm_profiles').select('id,name,type,specialty,follow_up_date').not('follow_up_date','is',null).lte('follow_up_date',addDays(today(),7)).order('follow_up_date').limit(5);
   document.getElementById('dash-fu').innerHTML=(fuItems&&fuItems.length)?`
@@ -673,10 +673,10 @@ async function loadDashboard(){
       <td><strong>${esc(c.name)}</strong></td><td>${typeBadge(c.type)}</td>
       <td style="color:${c.follow_up_date<=today()?'var(--red)':'var(--amb)'}">${c.follow_up_date}</td>
       <td><button class="btn btn-sec btn-sm" onclick="event.stopPropagation();openProfile('${c.id}')">View</button></td>
-    </tr>`).join('')}</tbody></table>`:'<div class="empty" style="padding:20px;"><p>No follow-ups due soon. Ã¢ÂÂ</p></div>';
+    </tr>`).join('')}</tbody></table>`:'<div class="empty" style="padding:20px;"><p>No follow-ups due soon. ✅</p></div>';
 }
 
-// Ã¢ÂÂÃ¢ÂÂ CANDIDATES Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── CANDIDATES ────────────────────────────────────────────────
 async function loadCandsData(){
   const{data}=await sb.from('crm_profiles').select('*').order('name');
   allCands=data||[];
@@ -701,14 +701,14 @@ async function loadCandidates(){
   if(sg)data=data.filter(c=>c.pipeline_stage===sg);
   if(sx)data=data.filter(c=>c.status===sx);
   const tbody=document.getElementById('cand-tbody');
-  if(!data.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="ei">Ã°ÂÂÂ</div><p>No candidates found.</p></div></td></tr>`;return;}
+  if(!data.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="ei">🔍</div><p>No candidates found.</p></div></td></tr>`;return;}
   tbody.innerHTML=data.map(c=>`<tr class="clk" onclick="openProfile('${c.id}')">
     <td><strong>${esc(c.name)}</strong>${c.referral_source?` <span class="b b-amb" style="font-size:9px;">REF</span>`:''}</td>
     <td>${typeBadge(c.type)}</td>
-    <td>${esc(c.specialty||'Ã¢ÂÂ')}</td>
-    <td>${[c.current_location,c.state].filter(Boolean).join(', ')||'Ã¢ÂÂ'}</td>
+    <td>${esc(c.specialty||'—')}</td>
+    <td>${[c.current_location,c.state].filter(Boolean).join(', ')||'—'}</td>
     <td>${stageBadge(c.pipeline_stage)}</td>
-    <td>${c.follow_up_date?`<span style="color:${c.follow_up_date<=today()?'var(--red)':'var(--g600)'}">${c.follow_up_date}</span>`:'Ã¢ÂÂ'}</td>
+    <td>${c.follow_up_date?`<span style="color:${c.follow_up_date<=today()?'var(--red)':'var(--g600)'}">${c.follow_up_date}</span>`:'—'}</td>
     <td><button class="btn btn-sec btn-sm" onclick="event.stopPropagation();openProfile('${c.id}')">View</button></td>
   </tr>`).join('');
 }
@@ -720,7 +720,7 @@ function setCandTab(el,type){
   loadCandidates();
 }
 
-// Ã¢ÂÂÃ¢ÂÂ CLIENTS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── CLIENTS ───────────────────────────────────────────────────
 async function loadClientsData(){
   const{data}=await sb.from('crm_clients').select('*').order('name');
   allClients=data||[];
@@ -735,15 +735,15 @@ async function loadClients(){
   if(st)data=data.filter(c=>(c.state===st||c.country===st));
   if(sx)data=data.filter(c=>c.status===sx);
   const tbody=document.getElementById('client-tbody');
-  if(!data.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="ei">Ã°ÂÂÂ¨</div><p>No clients found.</p></div></td></tr>`;return;}
+  if(!data.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="ei">🏨</div><p>No clients found.</p></div></td></tr>`;return;}
   tbody.innerHTML=data.map(c=>`<tr class="clk" onclick="openClientProfile('${c.id}')">
     <td><strong>${esc(c.name)}</strong></td>
     <td>${c.client_type==='Hospital'?'<span class="b b-pur">Hospital</span>':'<span class="b b-blue">GP Practice</span>'}</td>
-    <td>${esc(c.suburb||'Ã¢ÂÂ')}</td>
-    <td>${c.country==='New Zealand'?'Ã°ÂÂÂ³Ã°ÂÂÂ¿ NZ':'Ã°ÂÂÂ¦Ã°ÂÂÂº AU'}</td>
-    <td>${c.dpa_status?'<span class="b b-grn">DPA</span>':'Ã¢ÂÂ'}</td>
+    <td>${esc(c.suburb||'—')}</td>
+    <td>${c.country==='New Zealand'?'🇳🇿 NZ':'🇦🇺 AU'}</td>
+    <td>${c.dpa_status?'<span class="b b-grn">DPA</span>':'—'}</td>
     <td>${statusBadge(c.status)}</td>
-    <td>${c.follow_up_date||'Ã¢ÂÂ'}</td>
+    <td>${c.follow_up_date||'—'}</td>
     <td><button class="btn btn-sec btn-sm" onclick="event.stopPropagation();openClientProfile('${c.id}')">View</button></td>
   </tr>`).join('');
 }
@@ -755,7 +755,7 @@ function setClientTab(el,type){
   loadClients();
 }
 
-// Ã¢ÂÂÃ¢ÂÂ JOBS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── JOBS ──────────────────────────────────────────────────────
 async function loadJobsData(){
   const{data}=await sb.from('crm_jobs').select('*, crm_clients(name)').order('created_at',{ascending:false});
   allJobs=data||[];
@@ -767,41 +767,41 @@ async function loadJobs(){
   let data=allJobs;
   if(sx)data=data.filter(j=>j.status===sx);
   const tbody=document.getElementById('job-tbody');
-  if(!data.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="ei">Ã°ÂÂÂ¼</div><p>No jobs found.</p></div></td></tr>`;return;}
+  if(!data.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="ei">💼</div><p>No jobs found.</p></div></td></tr>`;return;}
   tbody.innerHTML=data.map(j=>`<tr>
     <td><strong>${esc(j.title)}</strong></td>
-    <td>${esc(j.crm_clients?.name||'Ã¢ÂÂ')}</td>
+    <td>${esc(j.crm_clients?.name||'—')}</td>
     <td><span class="b ${j.job_type==='Locum'?'b-pur':j.job_type==='OTD'?'b-amb':'b-blue'}">${j.job_type}</span></td>
-    <td>${esc(j.specialty||'Ã¢ÂÂ')}</td>
-    <td>${[j.suburb,j.state].filter(Boolean).join(', ')||'Ã¢ÂÂ'}</td>
+    <td>${esc(j.specialty||'—')}</td>
+    <td>${[j.suburb,j.state].filter(Boolean).join(', ')||'—'}</td>
     <td>${j.dpa_required?'<span class="b b-grn">Yes</span>':'No'}</td>
     <td>${statusBadge(j.status)}</td>
     <td style="display:flex;gap:5px;">
-      <button class="btn btn-sec btn-sm" onclick="matchJob('${j.id}')">Ã°ÂÂÂ¯</button>
+      <button class="btn btn-sec btn-sm" onclick="matchJob('${j.id}')">🎯</button>
       <button class="btn btn-sec btn-sm" onclick="editJob('${j.id}')">Edit</button>
     </td>
   </tr>`).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ PLACEMENTS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── PLACEMENTS ────────────────────────────────────────────────
 async function loadPlacements(){
   const{data}=await sb.from('crm_placements').select('*').order('created_at',{ascending:false});
   const tbody=document.getElementById('place-tbody');
-  if(!data||!data.length){tbody.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="ei">Ã°ÂÂÂ</div><p>No placements yet.</p></div></td></tr>`;return;}
+  if(!data||!data.length){tbody.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="ei">🎉</div><p>No placements yet.</p></div></td></tr>`;return;}
   tbody.innerHTML=data.map(p=>`<tr>
-    <td><strong>${esc(p.candidate_name||'Ã¢ÂÂ')}</strong></td>
-    <td>${esc(p.client_name||'Ã¢ÂÂ')}</td>
-    <td>${esc(p.placement_type||'Ã¢ÂÂ')}</td>
-    <td>${p.start_date||'Ã¢ÂÂ'}</td>
-    <td>${p.agreed_rate?'$'+fmt(p.agreed_rate):'Ã¢ÂÂ'}</td>
-    <td>${p.gross_fee?'$'+fmt(p.gross_fee):'Ã¢ÂÂ'}</td>
-    <td><strong>${p.net_fee?'$'+fmt(p.net_fee):'Ã¢ÂÂ'}</strong></td>
+    <td><strong>${esc(p.candidate_name||'—')}</strong></td>
+    <td>${esc(p.client_name||'—')}</td>
+    <td>${esc(p.placement_type||'—')}</td>
+    <td>${p.start_date||'—'}</td>
+    <td>${p.agreed_rate?'$'+fmt(p.agreed_rate):'—'}</td>
+    <td>${p.gross_fee?'$'+fmt(p.gross_fee):'—'}</td>
+    <td><strong>${p.net_fee?'$'+fmt(p.net_fee):'—'}</strong></td>
     <td>${statusBadge(p.status)}</td>
     <td><button class="btn btn-sec btn-sm" onclick="editPlace('${p.id}')">Edit</button></td>
   </tr>`).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ PIPELINE KANBAN Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── PIPELINE KANBAN ───────────────────────────────────────────
 async function loadPipeline(){
   const spec=document.getElementById('pf-spec')?.value;
   let q=sb.from('crm_profiles').select('id,name,specialty,type,state,pipeline_stage,status').eq('status','Active');
@@ -814,28 +814,28 @@ async function loadPipeline(){
       <h4>${s}<span>${cards.length}</span></h4>
       ${cards.map(c=>`<div class="kbc" onclick="openProfile('${c.id}')">
         <h5>${esc(c.name)}</h5>
-        <p>${esc(c.specialty||'Ã¢ÂÂ')} ÃÂ· ${typeBadge(c.type)}</p>
+        <p>${esc(c.specialty||'—')} · ${typeBadge(c.type)}</p>
       </div>`).join('')||`<div style="padding:8px;text-align:center;font-size:12px;color:var(--g400);">Empty</div>`}
     </div>`;
   });
   document.getElementById('kanban').innerHTML=cols.join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ FOLLOW-UPS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── FOLLOW-UPS ────────────────────────────────────────────────
 async function loadFollowups(){
   const{data}=await sb.from('crm_profiles').select('id,name,type,specialty,follow_up_date').not('follow_up_date','is',null).order('follow_up_date');
   const t=today();
   document.getElementById('fu-list').innerHTML=(data&&data.length)?data.map(c=>{
     const ov=c.follow_up_date<t,now=c.follow_up_date===t;
     return `<div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;border:1px solid ${ov?'#fecaca':now?'#fde68a':'var(--g200)'};background:${ov?'var(--red-l)':now?'var(--amb-l)':'#fff'};margin-bottom:8px;cursor:pointer;" onclick="openProfile('${c.id}')">
-      <span style="font-size:18px;">${ov?'Ã°ÂÂÂ´':now?'Ã°ÂÂÂ¡':'Ã°ÂÂÂµ'}</span>
-      <div style="flex:1;"><strong>${esc(c.name)}</strong> ${typeBadge(c.type)}<br><span style="font-size:11px;color:var(--g500);">${ov?'Overdue: ':now?'Today: ':'Due: '}${c.follow_up_date} ÃÂ· ${esc(c.specialty||'')}</span></div>
+      <span style="font-size:18px;">${ov?'🔴':now?'🟡':'🔵'}</span>
+      <div style="flex:1;"><strong>${esc(c.name)}</strong> ${typeBadge(c.type)}<br><span style="font-size:11px;color:var(--g500);">${ov?'Overdue: ':now?'Today: ':'Due: '}${c.follow_up_date} · ${esc(c.specialty||'')}</span></div>
       <button class="btn btn-sec btn-sm" onclick="event.stopPropagation();openProfile('${c.id}')">View</button>
     </div>`;
-  }).join(''):'<div class="empty"><div class="ei">Ã¢ÂÂ</div><p>No follow-ups scheduled.</p></div>';
+  }).join(''):'<div class="empty"><div class="ei">✅</div><p>No follow-ups scheduled.</p></div>';
 }
 
-// Ã¢ÂÂÃ¢ÂÂ PROFILE MODAL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── PROFILE MODAL ─────────────────────────────────────────────
 async function openProfile(id){
   currentProfileId=id;
   const[{data:p},{data:acts},{data:placements}]=await Promise.all([
@@ -853,10 +853,10 @@ async function openProfile(id){
   if(p.type==='locum'){
     if(isPlaced && latestPlace && latestPlace.start_date){
       dateLabel='Last Placed';
-      dateValue=`${latestPlace.start_date}${latestPlace.end_date?' Ã¢ÂÂ '+latestPlace.end_date:''}`;
+      dateValue=`${latestPlace.start_date}${latestPlace.end_date?' → '+latestPlace.end_date:''}`;
     } else if(p.available_from||p.available_to){
       dateLabel='Available';
-      dateValue=`${p.available_from||'?'} Ã¢ÂÂ ${p.available_to||'?'}`;
+      dateValue=`${p.available_from||'?'} → ${p.available_to||'?'}`;
     }
   }
   document.getElementById('prof-name').textContent=p.name;
@@ -868,7 +868,7 @@ async function openProfile(id){
         <div class="meta">
           ${typeBadge(p.type)} ${stageBadge(p.pipeline_stage)}
           ${p.email?`<a href="mailto:${esc(p.email)}" style="color:var(--pri)">${esc(p.email)}</a>`:''}
-          ${p.phone?`<span>Ã°ÂÂÂ ${esc(p.phone)}</span>`:''}
+          ${p.phone?`<span>📞 ${esc(p.phone)}</span>`:''}
         </div>
       </div>
     </div>
@@ -876,12 +876,12 @@ async function openProfile(id){
       ${di('Specialty',p.specialty)} ${di('Sub-specialty',p.sub_specialty)} ${di('Years Exp.',p.years_experience!=null?p.years_experience+' yrs':null)}
       ${di('Location',[p.current_location,p.state].filter(Boolean).join(', '))} ${di('MM Level',p.mm_level?'MM'+p.mm_level:null)} ${di('DPA Areas',(p.dpa_areas||[]).join(', '))}
       ${p.type==='locum'&&dateLabel?di(dateLabel,dateValue):''}
-      ${p.type==='locum'?di('Daily Rate',p.daily_rate_min?`$${p.daily_rate_min}${p.daily_rate_max?` Ã¢ÂÂ $${p.daily_rate_max}`:''}`:null):''}
+      ${p.type==='locum'?di('Daily Rate',p.daily_rate_min?`$${p.daily_rate_min}${p.daily_rate_max?` – $${p.daily_rate_max}`:''}`:null):''}
       ${p.type==='otd'?di('Visa',p.visa_type):''}  ${p.type==='otd'?di('Registration',p.registration_status):''}  ${p.type==='otd'?di('AHPRA',p.ahpra_number):''}
       ${di('Source',p.source)} ${di('Referral',p.referral_source?`${p.referral_source} (${p.referral_split_pct||0}%)`:null)} ${di('Follow-up',p.follow_up_date)}
       ${p.type==='locum'&&placements&&placements.length?di('Total Placements',placements.length+' placement'+(placements.length!==1?'s':'')):''}
     </div>
-    ${p.notes?`<div style="background:var(--amb-l);border-radius:7px;padding:10px;margin-bottom:14px;font-size:13px;">Ã°ÂÂÂ ${esc(p.notes)}</div>`:''}
+    ${p.notes?`<div style="background:var(--amb-l);border-radius:7px;padding:10px;margin-bottom:14px;font-size:13px;">📝 ${esc(p.notes)}</div>`:''}
     <div class="tabs" style="margin-bottom:14px;">
       <div class="tab active" onclick="stab(this,'ptl')">Timeline (${(acts||[]).length})</div>
       ${placements&&placements.length?`<div class="tab" onclick="stab(this,'ppl')">Placements (${placements.length})</div>`:''}
@@ -914,11 +914,11 @@ async function openClientProfile(id){
       ${c.client_type==='Hospital'?di('Health District',c.health_district):''}
       ${di('Follow-up',c.follow_up_date)}
     </div>
-    ${c.notes?`<div style="background:var(--amb-l);border-radius:7px;padding:10px;margin-bottom:14px;font-size:13px;">Ã°ÂÂÂ ${esc(c.notes)}</div>`:''}
+    ${c.notes?`<div style="background:var(--amb-l);border-radius:7px;padding:10px;margin-bottom:14px;font-size:13px;">📝 ${esc(c.notes)}</div>`:''}
     ${contacts&&contacts.length?`<div class="sec-title">Contacts</div><div style="margin-bottom:14px;">${contacts.map(ct=>`
       <div style="display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;margin-bottom:6px;font-size:13px;">
-        <span>Ã°ÂÂÂ¤</span><div><strong>${esc(ct.name)}</strong>${ct.role?` ÃÂ· ${esc(ct.role)}`:''}<br>
-        ${ct.email?`<a href="mailto:${esc(ct.email)}" style="color:var(--pri);font-size:12px;">${esc(ct.email)}</a> `:''}${ct.phone?`<span style="font-size:12px;color:var(--g500);">Ã°ÂÂÂ ${esc(ct.phone)}</span>`:''}
+        <span>👤</span><div><strong>${esc(ct.name)}</strong>${ct.role?` · ${esc(ct.role)}`:''}<br>
+        ${ct.email?`<a href="mailto:${esc(ct.email)}" style="color:var(--pri);font-size:12px;">${esc(ct.email)}</a> `:''}${ct.phone?`<span style="font-size:12px;color:var(--g500);">📞 ${esc(ct.phone)}</span>`:''}
         </div></div>`).join('')}</div>`:''}
     <div class="tabs" style="margin-bottom:14px;">
       <div class="tab active" onclick="stab(this,'ctl')">Timeline (${(acts||[]).length})</div>
@@ -940,24 +940,24 @@ function renderProfilePlacements(placements){
       <th style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;border-bottom:1px solid var(--g200);text-align:left;">Status</th>
     </tr></thead>
     <tbody>${placements.map(pl=>`<tr style="border-bottom:1px solid var(--g100);">
-      <td style="padding:9px 12px;font-size:13px;"><strong>${esc(pl.client_name||'Ã¢ÂÂ')}</strong></td>
-      <td style="padding:9px 12px;font-size:13px;">${pl.start_date||'Ã¢ÂÂ'}</td>
-      <td style="padding:9px 12px;font-size:13px;">${pl.end_date||'Ã¢ÂÂ'}</td>
-      <td style="padding:9px 12px;font-size:13px;">${pl.agreed_rate?'$'+fmt(pl.agreed_rate)+(pl.placement_type==='Locum'?'/day':''):'Ã¢ÂÂ'}</td>
-      <td style="padding:9px 12px;font-size:13px;color:var(--grn);font-weight:600;">${pl.net_fee?'$'+fmt(pl.net_fee):'Ã¢ÂÂ'}</td>
+      <td style="padding:9px 12px;font-size:13px;"><strong>${esc(pl.client_name||'—')}</strong></td>
+      <td style="padding:9px 12px;font-size:13px;">${pl.start_date||'—'}</td>
+      <td style="padding:9px 12px;font-size:13px;">${pl.end_date||'—'}</td>
+      <td style="padding:9px 12px;font-size:13px;">${pl.agreed_rate?'$'+fmt(pl.agreed_rate)+(pl.placement_type==='Locum'?'/day':''):'—'}</td>
+      <td style="padding:9px 12px;font-size:13px;color:var(--grn);font-weight:600;">${pl.net_fee?'$'+fmt(pl.net_fee):'—'}</td>
       <td style="padding:9px 12px;">${statusBadge(pl.status)}</td>
     </tr>`).join('')}</tbody>
   </table>`;
 }
 
 function di(l,v){
-  return `<div class="di"><div class="dl">${l}</div><div class="dv" style="${!v?'color:var(--g400)':''}">${v?esc(String(v)):'Ã¢ÂÂ'}</div></div>`;
+  return `<div class="di"><div class="dl">${l}</div><div class="dv" style="${!v?'color:var(--g400)':''}">${v?esc(String(v)):'—'}</div></div>`;
 }
 function renderTL(acts){
-  if(!acts.length)return'<div class="empty" style="padding:20px;"><div class="ei">Ã°ÂÂÂ¬</div><p>No activity yet.</p></div>';
-  const ico={email:'Ã¢ÂÂÃ¯Â¸Â',call:'Ã°ÂÂÂ',note:'Ã°ÂÂÂ',follow_up:'Ã°ÂÂÂ',placement:'Ã°ÂÂÂ',other:'Ã°ÂÂÂ'};
+  if(!acts.length)return'<div class="empty" style="padding:20px;"><div class="ei">💬</div><p>No activity yet.</p></div>';
+  const ico={email:'✉️',call:'📞',note:'📝',follow_up:'🔔',placement:'🎉',other:'📌'};
   const bg={email:'var(--pri-l)',call:'var(--grn-l)',note:'var(--g100)',follow_up:'var(--amb-l)',placement:'var(--pur-l)',other:'var(--g100)'};
-  return`<div class="tl">${acts.map(a=>`<div class="tli"><div class="tld" style="background:${bg[a.type]||'var(--g100)'}">${ico[a.type]||'Ã°ÂÂÂ'}</div>
+  return`<div class="tl">${acts.map(a=>`<div class="tli"><div class="tld" style="background:${bg[a.type]||'var(--g100)'}">${ico[a.type]||'📌'}</div>
     <div class="tlb"><div class="tls">${esc(a.subject||a.type)}</div>${a.body?`<div class="tlt">${esc(a.body)}</div>`:''}<div class="tld2">${fmtDate(a.created_at)}</div></div>
   </div>`).join('')}</div>`;
 }
@@ -969,7 +969,7 @@ function stab(el,pid){
   document.getElementById(pid)?.classList.add('active');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ ADD MODAL ROUTER Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── ADD MODAL ROUTER ─────────────────────────────────────────
 function openAdd(type){
   if(!type){
     // show from current view context
@@ -984,7 +984,7 @@ function openAdd(type){
   else if(type==='placement')openPlaceModal();
 }
 
-// Ã¢ÂÂÃ¢ÂÂ CANDIDATE MODAL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── CANDIDATE MODAL ───────────────────────────────────────────
 function openCandModal(id){
   editingCandId=id||null;
   document.getElementById('mc-title').textContent=id?'Edit Candidate':'Add Candidate';
@@ -1029,7 +1029,7 @@ function parseCV(){
   for(const st of ['NSW','VIC','QLD','WA','SA','TAS','ACT','NT']){if(cv.includes(st)){if(!val('c-state'))set('c-state',st);hints.push(`State: <strong>${st}</strong>`);break;}}
   const ahp=cv.match(/MED\d{10}/i);if(ahp){set('c-ahpra',ahp[0]);hints.push(`AHPRA: <strong>${ahp[0]}</strong>`);}
   const yr=cv.match(/(\d+)\+?\s*years?\s*(of\s+)?(clinical\s+)?experience/i);if(yr){set('c-yrs',yr[1]);hints.push(`Experience: <strong>${yr[1]} yrs</strong>`);}
-  if(hints.length){const h=document.getElementById('cv-hint');h.innerHTML='Ã°ÂÂ¤Â Detected: '+hints.join(' ÃÂ· ');h.classList.remove('hidden');}
+  if(hints.length){const h=document.getElementById('cv-hint');h.innerHTML='🤖 Detected: '+hints.join(' · ');h.classList.remove('hidden');}
 }
 
 async function saveCand(){
@@ -1051,11 +1051,11 @@ async function saveCand(){
   };
   const{error}=editingCandId?await sb.from('crm_profiles').update(payload).eq('id',editingCandId):await sb.from('crm_profiles').insert(payload);
   if(error){toast('Error: '+error.message);return;}
-  closeM('m-cand');toast(editingCandId?'Candidate updated Ã¢ÂÂ':'Candidate added Ã¢ÂÂ');
+  closeM('m-cand');toast(editingCandId?'Candidate updated ✓':'Candidate added ✓');
   await loadCandsData();loadDashboard();if(currentView==='candidates')loadCandidates();if(currentView==='pipeline')loadPipeline();
 }
 
-// Ã¢ÂÂÃ¢ÂÂ CLIENT MODAL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── CLIENT MODAL ──────────────────────────────────────────────
 function openClientModal(id){
   editingClientId=id||null;
   document.getElementById('ml-title').textContent=id?'Edit Client':'Add Client';
@@ -1104,7 +1104,7 @@ function addContactRow(data){
     <div class="fi"><label>Role</label><input value="${esc(data?.role||'')}" onchange="contactRows[${idx}].role=this.value" placeholder="e.g. Practice Manager"></div>
     <div class="fi"><label>Email</label><input type="email" value="${esc(data?.email||'')}" onchange="contactRows[${idx}].email=this.value"></div>
     <div class="fi"><label>Phone</label><input value="${esc(data?.phone||'')}" onchange="contactRows[${idx}].phone=this.value"></div>
-    <button class="btn btn-sec btn-sm" style="margin-bottom:0;" onclick="removeContactRow(${idx})">Ã¢ÂÂ</button>`;
+    <button class="btn btn-sec btn-sm" style="margin-bottom:0;" onclick="removeContactRow(${idx})">✕</button>`;
   el.appendChild(div);
 }
 
@@ -1140,11 +1140,11 @@ async function saveClient(){
     if(editingClientId)await sb.from('crm_contacts').delete().eq('client_id',clientId);
     await sb.from('crm_contacts').insert(validContacts.map(c=>({...c,client_id:clientId})));
   }
-  closeM('m-client');toast(editingClientId?'Client updated Ã¢ÂÂ':'Client added Ã¢ÂÂ');
+  closeM('m-client');toast(editingClientId?'Client updated ✓':'Client added ✓');
   await loadClientsData();if(currentView==='clients')loadClients();
 }
 
-// Ã¢ÂÂÃ¢ÂÂ JOB MODAL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── JOB MODAL ─────────────────────────────────────────────────
 function openJobModal(id){
   editingJobId=id||null;
   document.getElementById('mj-title').textContent=id?'Edit Job':'Add Job';
@@ -1179,10 +1179,10 @@ async function saveJob(){
   };
   const{error}=editingJobId?await sb.from('crm_jobs').update(payload).eq('id',editingJobId):await sb.from('crm_jobs').insert(payload);
   if(error){toast('Error: '+error.message);return;}
-  closeM('m-job');toast('Job saved Ã¢ÂÂ');await loadJobsData();if(currentView==='jobs')loadJobs();
+  closeM('m-job');toast('Job saved ✓');await loadJobsData();if(currentView==='jobs')loadJobs();
 }
 
-// Ã¢ÂÂÃ¢ÂÂ PLACEMENT MODAL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── PLACEMENT MODAL ───────────────────────────────────────────
 async function openPlaceModal(id){
   editingPlaceId=id||null;
   document.getElementById('mp-title').textContent=id?'Edit Placement':'Add Placement';
@@ -1242,8 +1242,8 @@ function calcFee(){
   const box=document.getElementById('fee-preview');
   box.classList.remove('hidden');
   box.innerHTML=`
-    <div class="fee-row"><span>${t==='Locum'?`Rate: $${fmt(rate)}/day ÃÂ ${pct}%`:t==='Permanent OTD'?'Flat fee':'Salary: $'+fmt(rate)+' ÃÂ '+pct+'%'}</span><span>Gross: <strong>$${fmt(gross)}</strong></span></div>
-    ${refSrc&&refSplit?`<div class="fee-row ref"><span>Referral (${esc(refSrc)} ${refSplit}%)</span><span>Ã¢ÂÂ$${fmt(refFee)}</span></div>`:''}
+    <div class="fee-row"><span>${t==='Locum'?`Rate: $${fmt(rate)}/day × ${pct}%`:t==='Permanent OTD'?'Flat fee':'Salary: $'+fmt(rate)+' × '+pct+'%'}</span><span>Gross: <strong>$${fmt(gross)}</strong></span></div>
+    ${refSrc&&refSplit?`<div class="fee-row ref"><span>Referral (${esc(refSrc)} ${refSplit}%)</span><span>−$${fmt(refFee)}</span></div>`:''}
     <div class="fee-row total"><span>MediPeople Net Fee</span><span>$${fmt(net)}</span></div>`;
   // Store for save
   window._feeCalc={gross,refFee,net,pct};
@@ -1271,17 +1271,17 @@ async function savePlace(){
   if(error){toast('Error: '+error.message);return;}
   // Update candidate stage to Placed
   await sb.from('crm_profiles').update({pipeline_stage:'Placed',status:'Placed'}).eq('id',candId);
-  closeM('m-place');toast('Placement saved Ã¢ÂÂ');loadDashboard();if(currentView==='placements')loadPlacements();
+  closeM('m-place');toast('Placement saved ✓');loadDashboard();if(currentView==='placements')loadPlacements();
 }
 
 async function populateJobsByClient(){
   const clientId=val('p-client');
   const jobs=allJobs.filter(j=>!clientId||j.client_id===clientId);
   const sel=document.getElementById('p-job');
-  sel.innerHTML='<option value="">Ã¢ÂÂ No job linked Ã¢ÂÂ</option>'+jobs.map(j=>`<option value="${j.id}">${esc(j.title)}</option>`).join('');
+  sel.innerHTML='<option value="">— No job linked —</option>'+jobs.map(j=>`<option value="${j.id}">${esc(j.title)}</option>`).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ ACTIVITY Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── ACTIVITY ──────────────────────────────────────────────────
 function openActivityModal(id,type){
   actTarget={id,type};
   clearForm(['a-subj','a-body','a-fu']);
@@ -1299,71 +1299,57 @@ async function saveActivity(){
     if(actTarget.type==='profile')await sb.from('crm_profiles').update({follow_up_date:val('a-fu')}).eq('id',actTarget.id);
     else if(actTarget.type==='client')await sb.from('crm_clients').update({follow_up_date:val('a-fu')}).eq('id',actTarget.id);
   }
-  closeM('m-act');toast('Activity logged Ã¢ÂÂ');
+  closeM('m-act');toast('Activity logged ✓');
   if(actTarget.type==='profile'&&currentProfileId)openProfile(currentProfileId);
   else if(actTarget.type==='client'&&currentClientId)openClientProfile(currentClientId);
 }
 
-// Ã¢ÂÂÃ¢ÂÂ MATCH ENGINE Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-let _meData=[], meV='cand';
+// ── MATCH ENGINE ──────────────────────────────────────────────
 function populateMatch(){
-  const sb='https://qoyokyuzkpfvaakdkmxg.supabase.co', key='sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
-  const el=id=>document.getElementById(id);
-  if(el('match-results')) el('match-results').innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">Loading...</div>';
+  const sb='https://qoyokyuzkpfvaakdkmxg.supabase.co',key='sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W',el=id=>document.getElementById(id);
+  if(el('match-results'))el('match-results').innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">Loading...</div>';
   fetch(sb+'/rest/v1/job_matches?order=score.desc&limit=2000',{headers:{apikey:key,Authorization:'Bearer '+key}})
   .then(r=>r.json()).then(rows=>{
-    _meData=rows;
-    const strong=rows.filter(r=>r.score>=70).length;
-    const cands=new Set(rows.map(r=>r.candidate_name)).size;
-    const jobs=new Set(rows.map(r=>r.job_id)).size;
-    if(el('me-total'))  el('me-total').textContent=rows.length;
-    if(el('me-strong')) el('me-strong').textContent=strong;
-    if(el('me-cands'))  el('me-cands').textContent=cands;
-    if(el('me-jobs'))   el('me-jobs').textContent=jobs;
+    window._meData=rows;
+    const strong=rows.filter(r=>r.score>=70).length,cands=new Set(rows.map(r=>r.candidate_name)).size,jobs=new Set(rows.map(r=>r.job_id)).size;
+    if(el('me-total'))el('me-total').textContent=rows.length;
+    if(el('me-strong'))el('me-strong').textContent=strong;
+    if(el('me-cands'))el('me-cands').textContent=cands;
+    if(el('me-jobs'))el('me-jobs').textContent=jobs;
     renderME();
-  }).catch(e=>{if(el('match-results')) el('match-results').innerHTML='<div style="padding:40px;text-align:center;color:#e02424">Error: '+e.message+'</div>';});
+  }).catch(e=>{if(el('match-results'))el('match-results').innerHTML='<div style="padding:40px;text-align:center;color:#e02424">Error: '+e.message+'</div>';});
 }
+let meV='cand';
 function renderME(){
+  if(!window._meData)return;
   const el=id=>document.getElementById(id);
-  const fname=(el('me-fname')?el('me-fname').value:'').toLowerCase();
-  const fjob=(el('me-fjob')?el('me-fjob').value:'').toLowerCase();
-  const fdesk=el('me-fdesk')?el('me-fdesk').value:'';
-  const fstate=el('me-fstate')?el('me-fstate').value:'';
-  const fscore=el('me-fscore')?parseInt(el('me-fscore').value):0;
+  const fname=(el('me-fname')?el('me-fname').value:'').toLowerCase(),fjob=(el('me-fjob')?el('me-fjob').value:'').toLowerCase();
+  const fdesk=el('me-fdesk')?el('me-fdesk').value:'',fstate=el('me-fstate')?el('me-fstate').value:'',fscore=el('me-fscore')?parseInt(el('me-fscore').value):0;
   if(el('me-bcand')){el('me-bcand').style.background=meV==='cand'?'#1a56db':'white';el('me-bcand').style.color=meV==='cand'?'white':'#374151';}
   if(el('me-bjob')){el('me-bjob').style.background=meV==='job'?'#1a56db':'white';el('me-bjob').style.color=meV==='job'?'white':'#374151';}
-  const rows=_meData.filter(r=>(!fname||(r.candidate_name||'').toLowerCase().includes(fname))&&(!fjob||(r.job_location||'').toLowerCase().includes(fjob))&&(!fdesk||r.desk_type===fdesk)&&(!fstate||r.job_state===fstate)&&r.score>=fscore);
-  const wrap=el('match-results'); if(!wrap) return;
+  const rows=window._meData.filter(r=>(!fname||(r.candidate_name||'').toLowerCase().includes(fname))&&(!fjob||(r.job_location||'').toLowerCase().includes(fjob))&&(!fdesk||r.desk_type===fdesk)&&(!fstate||r.job_state===fstate)&&r.score>=fscore);
+  const wrap=el('match-results');if(!wrap)return;
   if(!rows.length){wrap.innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">No matches found</div>';return;}
   const sBar=s=>{const c=s>=70?'#0e9f6e':s>=50?'#e3a008':'#9ca3af';return '<div style="width:38px;height:38px;border-radius:50%;border:3px solid '+c+';display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:'+c+'">'+s+'</div>';};
   const th=t=>'<th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">'+t+'</th>';
   const td=t=>'<td style="padding:10px 14px;font-size:13px">'+t+'</td>';
   const badge=t=>'<span style="font-size:11px;background:#e8efff;color:#1a56db;padding:2px 6px;border-radius:4px">'+t+'</span>';
   if(meV==='cand'){
-    const byC={};
-    rows.forEach(r=>{if(!byC[r.candidate_name])byC[r.candidate_name]=[];byC[r.candidate_name].push(r);});
+    const byC={};rows.forEach(r=>{if(!byC[r.candidate_name])byC[r.candidate_name]=[];byC[r.candidate_name].push(r);});
     let h='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'+th('Candidate')+th('Top Job')+th('Score')+th('Breakdown')+th('Jobs')+'</tr></thead><tbody>';
-    Object.entries(byC).sort((a,b)=>b[1][0].score-a[1][0].score).forEach(([name,ms])=>{
-      const top=ms[0];
-      h+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px;font-size:13px;font-weight:600">'+name+'</td>'+td(top.job_location+' ('+top.job_state+') '+badge(top.desk_type))+td(sBar(top.score))+td('<span style="font-size:11px;color:#6b7280">'+top.match_reasons+'</span>')+td(ms.length)+'</tr>';
-    });
+    Object.entries(byC).sort((a,b)=>b[1][0].score-a[1][0].score).forEach(([name,ms])=>{const top=ms[0];h+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px;font-size:13px;font-weight:600">'+name+'</td>'+td(top.job_location+' ('+top.job_state+') '+badge(top.desk_type))+td(sBar(top.score))+td('<span style="font-size:11px;color:#6b7280">'+top.match_reasons+'</span>')+td(ms.length)+'</tr>';});
     wrap.innerHTML=h+'</tbody></table>';
   } else {
-    const byJ={};
-    rows.forEach(r=>{if(!byJ[r.job_id])byJ[r.job_id]={loc:r.job_location,state:r.job_state,desk:r.desk_type,ms:[]};byJ[r.job_id].ms.push(r);});
+    const byJ={};rows.forEach(r=>{if(!byJ[r.job_id])byJ[r.job_id]={loc:r.job_location,state:r.job_state,desk:r.desk_type,ms:[]};byJ[r.job_id].ms.push(r);});
     let h='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'+th('Job')+th('Top Candidate')+th('Score')+th('Breakdown')+th('Candidates')+'</tr></thead><tbody>';
-    Object.values(byJ).sort((a,b)=>b.ms[0].score-a.ms[0].score).forEach(job=>{
-      const top=job.ms[0];
-      h+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px;font-size:13px;font-weight:600">'+job.loc+' ('+job.state+') '+badge(job.desk)+'</td><td style="padding:10px 14px;font-size:13px;font-weight:600">'+top.candidate_name+'</td>'+td(sBar(top.score))+td('<span style="font-size:11px;color:#6b7280">'+top.match_reasons+'</span>')+td(job.ms.length)+'</tr>';
-    });
+    Object.values(byJ).sort((a,b)=>b.ms[0].score-a.ms[0].score).forEach(job=>{const top=job.ms[0];h+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px;font-size:13px;font-weight:600">'+job.loc+' ('+job.state+') '+badge(job.desk)+'</td><td style="padding:10px 14px;font-size:13px;font-weight:600">'+top.candidate_name+'</td>'+td(sBar(top.score))+td('<span style="font-size:11px;color:#6b7280">'+top.match_reasons+'</span>')+td(job.ms.length)+'</tr>';});
     wrap.innerHTML=h+'</tbody></table>';
   }
 }
+function populateMatchJobSel(){populateMatch();}
 function matchJob(){}
 function runMatch(){populateMatch();}
 function scoreMatch(){}
-function populateMatchJobSel(){ populateMatch(); }
-
 function doSearch(q){
   clearTimeout(srchTimer);
   if(!q||q.length<2){if(currentView==='search')nav('dashboard');return;}
@@ -1377,30 +1363,30 @@ function doSearch(q){
     if(!results.length){tbody.innerHTML=`<tr><td colspan="6"><div class="empty"><p>No results for "${esc(q)}"</p></div></td></tr>`;return;}
     tbody.innerHTML=results.map(p=>`<tr class="clk" onclick="openProfile('${p.id}')">
       <td><strong>${esc(p.name)}</strong></td><td>${typeBadge(p.type)}</td>
-      <td>${esc(p.specialty||'Ã¢ÂÂ')}</td><td>${[p.current_location,p.state].filter(Boolean).join(', ')||'Ã¢ÂÂ'}</td>
+      <td>${esc(p.specialty||'—')}</td><td>${[p.current_location,p.state].filter(Boolean).join(', ')||'—'}</td>
       <td>${statusBadge(p.status)}</td>
       <td><button class="btn btn-sec btn-sm" onclick="event.stopPropagation();openProfile('${p.id}')">View</button></td>
     </tr>`).join('');
   },300);
 }
 
-// Ã¢ÂÂÃ¢ÂÂ SELECT POPULATORS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── SELECT POPULATORS ─────────────────────────────────────────
 function populateClientSelects(){
-  const opts='<option value="">Ã¢ÂÂ None Ã¢ÂÂ</option>'+allClients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const opts='<option value="">— None —</option>'+allClients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   ['j-client','p-client'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
 }
 async function populateCandSelect(){
   const{data}=await sb.from('crm_profiles').select('id,name,type').order('name');
   const sel=document.getElementById('p-cand');
-  if(sel)sel.innerHTML='<option value="">Ã¢ÂÂ Select Ã¢ÂÂ</option>'+(data||[]).map(c=>`<option value="${c.id}">${esc(c.name)} (${c.type})</option>`).join('');
+  if(sel)sel.innerHTML='<option value="">— Select —</option>'+(data||[]).map(c=>`<option value="${c.id}">${esc(c.name)} (${c.type})</option>`).join('');
 }
 function populateJobSelect(){
   const sel=document.getElementById('match-job');if(!sel)return;
   const open=allJobs.filter(j=>j.status==='Open');
-  sel.innerHTML='<option value="">Ã¢ÂÂ Select a Job Ã¢ÂÂ</option>'+open.map(j=>`<option value="${j.id}">${esc(j.title)}</option>`).join('');
+  sel.innerHTML='<option value="">— Select a Job —</option>'+open.map(j=>`<option value="${j.id}">${esc(j.title)}</option>`).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ HELPERS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── HELPERS ───────────────────────────────────────────────────
 function closeM(id){document.getElementById(id).classList.add('hidden');}
 function today(){return new Date().toISOString().split('T')[0];}
 function addDays(d,n){const dt=new Date(d);dt.setDate(dt.getDate()+n);return dt.toISOString().split('T')[0];}
@@ -1414,7 +1400,7 @@ function f(id){const v=parseFloat(val(id));return isNaN(v)?null:v;}
 function clearForm(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function typeBadge(t){const m={doctor:'b-blue',locum:'b-pur',otd:'b-amb'};const l={doctor:'AU Doctor',locum:'Locum',otd:'OTD'};return`<span class="b ${m[t]||'b-gray'}">${l[t]||t}</span>`;}
-function statusBadge(s){const m={Active:'b-grn',Placed:'b-blue',Inactive:'b-gray','On Hold':'b-amb',Open:'b-grn',Filled:'b-blue',Cancelled:'b-red',Completed:'b-gray',Confirmed:'b-grn'};return`<span class="b ${m[s]||'b-gray'}">${esc(s||'Ã¢ÂÂ')}</span>`;}
+function statusBadge(s){const m={Active:'b-grn',Placed:'b-blue',Inactive:'b-gray','On Hold':'b-amb',Open:'b-grn',Filled:'b-blue',Cancelled:'b-red',Completed:'b-gray',Confirmed:'b-grn'};return`<span class="b ${m[s]||'b-gray'}">${esc(s||'—')}</span>`;}
 function stageBadge(s){const m={New:'b-gray',Contacted:'b-blue',Qualified:'b-amb',Submitted:'b-pur',Placed:'b-grn'};return`<span class="b ${m[s]||'b-gray'}">${esc(s||'New')}</span>`;}
 
 // Close on overlay click
