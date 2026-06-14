@@ -231,19 +231,8 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     </div>
 
     <!-- JOBS -->
-    <div id="v-jobs" class="vw hidden">
-      <div class="card">
-        <div class="ch"><h3>Jobs</h3><div class="sp"></div>
-          <div style="display:flex;gap:8px;">
-            <select id="jf-status" onchange="loadJobs()" style="padding:5px 8px;border:1px solid var(--g200);border-radius:6px;font-size:12px;">
-              <option value="Open">Open</option><option value="">All</option><option value="Filled">Filled</option><option value="On Hold">On Hold</option><option value="Cancelled">Cancelled</option>
-            </select>
-            <button class="btn btn-pri btn-sm" onclick="openAdd('job')">+ Add Job</button>
-          </div>
-        </div>
-        <table><thead><tr><th>Title</th><th>Client</th><th>Type</th><th>Specialty</th><th>Location</th><th>DPA</th><th>Status</th><th></th></tr></thead>
-        <tbody id="job-tbody"></tbody></table>
-      </div>
+    <div <div id="v-jobs" class="vw hidden"><div style="padding:24px 28px"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:white;border:1px solid #e5e7eb;border-radius:10px;padding:14px 18px;margin-bottom:16px"><input type="text" id="jf-search" placeholder="Search location, client..." oninput="renderJobs()" style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px;min-width:180px"><select id="jf-desk" onchange="renderJobs()" style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px"><option value="">All Desks</option><option>GP Only</option><option>GP VMO</option><option>UCC</option><option>OTD Permanent</option></select><select id="jf-state" onchange="renderJobs()" style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px"><option value="">All States</option><option>ACT</option><option>NSW</option><option>NT</option><option>QLD</option><option>SA</option><option>TAS</option><option>VIC</option><option>WA</option></select><select id="jf-status" onchange="renderJobs()" style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px"><option value="">All Statuses</option><option>Active</option><option>Filled</option><option>On Hold</option><option>Expired</option></select><span id="jf-count" style="font-size:13px;color:#6b7280;margin-left:4px"></span><button onclick="loadJobs()" style="margin-left:auto;background:#1a56db;color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">Refresh</button></div><div style="background:white;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb"><th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">Location</th><th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">State</th><th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">Desk</th><th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">Rate</th><th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">Start</th><th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">End</th><th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">Status</th></tr></thead><tbody id="job-tbody"><tr><td colspan="7" style="padding:40px;text-align:center;color:#9ca3af">Click Refresh to load jobs...</td></tr></tbody></table></div></div></div>
+
     </div>
 
     <!-- PLACEMENTS -->
@@ -756,178 +745,43 @@ function setClientTab(el,type){
 }
 
 // ── JOBS ──────────────────────────────────────────────────────
-async function loadJobsData(){
-  const{data}=await sb.from('crm_jobs').select('*, crm_clients(name)').order('created_at',{ascending:false});
-  allJobs=data||[];
-}
-
 async function loadJobs(){
-  await loadJobsData();
-  const sx=document.getElementById('jf-status')?.value;
-  let data=allJobs;
-  if(sx)data=data.filter(j=>j.status===sx);
-  const tbody=document.getElementById('job-tbody');
-  if(!data.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="ei">💼</div><p>No jobs found.</p></div></td></tr>`;return;}
-  tbody.innerHTML=data.map(j=>`<tr>
-    <td><strong>${esc(j.title)}</strong></td>
-    <td>${esc(j.crm_clients?.name||'—')}</td>
-    <td><span class="b ${j.job_type==='Locum'?'b-pur':j.job_type==='OTD'?'b-amb':'b-blue'}">${j.job_type}</span></td>
-    <td>${esc(j.specialty||'—')}</td>
-    <td>${[j.suburb,j.state].filter(Boolean).join(', ')||'—'}</td>
-    <td>${j.dpa_required?'<span class="b b-grn">Yes</span>':'No'}</td>
-    <td>${statusBadge(j.status)}</td>
-    <td style="display:flex;gap:5px;">
-      <button class="btn btn-sec btn-sm" onclick="matchJob('${j.id}')">🎯</button>
-      <button class="btn btn-sec btn-sm" onclick="editJob('${j.id}')">Edit</button>
-    </td>
-  </tr>`).join('');
+  const sb="https://qoyokyuzkpfvaakdkmxg.supabase.co",key="sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W",el=id=>document.getElementById(id);
+  if(el("job-tbody"))el("job-tbody").innerHTML="<tr><td colspan=\"7\" style=\"padding:40px;text-align:center;color:#9ca3af\">Loading...</td></tr>";
+  fetch(sb+"/rest/v1/jobs?order=state.asc,location.asc&limit=500",{headers:{apikey:key,Authorization:"Bearer "+key}})
+  .then(r=>r.json()).then(rows=>{window._jobsData=rows;renderJobs();})
+  .catch(e=>{if(el("job-tbody"))el("job-tbody").innerHTML="<tr><td colspan=\"7\" style=\"padding:40px;text-align:center;color:#e02424\">Error: "+e.message+"</td></tr>";});
 }
-
-// ── PLACEMENTS ────────────────────────────────────────────────
-async function loadPlacements(){
-  const{data}=await sb.from('crm_placements').select('*').order('created_at',{ascending:false});
-  const tbody=document.getElementById('place-tbody');
-  if(!data||!data.length){tbody.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="ei">🎉</div><p>No placements yet.</p></div></td></tr>`;return;}
-  tbody.innerHTML=data.map(p=>`<tr>
-    <td><strong>${esc(p.candidate_name||'—')}</strong></td>
-    <td>${esc(p.client_name||'—')}</td>
-    <td>${esc(p.placement_type||'—')}</td>
-    <td>${p.start_date||'—'}</td>
-    <td>${p.agreed_rate?'$'+fmt(p.agreed_rate):'—'}</td>
-    <td>${p.gross_fee?'$'+fmt(p.gross_fee):'—'}</td>
-    <td><strong>${p.net_fee?'$'+fmt(p.net_fee):'—'}</strong></td>
-    <td>${statusBadge(p.status)}</td>
-    <td><button class="btn btn-sec btn-sm" onclick="editPlace('${p.id}')">Edit</button></td>
-  </tr>`).join('');
+function renderJobs(){
+  if(!window._jobsData)return;
+  const el=id=>document.getElementById(id);
+  const q=(el("jf-search")?el("jf-search").value:"").toLowerCase();
+  const desk=el("jf-desk")?el("jf-desk").value:"";
+  const state=el("jf-state")?el("jf-state").value:"";
+  const status=el("jf-status")?el("jf-status").value:"";
+  const rows=window._jobsData.filter(j=>
+    (!q||(j.location||"").toLowerCase().includes(q)||(j.client_name||"").toLowerCase().includes(q))&&
+    (!desk||j.desk_type===desk)&&(!state||j.state===state)&&(!status||j.status===status));
+  if(el("jf-count"))el("jf-count").textContent=rows.length+" jobs";
+  const tbody=el("job-tbody");if(!tbody)return;
+  if(!rows.length){tbody.innerHTML="<tr><td colspan=\"7\" style=\"padding:40px;text-align:center;color:#9ca3af\">No jobs found</td></tr>";return;}
+  const dC={"GP Only":"#e8efff","GP VMO":"#fef3c7","UCC":"#f0fdf4","OTD Permanent":"#fdf4ff"};
+  const dT={"GP Only":"#1a56db","GP VMO":"#92400e","UCC":"#166534","OTD Permanent":"#7e22ce"};
+  const sC={"Active":"#f0fdf4","Filled":"#eff6ff","On Hold":"#fff7ed","Expired":"#f9fafb"};
+  const sT={"Active":"#166534","Filled":"#1e40af","On Hold":"#c2410c","Expired":"#6b7280"};
+  const fd=d=>d?d.substring(0,10):"-";
+  tbody.innerHTML=rows.map(j=>
+    "<tr style=\"border-bottom:1px solid #f3f4f6\">"
+    +"<td style=\"padding:10px 14px;font-size:13px;font-weight:600\">"+(j.location||"-")+(j.client_name?"<div style=\"font-size:11px;color:#9ca3af;margin-top:2px\">"+j.client_name+"</div>":"")+"</td>"
+    +"<td style=\"padding:10px 14px;font-size:13px\">"+(j.state||"-")+"</td>"
+    +"<td style=\"padding:10px 14px\"><span style=\"font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:"+(dC[j.desk_type]||"#f3f4f6")+";color:"+(dT[j.desk_type]||"#374151")+"\">"+(j.desk_type||"-")+"</span></td>"
+    +"<td style=\"padding:10px 14px;font-size:13px\">"+(j.rate_text||"-")+"</td>"
+    +"<td style=\"padding:10px 14px;font-size:13px\">"+fd(j.start_date)+"</td>"
+    +"<td style=\"padding:10px 14px;font-size:13px\">"+fd(j.end_date)+"</td>"
+    +"<td style=\"padding:10px 14px\"><span style=\"font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:"+(sC[j.status]||"#f3f4f6")+";color:"+(sT[j.status]||"#374151")+"\">"+(j.status||"-")+"</span></td>"
+    +"</tr>"
+  ).join("");
 }
-
-// ── PIPELINE KANBAN ───────────────────────────────────────────
-async function loadPipeline(){
-  const spec=document.getElementById('pf-spec')?.value;
-  let q=sb.from('crm_profiles').select('id,name,specialty,type,state,pipeline_stage,status').eq('status','Active');
-  if(spec)q=q.eq('specialty',spec);
-  const{data}=await q.order('name');
-  const stages=['New','Contacted','Qualified','Submitted','Placed'];
-  const cols=stages.map(s=>{
-    const cards=(data||[]).filter(c=>c.pipeline_stage===s);
-    return `<div class="kbcol">
-      <h4>${s}<span>${cards.length}</span></h4>
-      ${cards.map(c=>`<div class="kbc" onclick="openProfile('${c.id}')">
-        <h5>${esc(c.name)}</h5>
-        <p>${esc(c.specialty||'—')} · ${typeBadge(c.type)}</p>
-      </div>`).join('')||`<div style="padding:8px;text-align:center;font-size:12px;color:var(--g400);">Empty</div>`}
-    </div>`;
-  });
-  document.getElementById('kanban').innerHTML=cols.join('');
-}
-
-// ── FOLLOW-UPS ────────────────────────────────────────────────
-async function loadFollowups(){
-  const{data}=await sb.from('crm_profiles').select('id,name,type,specialty,follow_up_date').not('follow_up_date','is',null).order('follow_up_date');
-  const t=today();
-  document.getElementById('fu-list').innerHTML=(data&&data.length)?data.map(c=>{
-    const ov=c.follow_up_date<t,now=c.follow_up_date===t;
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;border:1px solid ${ov?'#fecaca':now?'#fde68a':'var(--g200)'};background:${ov?'var(--red-l)':now?'var(--amb-l)':'#fff'};margin-bottom:8px;cursor:pointer;" onclick="openProfile('${c.id}')">
-      <span style="font-size:18px;">${ov?'🔴':now?'🟡':'🔵'}</span>
-      <div style="flex:1;"><strong>${esc(c.name)}</strong> ${typeBadge(c.type)}<br><span style="font-size:11px;color:var(--g500);">${ov?'Overdue: ':now?'Today: ':'Due: '}${c.follow_up_date} · ${esc(c.specialty||'')}</span></div>
-      <button class="btn btn-sec btn-sm" onclick="event.stopPropagation();openProfile('${c.id}')">View</button>
-    </div>`;
-  }).join(''):'<div class="empty"><div class="ei">✅</div><p>No follow-ups scheduled.</p></div>';
-}
-
-// ── PROFILE MODAL ─────────────────────────────────────────────
-async function openProfile(id){
-  currentProfileId=id;
-  const[{data:p},{data:acts},{data:placements}]=await Promise.all([
-    sb.from('crm_profiles').select('*').eq('id',id).single(),
-    sb.from('crm_activities').select('*').eq('profile_id',id).order('created_at',{ascending:false}),
-    sb.from('crm_placements').select('*').eq('candidate_id',id).order('start_date',{ascending:false})
-  ]);
-  if(!p)return;
-  const color={doctor:'#2563eb',locum:'#7c3aed',otd:'#d97706'}[p.type]||'#6b7280';
-  const ini=p.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  // For placed locums: show most recent placement dates; for available locums: show available dates
-  const isPlaced = p.pipeline_stage==='Placed' || p.status==='Placed';
-  const latestPlace = placements&&placements.length?placements[0]:null;
-  let dateLabel='', dateValue='';
-  if(p.type==='locum'){
-    if(isPlaced && latestPlace && latestPlace.start_date){
-      dateLabel='Last Placed';
-      dateValue=`${latestPlace.start_date}${latestPlace.end_date?' → '+latestPlace.end_date:''}`;
-    } else if(p.available_from||p.available_to){
-      dateLabel='Available';
-      dateValue=`${p.available_from||'?'} → ${p.available_to||'?'}`;
-    }
-  }
-  document.getElementById('prof-name').textContent=p.name;
-  document.getElementById('prof-body').innerHTML=`
-    <div class="ph">
-      <div class="av" style="background:${color}">${ini}</div>
-      <div class="pi">
-        <h2>${esc(p.name)}</h2>
-        <div class="meta">
-          ${typeBadge(p.type)} ${stageBadge(p.pipeline_stage)}
-          ${p.email?`<a href="mailto:${esc(p.email)}" style="color:var(--pri)">${esc(p.email)}</a>`:''}
-          ${p.phone?`<span>📞 ${esc(p.phone)}</span>`:''}
-        </div>
-      </div>
-    </div>
-    <div class="dg">
-      ${di('Specialty',p.specialty)} ${di('Sub-specialty',p.sub_specialty)} ${di('Years Exp.',p.years_experience!=null?p.years_experience+' yrs':null)}
-      ${di('Location',[p.current_location,p.state].filter(Boolean).join(', '))} ${di('MM Level',p.mm_level?'MM'+p.mm_level:null)} ${di('DPA Areas',(p.dpa_areas||[]).join(', '))}
-      ${p.type==='locum'&&dateLabel?di(dateLabel,dateValue):''}
-      ${p.type==='locum'?di('Daily Rate',p.daily_rate_min?`$${p.daily_rate_min}${p.daily_rate_max?` – $${p.daily_rate_max}`:''}`:null):''}
-      ${p.type==='otd'?di('Visa',p.visa_type):''}  ${p.type==='otd'?di('Registration',p.registration_status):''}  ${p.type==='otd'?di('AHPRA',p.ahpra_number):''}
-      ${di('Source',p.source)} ${di('Referral',p.referral_source?`${p.referral_source} (${p.referral_split_pct||0}%)`:null)} ${di('Follow-up',p.follow_up_date)}
-      ${p.type==='locum'&&placements&&placements.length?di('Total Placements',placements.length+' placement'+(placements.length!==1?'s':'')):''}
-    </div>
-    ${p.notes?`<div style="background:var(--amb-l);border-radius:7px;padding:10px;margin-bottom:14px;font-size:13px;">📝 ${esc(p.notes)}</div>`:''}
-    <div class="tabs" style="margin-bottom:14px;">
-      <div class="tab active" onclick="stab(this,'ptl')">Timeline (${(acts||[]).length})</div>
-      ${placements&&placements.length?`<div class="tab" onclick="stab(this,'ppl')">Placements (${placements.length})</div>`:''}
-      ${p.cv_text?`<div class="tab" onclick="stab(this,'pcv')">CV</div>`:''}
-    </div>
-    <div id="ptl" class="tab-pane active">${renderTL(acts||[])}</div>
-    ${placements&&placements.length?`<div id="ppl" class="tab-pane">${renderProfilePlacements(placements)}</div>`:''}
-    ${p.cv_text?`<div id="pcv" class="tab-pane"><div style="background:var(--g50);border-radius:7px;padding:14px;font-size:12px;white-space:pre-wrap;max-height:350px;overflow-y:auto;">${esc(p.cv_text)}</div></div>`:''}
-  `;
-  document.getElementById('m-profile').classList.remove('hidden');
-}
-
-async function openClientProfile(id){
-  currentClientId=id;
-  const[{data:c},{data:acts},{data:contacts}]=await Promise.all([
-    sb.from('crm_clients').select('*').eq('id',id).single(),
-    sb.from('crm_activities').select('*').eq('client_id',id).order('created_at',{ascending:false}),
-    sb.from('crm_contacts').select('*').eq('client_id',id).order('name')
-  ]);
-  if(!c)return;
-  document.getElementById('cpname').textContent=c.name;
-  document.getElementById('cp-body').innerHTML=`
-    <div class="dg">
-      ${di('Type',c.client_type)} ${di('Country',c.country)} ${di('DPA',c.dpa_status?'Yes':'No')}
-      ${di('Suburb',c.suburb)} ${di('State',c.state)} ${di('Status',c.status)}
-      ${c.client_type==='GP Practice'?di('Practice Manager',c.practice_manager):''}
-      ${c.client_type==='GP Practice'?di('Billing',c.billing_type):''}
-      ${c.client_type==='Hospital'?di('Hospital Type',c.hospital_type):''}
-      ${c.client_type==='Hospital'?di('Department',c.specialty_department):''}
-      ${c.client_type==='Hospital'?di('Health District',c.health_district):''}
-      ${di('Follow-up',c.follow_up_date)}
-    </div>
-    ${c.notes?`<div style="background:var(--amb-l);border-radius:7px;padding:10px;margin-bottom:14px;font-size:13px;">📝 ${esc(c.notes)}</div>`:''}
-    ${contacts&&contacts.length?`<div class="sec-title">Contacts</div><div style="margin-bottom:14px;">${contacts.map(ct=>`
-      <div style="display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;margin-bottom:6px;font-size:13px;">
-        <span>👤</span><div><strong>${esc(ct.name)}</strong>${ct.role?` · ${esc(ct.role)}`:''}<br>
-        ${ct.email?`<a href="mailto:${esc(ct.email)}" style="color:var(--pri);font-size:12px;">${esc(ct.email)}</a> `:''}${ct.phone?`<span style="font-size:12px;color:var(--g500);">📞 ${esc(ct.phone)}</span>`:''}
-        </div></div>`).join('')}</div>`:''}
-    <div class="tabs" style="margin-bottom:14px;">
-      <div class="tab active" onclick="stab(this,'ctl')">Timeline (${(acts||[]).length})</div>
-    </div>
-    <div id="ctl" class="tab-pane active">${renderTL(acts||[])}</div>
-  `;
-  document.getElementById('m-cprofile').classList.remove('hidden');
-}
-
 function renderProfilePlacements(placements){
   if(!placements||!placements.length)return'<div class="empty" style="padding:20px;"><p>No placements yet.</p></div>';
   return`<table style="width:100%;border-collapse:collapse;">
@@ -1274,14 +1128,7 @@ async function savePlace(){
   closeM('m-place');toast('Placement saved ✓');loadDashboard();if(currentView==='placements')loadPlacements();
 }
 
-async function populateJobsByClient(){
-  const clientId=val('p-client');
-  const jobs=allJobs.filter(j=>!clientId||j.client_id===clientId);
-  const sel=document.getElementById('p-job');
-  sel.innerHTML='<option value="">— No job linked —</option>'+jobs.map(j=>`<option value="${j.id}">${esc(j.title)}</option>`).join('');
-}
-
-// ── ACTIVITY ──────────────────────────────────────────────────
+async function populateJobs(){loadJobs();}
 function openActivityModal(id,type){
   actTarget={id,type};
   clearForm(['a-subj','a-body','a-fu']);
