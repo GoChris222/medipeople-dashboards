@@ -640,7 +640,7 @@ async function loadCandidates(){
 
 // ─── SAVE/LOAD HELPERS (Supabase) ─────────────────────────────────────────
 async function saveVacs(v){await sb.from(TBL_VAC).upsert(v);}
-async function savePrefs(cid,prefs){await sb.from(TBL_PREFS).upsert({cand_id:cid,...prefs});}
+async function savePrefs(cid,prefs){return await sb.from(TBL_PREFS).upsert({cand_id:cid,...prefs});}
 async function saveOutcomes(o){await sb.from(TBL_OUTCOMES).insert(o);}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
