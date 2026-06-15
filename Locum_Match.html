@@ -577,10 +577,10 @@ const SB_URL='https://qoyokyuzkpfvaakdkmxg.supabase.co';
 const SB_KEY='sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
 const sb=supabase.createClient(SB_URL,SB_KEY);
 
-// ─── LOCAL STORAGE KEYS ───────────────────────────────────────────────────
-const LS_VAC='mp_locum_vacancies';
-const LS_PREFS='mp_locum_cand_prefs';
-const LS_OUTCOMES='mp_locum_outcomes';
+// ─── SUPABASE TABLES ──────────────────────────────────────────────────────
+const TBL_VAC='locum_vacancies';
+const TBL_PREFS='locum_cand_prefs';
+const TBL_OUTCOMES='locum_outcomes';
 
 // ─── STATE ────────────────────────────────────────────────────────────────
 let vacancies=[];
@@ -593,9 +593,18 @@ let currentCandId=null;
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
 async function init(){
-  vacancies=JSON.parse(localStorage.getItem(LS_VAC)||'[]');
-  candPrefs=JSON.parse(localStorage.getItem(LS_PREFS)||'{}');
-  outcomes=JSON.parse(localStorage.getItem(LS_OUTCOMES)||'[]');
+  const[vacRes,prefRes,outRes]=await Promise.all([
+    sb.from(TBL_VAC).select('*').order('created_at',{ascending:false}),
+    sb.from(TBL_PREFS).select('*'),
+    sb.from(TBL_OUTCOMES).select('*').order('date',{ascending:false})
+  ]);
+  if(vacRes.error)console.error('vac load:',vacRes.error);
+  if(prefRes.error)console.error('prefs load:',prefRes.error);
+  if(outRes.error)console.error('outcomes load:',outRes.error);
+  vacancies=vacRes.data||[];
+  candPrefs={};
+  (prefRes.data||[]).forEach(p=>{candPrefs[p.cand_id]=p;});
+  outcomes=outRes.data||[];
   await loadCandidates();
   renderDash();
 }
@@ -629,10 +638,10 @@ async function loadCandidates(){
   candidates=data||[];
 }
 
-// ─── SAVE/LOAD HELPERS ────────────────────────────────────────────────────
-function saveVacs(){localStorage.setItem(LS_VAC,JSON.stringify(vacancies));}
-function savePrefs(){localStorage.setItem(LS_PREFS,JSON.stringify(candPrefs));}
-function saveOutcomes(){localStorage.setItem(LS_OUTCOMES,JSON.stringify(outcomes));}
+// ─── SAVE/LOAD HELPERS (Supabase) ─────────────────────────────────────────
+async function saveVacs(v){await sb.from(TBL_VAC).upsert(v);}
+async function savePrefs(cid,prefs){await sb.from(TBL_PREFS).upsert({cand_id:cid,...prefs});}
+async function saveOutcomes(o){await sb.from(TBL_OUTCOMES).insert(o);}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -1191,12 +1200,11 @@ function openCandProfile(candId){
   showModal('cand-modal');
 }
 
-function saveCandPrefs(){
+async function saveCandPrefs(){
   if(!currentCandId)return;
   const prefStates=Array.from(document.querySelectorAll('[data-type="pref"]:checked')).map(cb=>cb.dataset.state);
   const avoidStates=Array.from(document.querySelectorAll('[data-type="avoid"]:checked')).map(cb=>cb.dataset.state);
-  candPrefs[currentCandId]={
-    ...candPrefs[currentCandId],
+  const prefs={
     role_types:document.getElementById('cp-role-type').value,
     block_pref:document.getElementById('cp-block-pref').value,
     rural_ok:document.getElementById('cp-rural').value,
@@ -1205,7 +1213,9 @@ function saveCandPrefs(){
     preferred_states:prefStates,
     avoided_states:avoidStates
   };
-  savePrefs();
+  candPrefs[currentCandId]={...candPrefs[currentCandId],...prefs};
+  const{error}=await savePrefs(currentCandId,prefs);
+  if(error){notify('Error saving prefs: '+error.message);return;}
   closeModal('cand-modal');
   notify('Preferences saved for '+candidates.find(c=>c.id===currentCandId)?.name);
 }
@@ -1229,12 +1239,12 @@ function toggleOutcomeReason(){
   document.getElementById('o-reason-wrap').style.display=(v==='declined')?'flex':'none';
 }
 
-function saveOutcome(){
+async function saveOutcome(){
   const outcome=document.getElementById('o-outcome').value;
   if(!outcome){notify('Please select an outcome');return;}
   const cand=candidates.find(c=>c.id===outcomeContext.candId);
   const vac=vacancies.find(v=>v.id===outcomeContext.vacId);
-  outcomes.unshift({
+  const o={
     id:uid(),
     cand_id:outcomeContext.candId,
     vac_id:outcomeContext.vacId,
@@ -1245,8 +1255,10 @@ function saveOutcome(){
     reason:document.getElementById('o-reason').value||'',
     notes:document.getElementById('o-notes').value||'',
     date:new Date().toISOString().slice(0,10)
-  });
-  saveOutcomes();
+  };
+  const{error}=await saveOutcomes(o);
+  if(error){notify('Error saving outcome: '+error.message);return;}
+  outcomes.unshift(o);
   closeModal('outcome-modal');
   notify('Outcome logged — candidate score updated');
   // Re-render match results if we're on that view
@@ -1273,18 +1285,20 @@ function renderOutcomeLog(){
     </div>`).join('');
 }
 
-function deleteOutcome(id){
+async function deleteOutcome(id){
+  const{error}=await sb.from(TBL_OUTCOMES).delete().eq('id',id);
+  if(error){notify('Error deleting outcome: '+error.message);return;}
   outcomes=outcomes.filter(o=>o.id!==id);
-  saveOutcomes();
   renderOutcomeLog();
   notify('Outcome removed');
 }
 
 // ─── ADD/EDIT VACANCY ─────────────────────────────────────────────────────
-function deleteVacancy(id){
+async function deleteVacancy(id){
   if(!confirm('Delete this vacancy?'))return;
+  const{error}=await sb.from(TBL_VAC).delete().eq('id',id);
+  if(error){notify('Error deleting vacancy: '+error.message);return;}
   vacancies=vacancies.filter(v=>v.id!==id);
-  saveVacs();
   renderVacanciesTable();
   notify('Vacancy deleted');
 }
@@ -1318,7 +1332,7 @@ function openEditVacancy(id){
   showModal('vac-modal');
 }
 
-function saveVacancy(){
+async function saveVacancy(){
   const title=document.getElementById('v-title').value.trim();
   if(!title){notify('Please enter a job title');return;}
   const v={
@@ -1347,9 +1361,10 @@ function saveVacancy(){
     notes:document.getElementById('v-notes').value.trim(),
     created_at:editingVacId?(vacancies.find(x=>x.id===editingVacId)?.created_at||new Date().toISOString()):new Date().toISOString()
   };
+  const{error}=await saveVacs(v);
+  if(error){notify('Error saving vacancy: '+error.message);return;}
   if(editingVacId){vacancies=vacancies.map(x=>x.id===editingVacId?v:x);}
   else{vacancies.unshift(v);}
-  saveVacs();
   closeModal('vac-modal');
   notify(editingVacId?'Vacancy updated':'Vacancy added');
   // Refresh current view
@@ -1583,7 +1598,7 @@ function parseStructuredFormat(lines){
     const line=lines[i];
     const stateKey=Object.keys(STATE_PATTERNS).find(k=>line.toUpperCase()===k);
     if(stateKey){currentState=STATE_PATTERNS[stateKey];i++;continue;}
-    const titleMatch=line.match(/^(.+?)\s*[–\-]\s*(.+?)(?:\s{3,}|\t)(\$[\d,./–\-]+.*)?$/);
+    const titleMatch=line.match(/^(.+?)\s*[–\-]\s*(.+?)(?:\s{3,}|\t)(\$[\d,.\/–\-]+.*)?$/);
     if(titleMatch&&line.length>5&&!line.startsWith('$')&&!DATE_RX.test(line.slice(0,5))){
       const location=titleMatch[1].trim();const roleRaw=titleMatch[2].trim();
       let rate=titleMatch[3]?titleMatch[3].trim():'';
@@ -1616,7 +1631,6 @@ function parseStructuredFormat(lines){
 }
 
 function smartExtract(raw,lines){
-  // Normalise curly apostrophes so "Galiwin'ku" matches lookup
   raw=raw.replace(/[''‚‛′‵`]/g,"'");
   lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
   const lower=raw.toLowerCase();
@@ -1632,11 +1646,9 @@ function smartExtract(raw,lines){
       }
     }
   }
-  // Also detect explicit location headers: short standalone lines (3-50 chars, no date, not skip)
   const lineAnchors=[];
   lines.forEach((line,li)=>{
     if(line.length>=3&&line.length<=60&&!SKIP_RX.test(line)&&!DATE_RX.test(line.slice(0,6))&&!line.startsWith('$')&&!line.match(/^\d/)&&!line.includes('@')&&!line.includes('http')){
-      // Check next 3 lines for dates — if so, this is a location header
       const nextLines=lines.slice(li+1,li+5).join(' ');
       if(extractDates(nextLines).length>0||/ASAP/i.test(nextLines)){
         const st=detectState(line)||detectState(raw);
@@ -1644,29 +1656,22 @@ function smartExtract(raw,lines){
       }
     }
   });
-
-  // Merge: prefer line anchors if they match town anchors, else use both
   let allAnchors=[...anchors];
   lineAnchors.forEach(la=>{
     if(!allAnchors.some(a=>a.displayName.toLowerCase().includes(la.town.toLowerCase())||la.town.toLowerCase().includes(a.displayName.toLowerCase())))
       allAnchors.push(la);
   });
-  // Deduplicate by proximity
   allAnchors.sort((a,b)=>a.idx-b.idx);
   const deduped=[];
   allAnchors.forEach(a=>{
     if(!deduped.some(d=>Math.abs(d.idx-a.idx)<50))deduped.push(a);
   });
-
   if(deduped.length===0){
-    // No known locations — extract as single vacancy from full text
     const vac=extractBlockFields(raw,raw);
     if(vac.dates_raw||vac.rate_raw){importedVacancies.push({id:uid(),title:'Unknown location',client:'',location:'',state:'',role_type:detectRoleTypeFromText(raw),...vac,status:'Open',urgency:'normal',created_at:new Date().toISOString()});}
     return;
   }
-
   if(deduped.length===1||isMainlySingleVacancy(raw)){
-    // Single location
     const a=deduped[0];
     const vac=extractBlockFields(raw,raw);
     vac.location=vac.location||a.displayName;
@@ -1675,8 +1680,6 @@ function smartExtract(raw,lines){
     importedVacancies.push({id:uid(),client:'',status:'Open',urgency:'normal',created_at:new Date().toISOString(),...vac});
     return;
   }
-
-  // Multi-location: split around each anchor
   deduped.forEach((anchor,i)=>{
     const blockStart=Math.max(0,anchor.idx-20);
     const blockEnd=i+1<deduped.length?deduped[i+1].idx:raw.length;
@@ -1691,90 +1694,7 @@ function smartExtract(raw,lines){
   });
 }
 
-function isMainlySingleVacancy(text){
-  // Heuristic: if only one rate and the locations are just mentioned (not section headers)
-  const rateMatches=(text.match(/\$\s*[\d,]+\s*(?:per\s*day|\/day|day\s*rate)/gi)||[]).length;
-  return rateMatches<=1;
-}
-
-function detectALS2(text){
-  return /\bALS\s*2\b|ALS2\s*cert|advanced\s*life\s*support\s*2/i.test(text);
-}
-
-function extractBillingsPct(text){
-  const m=text.match(/(\d{2})\s*%\s*of\s*billings/i);
-  return m?m[1]:'';
-}
-
-function detectAMS(text){
-  return /aboriginal\s*medical\s*service|aboriginal\s*health\s*service|ACCHS|ACCHO|aboriginal\s*community\s*controlled|aboriginal\s*corporation|first\s*nations.*health|indigenous.*health.*service|maari\s*ma|katungul|amsant|winnunga|galambila|tharawal|tobwabba|bila\s*muuji|awabakal|durri|penkah|walgett\s*aboriginal|\bAMS\b/i.test(text);
-}
-
-function extractBlockFields(block,fullText){
-  const rate=extractRate(block)||extractRate(fullText.slice(0,500));
-  const dates=extractDates(block);
-  const inclusions=extractInclusions(block)||extractInclusions(fullText);
-  const roleType=detectRoleTypeFromText(block)||detectRoleTypeFromText(fullText);
-  const state=detectState(block);
-  const sessions=extractSessions(block)||extractSessions(fullText);
-  const min_weeks=extractMinWeeks(block)||extractMinWeeks(fullText);
-  const on_call=extractOnCall(block)||extractOnCall(fullText);
-  const is_ams=detectAMS(block)||detectAMS(fullText);
-  const is_als2=detectALS2(block)||detectALS2(fullText);
-  const billings_pct=extractBillingsPct(block)||extractBillingsPct(fullText);
-  return{location:'',state,role_type:roleType,rate:parseRate(rate),rate_raw:rate,dates_raw:dates,inclusions_raw:inclusions,sessions,min_weeks,on_call,is_ams,is_als2,billings_pct,notes:'',title:''};
-}
-
-function extractSessions(text){
-  const m=text.match(/sessions?\s*(?:required|available|per\s*week)?[\s:]*([^\n,;.]{3,50})/i);
-  if(m){
-    const v=m[1].trim();
-    if(/mon.*fri|5\s*days|monday.*friday/i.test(v))return'Monday to Friday';
-    if(/mon.*thu|4\s*days/i.test(v))return'Monday to Thursday';
-    if(v.length<50)return v;
-  }
-  if(/monday\s*to\s*friday|mon.*fri\s*only|5\s*days\s*per\s*week/i.test(text))return'Monday to Friday';
-  if(/monday\s*to\s*thursday|mon.*thu\s*only/i.test(text))return'Monday to Thursday';
-  return'';
-}
-
-function extractMinWeeks(text){
-  const patterns=[
-    /minimum\s+(\d+)\s+weeks?/i,
-    /(\d+)\s+week\s+minimum/i,
-    /min\.?\s*(\d+)\s*wks?/i,
-    /minimum\s+block[:\s]+(\d+)\s+weeks?/i,
-    /\((\d+)\s+weeks?\)/i,
-  ];
-  for(const p of patterns){const m=text.match(p);if(m)return m[1]+' weeks';}
-  if(/minimum\s+(\d+)\s+week/i.test(text)){const m=text.match(/minimum\s+(\d+)\s+week/i);return m[1]+' weeks';}
-  return'';
-}
-
-function extractOnCall(text){
-  const patterns=[
-    /on[- ]?call[\s:]*(?:ratio|component|requirement)?[\s:]*(1\s*[:/in]\s*\d+)/i,
-    /(1\s*[:/]\s*\d+)\s*on[- ]?call/i,
-    /on[- ]?call[\s:]*(entire\s*block|as\s*per\s*roster|apor|tbc|as\s*required)/i,
-    /on[- ]?call[\s:]*(every\s*(?:second|third|fourth)\s*(?:night|week))/i,
-  ];
-  for(const p of patterns){const m=text.match(p);if(m)return m[1].trim();}
-  if(/on[- ]?call.*entire.*block|entire.*block.*on[- ]?call/i.test(text))return'Entire block';
-  if(/as\s*per\s*roster/i.test(text))return'As per roster';
-  return'';
-}
-
-function isValidLocation(name){
-  if(!name||name.length>60)return false;
-  // Reject lines containing descriptive/heading words
-  if(/\bvacancies\b|\bvacancy\b|\bopportunities\b|\bpermanent\b|\blocum\b|\bFIFO\b|\bavailable\b|\brequired\b|\bseeking\b|\bwe\s+are\b|\bplease\b|\bkind\s+regards\b|\bcontacts?\b|\bdetails\b|\bfees?\b|\brates?\b|\bavailability\b|\bwaiting\b|\bongoing\b/i.test(name))return false;
-  // Reject lines with email addresses or phone numbers
-  if(/@|http|\d{8,}/.test(name))return false;
-  return true;
-}
-
 function applyZoneRates(text){
-  // Detect zone-based fee schedules e.g. "Zone 1 Nhulunbuy, Gunyangara $1600 per day"
   const norm=text.replace(/[''‚‛′‵`]/g,"'");
   const zoneMap={};
   const zoneRx=/Zone\s*\d+\s+([^$\n]{5,80})\$\s*([\d,]+)/gi;
@@ -1787,27 +1707,36 @@ function applyZoneRates(text){
   }
   if(Object.keys(zoneMap).length===0)return;
   importedVacancies.forEach(v=>{
-    if(v.rate_raw)return; // already has rate
+    if(v.rate_raw)return;
     const loc=v.location.toLowerCase();
     const match=Object.keys(zoneMap).find(z=>loc.includes(z)||z.includes(loc));
     if(match){v.rate_raw=zoneMap[match];v.rate=parseRate(zoneMap[match]);}
   });
 }
 
-function detectRoleType(text){
-  const t=text.toLowerCase();
-  if(t.includes('interventional')||t.includes(' ir ')) return 'Interventional Radiologist';
-  if(t.includes('radiolog')) return 'General Radiologist';
-  if(t.includes('gp vmo')||t.includes('gpvmo')||t.includes('vmo')||t.includes('gp/ed')||t.includes('gped')||t.includes('ed locum')||t.includes('ed registrar')||t.includes('on-call')||t.includes('senior ed')||t.includes('inpatient')||t.includes('smo')) return 'GP VMO';
-  if(t.includes('ucc')||t.includes('urgent care')) return 'UCC';
-  return 'GP VMO'; // default for these rural/ED emails
+function isValidLocation(name){
+  if(!name||name.length>60)return false;
+  if(/\bvacancies\b|\bvacancy\b|\bopportunities\b|\bpermanent\b|\blocum\b|\bFIFO\b|\bavailable\b|\brequired\b|\bseeking\b|\bwe\s+are\b|\bplease\b|\bkind\s+regards\b/i.test(name))return false;
+  if(/@|http|\d{8,}/.test(name))return false;
+  return true;
 }
 
-function parseRate(rateStr){
-  if(!rateStr)return '';
-  const m=rateStr.match(/\$?([\d,]+)/);
-  return m?m[1].replace(/,/g,''):'';
+function isMainlySingleVacancy(text){
+  const rateMatches=(text.match(/\$\s*[\d,]+\s*(?:per\s*day|\/day|day\s*rate)/gi)||[]).length;
+  return rateMatches<=1;
 }
+
+function findExistingVacancy(location,state){
+  if(!location)return null;
+  const loc=location.toLowerCase().trim();
+  return vacancies.find(v=>{
+    const vl=(v.location||v.title||'').toLowerCase().trim();
+    const sameState=!state||!v.state||v.state===state;
+    return sameState&&(vl===loc||vl.startsWith(loc)||loc.startsWith(vl));
+  })||null;
+}
+
+function removeImported(idx){importedVacancies.splice(idx,1);renderImportResults();}
 
 function renderImportResults(){
   const el=document.getElementById('import-results');
@@ -1817,7 +1746,6 @@ function renderImportResults(){
     el.innerHTML='<div class="empty"><p>No vacancies detected.<br>Check the format and try again.</p></div>';
     bar.style.display='none';cnt.textContent='';return;
   }
-  // Tag duplicates
   importedVacancies.forEach(v=>{v._existing=findExistingVacancy(v.location||v.title,v.state);});
   const updates=importedVacancies.filter(v=>v._existing).length;
   const news=importedVacancies.length-updates;
@@ -1831,9 +1759,6 @@ function renderImportResults(){
         <input value="${esc(v.rate_raw||'')}" onchange="importedVacancies[${idx}].rate_raw=this.value;importedVacancies[${idx}].rate=parseRate(this.value);" placeholder="Rate e.g. $1,800/day" style="font-size:11px;padding:2px 6px;border:1px solid var(--g300);border-radius:4px;width:130px;color:var(--grn);font-weight:600;">
         <span class="b b-${v.role_type==='GP Only'?'grn':v.role_type==='Interventional Radiologist'||v.role_type==='General Radiologist'?'blue':'pur'}">${esc(v.role_type)}</span>
         ${v._existing?'<span class="b" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;">UPDATE</span>':'<span class="b b-blue">NEW</span>'}
-        ${v.is_ams?'<span class="b" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">AMS</span>':''}
-        ${v.is_als2?'<span class="b b-blue">ALS2</span>':''}
-        <label style="font-size:11px;color:var(--g500);display:flex;align-items:center;gap:3px;cursor:pointer;"><input type="checkbox" ${v.is_ams?'checked':''} onchange="importedVacancies[${idx}].is_ams=this.checked;renderImportResults()"> AMS</label>
         <button class="btn btn-sec btn-xs" onclick="removeImported(${idx})">✕</button>
       </div>
       <div style="padding:8px 12px;font-size:12px;">
@@ -1847,30 +1772,24 @@ function renderImportResults(){
         </div>
         ${v.dates_raw?`<div style="margin-top:4px;"><span style="color:var(--g500);">Dates: </span>${esc(v.dates_raw)}</div>`:''}
         ${v.inclusions_raw?`<div style="margin-top:2px;"><span style="color:var(--g500);">Inclusions: </span>${esc(v.inclusions_raw)}</div>`:''}
-        ${v.role_type==='GP Only'?`
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
-          <div><span style="color:var(--g500);">Sessions: </span>
-            <input value="${esc(v.sessions||'Monday to Friday')}" onchange="importedVacancies[${idx}].sessions=this.value" style="font-size:11px;padding:1px 4px;border:1px solid var(--g300);border-radius:4px;width:130px;">
-          </div>
-          <div><span style="color:var(--g500);">Min. weeks: </span>
-            <select onchange="importedVacancies[${idx}].min_weeks=this.value" style="font-size:11px;padding:1px 4px;border:1px solid var(--g300);border-radius:4px;">
-              ${['Open','1 week','2 weeks','3 weeks','4 weeks','6 weeks','8 weeks'].map(w=>`<option ${(v.min_weeks||'Open')===w?'selected':''}>${w}</option>`).join('')}
-            </select>
-          </div>
-        </div>`:''}
-        ${v.role_type==='GP VMO'||v.role_type==='ED VMO'?`
-        <div style="margin-top:6px;"><span style="color:var(--g500);">On-call: </span>
-          <select onchange="importedVacancies[${idx}].on_call=this.value" style="font-size:11px;padding:1px 4px;border:1px solid var(--g300);border-radius:4px;">
-            ${['TBC','Entire block','1:2','1:3','1:4','As per roster','None'].map(o=>`<option ${(v.on_call||'TBC')===o?'selected':''}>${o}</option>`).join('')}
-          </select>
-        </div>`:''}
       </div>
     </div>`).join('');
 }
 
-function removeImported(idx){
-  importedVacancies.splice(idx,1);
-  renderImportResults();
+async function saveAllImported(){
+  if(!importedVacancies.length)return;
+  let added=0,updated=0;
+  for(const v of importedVacancies){
+    const full={...v};delete full._existing;
+    const{error}=await sb.from(TBL_VAC).upsert(full);
+    if(error){notify('Error saving: '+error.message);console.error(error);return;}
+    const existing=findExistingVacancy(v.location||v.title,v.state);
+    if(existing){Object.assign(existing,{...full,id:existing.id,created_at:existing.created_at});updated++;}
+    else{vacancies.unshift(full);added++;}
+  }
+  clearImport();
+  notify((added?added+' added':'')+(added&&updated?' · ':'')+(updated?updated+' updated':''));
+  renderDash();
 }
 
 function clearImport(){
@@ -1881,78 +1800,36 @@ function clearImport(){
   document.getElementById('import-count').textContent='';
 }
 
-function findExistingVacancy(location,state){
-  if(!location)return null;
-  const loc=location.toLowerCase().trim();
-  return vacancies.find(v=>{
-    const vl=(v.location||v.title||'').toLowerCase().trim();
-    const sameState=!state||!v.state||v.state===state;
-    return sameState&&(vl===loc||vl.startsWith(loc)||loc.startsWith(vl));
-  })||null;
-}
-
-function saveAllImported(){
-  if(!importedVacancies.length)return;
-  let added=0,updated=0;
-  importedVacancies.forEach(v=>{
-    const full={...v};
-    delete full._existing;
-    const existing=findExistingVacancy(v.location||v.title,v.state);
-    if(existing){
-      // Update in place — preserve id and created_at, update everything else
-      Object.assign(existing,{...full,id:existing.id,created_at:existing.created_at,updated_at:new Date().toISOString()});
-      updated++;
-    } else {
-      vacancies.unshift(full);
-      added++;
-    }
-  });
-  saveVacs();
-  clearImport();
-  notify((added?added+' added':'')+(added&&updated?' · ':'')+(updated?updated+' updated':''));
-  renderDash();
-}
-
 // ─── BROADCAST ────────────────────────────────────────────────────────────
 function renderBroadcastView(){
   renderBroadcastPicker();
   renderBroadcastPreview();
 }
 
-const AUDIENCE_ROLES={
-  'GP VMO':['GP VMO','ED VMO'],
-  'GP Only':['GP Only'],
-  'UCC':['UCC'],
-  'Interventional Radiologist':['Interventional Radiologist'],
-  'General Radiologist':['General Radiologist']
-};
-
 function renderBroadcastPicker(){
-  const el=document.getElementById('bc-vac-picker');
-  const audience=getBroadcastAudience();
-  const allowedRoles=AUDIENCE_ROLES[audience]||[];
-  const openVacs=vacancies.filter(v=>v.status==='Open');
-  const matching=openVacs.filter(v=>allowedRoles.includes(v.role_type));
-  const others=openVacs.filter(v=>!allowedRoles.includes(v.role_type));
-  if(!openVacs.length){
-    el.innerHTML='<div class="empty"><p>No open vacancies.<br>Add or import some first.</p></div>';
-    return;
-  }
-  if(!matching.length){
-    el.innerHTML=`<div class="empty"><p>No ${audience} vacancies found.<br>Import some first.</p></div>`;
-    return;
-  }
-  el.innerHTML=matching.map(v=>`
-    <label style="display:flex;align-items:flex-start;gap:8px;padding:7px 4px;border-bottom:1px solid var(--g100);cursor:pointer;font-size:12px;">
-      <input type="checkbox" class="bc-vac-cb" data-id="${v.id}" onchange="renderBroadcastPreview()" checked style="margin-top:2px;">
-      <span style="flex:1;"><strong>${esc(v.title)}</strong>${v.is_ams?'<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;margin-left:4px;">AMS</span>':''}<br><span style="color:var(--g500);">${esc(v.state||'')} · ${esc(v.role_type||'')}${v.rate_raw?' · '+esc(v.rate_raw):''}</span></span>
-    </label>`).join('')+
-  (others.length?`<div style="padding:6px 4px;font-size:11px;color:var(--g400);border-top:1px solid var(--g100);margin-top:4px;">${others.length} other-role vacancies hidden</div>`:'');
+  const el=document.getElementById('bc-vac-picker');if(!el)return;
+  const open=vacancies.filter(v=>!v.status||v.status==='Open');
+  if(!open.length){el.innerHTML='<div style="padding:10px;font-size:12px;color:var(--g500);">No open vacancies.</div>';return;}
+  el.innerHTML=open.map(v=>`
+    <label style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--g100);cursor:pointer;">
+      <input type="checkbox" class="bc-vac-cb" data-id="${v.id}" style="margin-top:2px;" onchange="renderBroadcastPreview()">
+      <div>
+        <div style="font-size:12px;font-weight:600;">${esc(v.title)}</div>
+        <div style="font-size:11px;color:var(--g500);">${esc(v.state||'')}${v.rate_raw?' · '+esc(v.rate_raw):''}</div>
+      </div>
+    </label>`).join('');
 }
 
-function getSelectedBroadcastVacs(){
-  const checked=Array.from(document.querySelectorAll('.bc-vac-cb:checked')).map(cb=>cb.dataset.id);
-  return vacancies.filter(v=>checked.includes(v.id));
+function renderBroadcastPreview(){
+  const audience=getBroadcastAudience();
+  const vacs=getSelectedBroadcastVacs();
+  const preview=document.getElementById('bc-preview');
+  const subject=document.getElementById('bc-subject');
+  if(!preview)return;
+  const statesUniq=[...new Set(vacs.map(v=>v.state).filter(Boolean))];
+  const subjectText=statesUniq.length?`${audience} Locum Opportunities — ${statesUniq.join(', ')}`:`${audience} Locum Opportunities`;
+  if(subject)subject.value=subjectText;
+  preview.innerHTML=vacs.length?buildBroadcastHTML(audience,vacs):'<div class="empty"><p>Select vacancies on the left to preview.</p></div>';
 }
 
 function getBroadcastAudience(){
@@ -1960,25 +1837,9 @@ function getBroadcastAudience(){
   return r?r.value:'GP VMO';
 }
 
-function renderBroadcastPreview(){
-  const audience=getBroadcastAudience();
-  const selected=getSelectedBroadcastVacs();
-  const month=new Date().toLocaleDateString('en-AU',{month:'long',year:'numeric'});
-  // Subject
-  // Find max rate for subject line
-  const maxRate=selected.reduce((max,v)=>{const r=parseInt((v.rate_raw||'').replace(/[^\d]/g,''));return r>max?r:max;},0);
-  const rateStr=maxRate>=1000?'Up to $'+maxRate.toLocaleString()+'/day – ':'';
-  const statesStr=[...new Set(selected.map(v=>v.state).filter(Boolean))].join(', ');
-  const subjectMap={
-    'GP VMO':`GP/ED & VMO Locum Opportunities – ${rateStr}${statesStr||'AU'}`,
-    'GP Only':`GP Clinic Locum Opportunities – ${rateStr}${statesStr||'AU'}`,
-    'UCC':`Urgent Care Clinic (UCC) Locum Opportunities – ${rateStr}${statesStr||'AU'}`,
-    'Interventional Radiologist':`Interventional Radiology Locum Opportunities – ${statesStr||'AU'}`,
-    'General Radiologist':`Radiology Locum Opportunities – ${statesStr||'AU'}`
-  };
-  document.getElementById('bc-subject').value=subjectMap[audience]||'Locum Opportunities – '+month;
-  // Build HTML
-  document.getElementById('bc-preview').innerHTML=buildBroadcastHTML(audience,selected);
+function getSelectedBroadcastVacs(){
+  const checked=Array.from(document.querySelectorAll('.bc-vac-cb:checked')).map(cb=>cb.dataset.id);
+  return vacancies.filter(v=>checked.includes(v.id));
 }
 
 function buildBroadcastHTML(audience,vacs){
@@ -1995,21 +1856,7 @@ function buildBroadcastHTML(audience,vacs){
     'Interventional Radiologist':'I have some great Interventional Radiology locum opportunities available. Please see the current vacancies below.',
     'General Radiologist':'I have some great Radiology locum opportunities available. Please see the current vacancies below.'
   };
-  // Featured: rate >= $3000 or urgency critical
-  const featured=vacs.filter(v=>{const r=parseInt((v.rate_raw||'').replace(/[^\d]/g,''));return r>=3000||v.urgency==='critical';});
-  let html=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 16px 0;">Hi $first name$,</p>
-<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 20px 0;">${audienceIntro[audience]||'I have some great locum opportunities available. Please see the current vacancies below.'}</p>`;
-  if(featured.length>0){
-    html+=`<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:12px 16px;margin-bottom:20px;font-family:Arial,Helvetica,sans-serif;"><p style="color:#16a34a;font-weight:bold;font-size:14px;margin:0 0 8px 0;">Featured Roles – $3,000+/day</p>`;
-    featured.forEach(v=>{
-      const loc=v.title.includes('–')?v.title.split('–')[0].trim():v.title;
-      const role=v.title.includes('–')?v.title.split('–').slice(1).join('–').trim():'';
-      const dateShort=v.dates_raw?v.dates_raw.split('•')[0].trim():'Multiple blocks available';
-      html+=`<p style="font-size:13px;margin:3px 0;font-family:Arial,Helvetica,sans-serif;">• <strong>${esc(loc)}${v.state?', '+v.state:''}</strong> – ${esc(role||v.role_type||'')} – ${esc(dateShort)}${v.rate_raw?' – '+esc(v.rate_raw):''}</p>`;
-    });
-    html+=`</div>`;
-  }
-
+  let html=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 16px 0;">Hi $first name$,</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 20px 0;">${audienceIntro[audience]||'I have some great locum opportunities available. Please see the current vacancies below.'}</p>`;
   states.forEach(state=>{
     const svacs=byState[state];
     html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:13px;margin:20px 0 10px 0;letter-spacing:0.02em;">${stateFullName[state]||state}</p>`;
@@ -2019,28 +1866,14 @@ function buildBroadcastHTML(audience,vacs){
       const inclDisplay=v.inclusions_raw||'';
       const billingsStr=v.billings_pct?` or ${v.billings_pct}% of billings`:'';
       const fullRate=rateDisplay?(rateDisplay+billingsStr):'';
-      const titleDisplay=esc(v.title)
-        +(v.is_ams?' <span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:normal;border:1px solid #fcd34d;">AMS</span>':'')
-        +(v.is_als2?' <span style="background:#eff6ff;color:#1d4ed8;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:normal;border:1px solid #bfdbfe;">ALS2</span>':'');
-      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${titleDisplay}</span>${fullRate?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(fullRate)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
+      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${esc(v.title)}</span>${fullRate?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(fullRate)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
       if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(datesDisplay)}</p>`;
-      if(v.role_type==='GP Only'||v.role_type==='UCC'){
-        const sess=v.sessions||'Monday to Friday';
-        const minW=v.min_weeks&&v.min_weeks!=='Open'?v.min_weeks:'Open';
-        html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Sessions</p><p style="font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(sess)}</p>`;
-        html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Minimum</p><p style="font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(minW)}</p>`;
-      }
-      if((v.role_type==='GP VMO'||v.role_type==='ED VMO')&&v.on_call&&v.on_call!=='None'){
-        html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">On-call</p><p style="font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(v.on_call)}</p>`;
-      }
       if(inclDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Inclusions</p><p style="font-size:13px;margin:0;color:#111827;">${esc(inclDisplay)}</p>`;
       html+=`</div></div>`;
     });
   });
   if(!vacs.length)html+=`<p style="color:#9ca3af;font-style:italic;font-family:Arial,Helvetica,sans-serif;">No vacancies selected.</p>`;
-  html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:20px 0 6px 0;">If any of these interest you, please reply to this email or give me a call on <strong>0410 547 011</strong> and I'll get you across all the details.</p>
-<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#16a34a;margin:0 0 20px 0;">You can earn $1,000 for referring a colleague! Visit our <a href="https://www.medipeople.com.au/rewards" style="color:#16a34a;">Rewards Page</a> for more details.</p>
-<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;margin:0;">Kind regards,<br><strong>Chris Tsolakis</strong> | Director<br>MediPeople<br>T: +61 2 8001 6272 &nbsp;|&nbsp; M: +61 410 547 011<br><a href="mailto:chris.t@medipeople.com.au" style="color:#2e7d32;">chris.t@medipeople.com.au</a> &nbsp;|&nbsp; <a href="https://www.medipeople.com.au" style="color:#2e7d32;">www.medipeople.com.au</a></p>`;
+  html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:20px 0 6px 0;">If any of these interest you, please reply to this email or give me a call on <strong>0410 547 011</strong> and I'll get you across all the details.</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#16a34a;margin:0 0 20px 0;">You can earn $1,000 for referring a colleague! Visit our <a href="https://www.medipeople.com.au/rewards" style="color:#16a34a;">Rewards Page</a> for more details.</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;margin:0;">Kind regards,<br><strong>Chris Tsolakis</strong> | Director<br>MediPeople<br>T: +61 2 8001 6272 &nbsp;|&nbsp; M: +61 410 547 011<br><a href="mailto:chris.t@medipeople.com.au" style="color:#2e7d32;">chris.t@medipeople.com.au</a> &nbsp;|&nbsp; <a href="https://www.medipeople.com.au" style="color:#2e7d32;">www.medipeople.com.au</a></p>`;
   return html;
 }
 
@@ -2049,8 +1882,7 @@ function buildBroadcastPlain(audience,vacs){
   const byState={};
   vacs.forEach(v=>{const s=v.state||'Other';if(!byState[s])byState[s]=[];byState[s].push(v);});
   const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
-  const audienceDesc={'GP VMO':'GP VMO locum opportunities','GP Only':'GP locum opportunities','Interventional Radiologist':'Interventional Radiology locum opportunities','General Radiologist':'Radiology locum opportunities'};
-  let txt=`Hi [First Name],\n\nI hope you're well. I have some ${audienceDesc[audience]||'locum opportunities'} available${states.length?' across '+states.join(', ')+'.':'.'}  Please see the current vacancies below.\n\n`;
+  let txt=`Hi [First Name],\n\nHope you're well! I have some locum opportunities that may suit you.\n\n`;
   states.forEach(state=>{
     txt+=`${'─'.repeat(40)}\n${state}\n${'─'.repeat(40)}\n\n`;
     byState[state].forEach(v=>{
@@ -2058,232 +1890,52 @@ function buildBroadcastPlain(audience,vacs){
       txt+=`${v.title}${rateDisplay?'   '+rateDisplay:''}\n`;
       if(v.dates_raw)txt+=`Dates: ${v.dates_raw}\n`;
       if(v.inclusions_raw)txt+=`Inclusions: ${v.inclusions_raw}\n`;
-      if(v.notes&&!v.notes.includes('|'))txt+=`${v.notes}\n`;
       txt+='\n';
     });
   });
-  txt+=`If any of these interest you, please reply or give me a call on 0410 547 011 and I'll get you across all the details.\n\nYou can earn $1,000 for referring a colleague! Visit medipeople.com.au/rewards for more details.\n\nKind regards,\nChris Tsolakis | Director\nMediPeople\nT: +61 2 8001 6272 | M: +61 410 547 011\nchris.t@medipeople.com.au | www.medipeople.com.au`;
+  txt+=`If any of these interest you, please reply or give me a call on 0410 547 011.\n\nKind regards,\nChris Tsolakis | Director\nMediPeople\nT: +61 2 8001 6272 | M: +61 410 547 011\nchris.t@medipeople.com.au | www.medipeople.com.au`;
   return txt;
 }
 
 function copyBroadcastHTML(){
-  const audience=getBroadcastAudience();
-  const vacs=getSelectedBroadcastVacs();
-  const subject=document.getElementById('bc-subject').value;
-  const html=buildBroadcastHTML(audience,vacs);
-  const full=`<strong>Subject:</strong> ${subject}<br><br>`+html;
-  navigator.clipboard.writeText(full).then(()=>notify('HTML copied — paste into Bullhorn'));
+  renderBroadcastPreview();
+  const pv=document.getElementById('bc-preview');if(!pv)return;
+  navigator.clipboard.writeText(pv.innerHTML).then(()=>notify('Broadcast HTML copied')).catch(()=>notify('Could not copy'));
 }
 
 function copyBroadcastPlain(){
   const audience=getBroadcastAudience();
   const vacs=getSelectedBroadcastVacs();
-  const subject=document.getElementById('bc-subject').value;
-  const txt='Subject: '+subject+'\n\n'+buildBroadcastPlain(audience,vacs);
-  navigator.clipboard.writeText(txt).then(()=>notify('Plain text copied — paste into Bullhorn'));
+  navigator.clipboard.writeText(buildBroadcastPlain(audience,vacs)).then(()=>notify('Broadcast plain text copied')).catch(()=>notify('Could not copy'));
 }
 
-// ─── START ────────────────────────────────────────────────────────────────
+function draftBroadcastMsg(vac,name){
+  const dateStr=vac.start_date?(fmtDate(vac.start_date)+(vac.end_date?' – '+fmtDate(vac.end_date):'')):'dates TBC';
+  return `Hi ${name||'[Name]'},\n\nHope you're well! I have a great locum opportunity I'd love to run by you.\n\n📍 Location: ${vac.location||''} ${vac.state||''}\n📅 Dates: ${dateStr}\n💰 Rate: ${vac.rate?'$'+vac.rate+'/day':'TBC'}\n🏥 Role: ${vac.role_type||'GP locum'}${vac.dpa==='true'?' (DPA location)':''}${vac.travel==='true'?'\n✈️ Travel provided':''}${vac.accom==='true'?'\n🏠 Accommodation provided':''}\n\n${vac.notes?'Additional details: '+vac.notes+'\n\n':''}Would this work for you? Happy to chat through any details.\n\nWarm regards,\nChris Tsolakis | MediPeople`;
+}
+
+function copyMsg(){
+  const ta=document.getElementById('msg-body');if(!ta)return;
+  navigator.clipboard.writeText(ta.value).then(()=>notify('Message copied to clipboard'));
+}
+
+function getTier(score){
+  if(score>=68)return'hot';
+  if(score>=42)return'warm';
+  return'cold';
+}
+
+function openAddCandidate(id){
+  // Candidates are managed in the CRM — this opens a read-only prefs view
+  if(id)openCandProfile(id);
+}
+
+function closeAddCand(){
+  const m=document.getElementById('addcand-modal');if(m)m.style.display='none';
+}
+
+// ─── BOOTSTRAP ────────────────────────────────────────────────────────────
 init();
-</script>
-
-
-<script>
-/* === Import parser v5 (email): town-anchored; dash/dot safe; multi-town; suburb+signature state autodetect; agency-fee -10%; hourly/period rates; paired date columns; on_call autodetect; shift notes === */
-
-Object.assign(TOWN_STATE,{'mount morgan':'QLD','kimba':'SA','cleve':'SA','maroubra':'NSW','mittagong':'NSW','toongabbie':'NSW','childers':'QLD','eidsvold':'QLD','esperance':'WA','queenstown':'TAS'});
-var __TS=Object.keys(TOWN_STATE).sort(function(a,b){return b.length-a.length;});
-var __FULLRAW='';
-function __nd(t){return t.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212\u2043\uFE58\uFE63\uFF0D]/g,'-');}
-function __isState(l){return !!STATE_PATTERNS[l.trim().toUpperCase()];}
-function __incl(line){return /all[-\s]?inclusive/i.test(line)||(/inclusiv/i.test(line)&&/agency/i.test(line));}
-function __rateFromLine(line){
-  if(/(accommodation|car hire|hire car|flights?|travel|mileage|fuel|taxi|allowance|reimburs|capped|up to)/i.test(line)&&!/\brate\b|per day|\/day|per hour|\/hr|ph\b/i.test(line))return null;
-  var m,num=null;
-  if(m=line.match(/\$\s*([\d,]+(?:\.\d+)?)\s*(?:per\s*hour|\/\s*hr|\/\s*hour|ph\b|p\/h|per\s*hr)/i))num=m[1];
-  else if(m=line.match(/\$\s*([\d,]+(?:\.\d+)?)\s*(?:per\s*day|\/\s*day|p\s*\/?\s*day|pd\b|day\s*rate)/i))num=m[1];
-  else if(m=line.match(/\$?\s*([\d,]+(?:\.\d+)?)\s*for\s+the\s+\d+\s*hour/i))num=m[1];
-  else if(/\brate\b/i.test(line)&&(m=line.match(/\$\s*([\d,]+(?:\.\d+)?)/)))num=m[1];
-  else if((m=line.match(/\$\s*([\d,]+(?:\.\d+)?)/))&&parseFloat(m[1].replace(/,/g,''))>=1000)num=m[1];
-  if(num===null)return null;var n=parseFloat(num.replace(/,/g,''));
-  return {n:n,agency:__incl(line),raw:(line.match(/\$\s*[\d,]+(?:\.\d+)?[^\n]{0,18}/)||['$'+num])[0].trim()};
-}
-function __applyRate(vac,info){if(!info||vac.rate)return;var n=info.agency?Math.round(info.n*0.9):Math.round(info.n);vac.rate=String(n);vac.rate_raw=info.raw;if(info.agency)vac.notes=(vac.notes?vac.notes+' ':'')+'[advertised $'+info.n+' incl. agency fee → broadcast -10% = $'+n+']';}
-function __stFallback(line,cur){return detectState(line)||cur||detectState(__FULLRAW)||'';}
-function __tc(s){return /[a-z]/.test(s)?s:s.replace(/\b([A-Z])([A-Z']*)/g,function(m,a,b){return a+b.toLowerCase();});}
-function __newVac(town,state){town=__tc(town);return {id:'mp'+Math.random().toString(36).slice(2,12),title:town,client:'',location:town,state:state||'',role_type:'',rate:'',rate_raw:'',dates_raw:'',inclusions_raw:'',notes:'',on_call:'TBC',status:'Open',urgency:'normal',created_at:new Date().toISOString(),_existing:null};}
-function __townHeader(line){
-  var raw=__nd(line).replace(/^[\s•*]+/,'').replace(/^\d{1,2}[.)]\s+/,'').replace(/\s+/g,' ').trim();
-  var lower=raw.toLowerCase().replace(/[‘’]/g,"'");
-  for(var i=0;i<__TS.length;i++){var t=__TS[i];if(lower.indexOf(t)===0){var a=raw.charAt(t.length);if(a===''||/[^a-z0-9']/i.test(a))return {town:raw.substr(0,t.length),state:TOWN_STATE[t],rest:raw.substr(t.length).replace(/^[\s\-:.,|]+/,'').trim()};}}
-  var mon='(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)';
-  var gm=raw.match(/^([A-Z][A-Za-z']+(?:\s[A-Z][A-Za-z']+){0,2})\s*[-–:]?\s+(.+)$/);
-  if(gm){var pfx=gm[1],rest=gm[2],pl=pfx.toLowerCase();
-    if(!/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\b/.test(pl)&&!new RegExp('^'+mon).test(pl)&&!/^(start|date|rate|inclusion|note|session|system|must|the|we|please|locum|all|attn|available|working|gp|about|what|detail|hi|hello|good|each|every|exclusively|no|return|flight|travel|accommodation|vehicle|commute|weekend|nurse|aboriginal|receptionist|before|gps|required|category|contact|professional|forms|driver|medical|ahpra|abn|immunisation|our|this|various|urgent|official|speciality|hbmp|ed |rosters|goldfields|end|shift|image|key|when|telephone|email|hotel|hire)/.test(pl)&&/\d/.test(rest)&&new RegExp(mon).test(rest.toLowerCase())){return {town:pfx,state:detectState(raw)||'',rest:''};}}
-  return null;
-}
-function __multiTown(line){
-  var seg=__nd(line).replace(/\s+/g,' ').trim();var head=seg.split(/\s[-–]\s/)[0];if(head.length>70)return null;
-  var parts=head.split(/,|\s&\s|\band\b|\bor\b/).map(function(p){return p.trim();}).filter(Boolean);if(parts.length<2)return null;
-  var found=[];for(var i=0;i<parts.length;i++){var pl=parts[i].toLowerCase().replace(/[‘’]/g,"'");for(var j=0;j<__TS.length;j++){var t=__TS[j];if(pl===t||pl.indexOf(t)===0){found.push({town:parts[i].replace(/[‘’]/g,"'"),state:TOWN_STATE[t]});break;}}}
-  return found.length>=2?found:null;
-}
-function __dates(line){var d=extractDates(line);if(d)return d;var m=line.trim().match(/^\d{1,2}\/\d{1,2}(?:\/\d{2,4})?$/);return m?m[0]:'';}
-function __oncall(t){if(/\b1\s*(?::|in)\s*2\b/i.test(t))return '1:2';if(/\b1\s*(?::|in)\s*3\b/i.test(t))return '1:3';if(/\b1\s*(?::|in)\s*4\b/i.test(t))return '1:4';if(/24\s*hour|entire block|on.?call period/i.test(t))return 'Entire block';if(/as per roster|per the roster|roster requirements|full details of the roster/i.test(t))return 'As per roster';if(/no on.?call|no after.?hours|not on call|no vmo/i.test(t))return 'None';return '';}
-function __shift(line){var m=line.match(/\d{1,2}[.:]\d{2}\s*(?:to|-|–|—)\s*\d{1,2}[.:]\d{2}[^\n]*/i);if(m)return m[0].trim();if(/night shift|day shift|varied.*shift|various shift|overnight|weekend on/i.test(line))return line.trim();return '';}
-function __flush(v){if(!v||!v.__db||!v.__db.length)return;var b=v.__db;v.__db=[];var out;if(b.length>=2&&b.length%2===0){var h=b.length/2,p=[];for(var i=0;i<h;i++)p.push(b[i]+' – '+b[i+h]);out=p.join(' • ');}else out=b.join(' • ');v.dates_raw=v.dates_raw?v.dates_raw+' • '+out:out;}
-function parseImport(){
-  var raw=document.getElementById('import-paste').value.trim();
-  if(!raw){notify('Paste some email text first');return;}
-  __FULLRAW=raw;importedVacancies.length=0;
-  var all=raw.split('\n');var cut=all.length;
-  for(var i=0;i<all.length;i++){if(/^(kind regards|best regards|regards,|with thanks|many thanks|thanks,|cheers,|warm regards)/i.test(all[i].trim())){cut=i;break;}}
-  var rawLines=all.slice(0,cut);
-  var currentState='';var vac=null;var seen={};var blockText={};
-  function reg(v){var k=(v.location+'|'+v.state).toLowerCase();if(seen[k])return seen[k];seen[k]=v;blockText[k]='';importedVacancies.push(v);return v;}
-  function isBareDate(l){return /^\d{1,2}\/\d{1,2}(?:\/\d{2,4})?$/.test(l.trim());}
-  function attach(v,line){__flush(v);var k=(v.location+'|'+v.state).toLowerCase();blockText[k]=(blockText[k]||'')+' '+line;__applyRate(v,__rateFromLine(line));var oc=__oncall(line);if(oc&&(!v.on_call||v.on_call==='TBC'))v.on_call=oc;var sh=__shift(line);if(sh&&(' '+(v.notes||'')).indexOf(sh)<0)v.notes=(v.notes?v.notes+' ':'')+sh;var d=extractDates(line);if(d)v.dates_raw=v.dates_raw?v.dates_raw+' • '+d:d;}
-  for(var i=0;i<rawLines.length;i++){
-    var line=rawLines[i].trim();if(!line)continue;
-    if(__isState(line)){__flush(vac);currentState=STATE_PATTERNS[line.toUpperCase()];continue;}
-    if(SKIP_RX.test(line))continue;
-    if(vac&&isBareDate(line)){(vac.__db=vac.__db||[]).push(line.trim());continue;}
-    var mt=__multiTown(line);
-    if(mt){__flush(vac);var info=__rateFromLine(line);var dd=__dates(line);var made=null;
-      mt.forEach(function(f){var v=reg(__newVac(f.town,f.state||currentState||detectState(__FULLRAW)));__applyRate(v,info);if(dd&&!v.dates_raw)v.dates_raw=dd;var oc=__oncall(line);if(oc)v.on_call=oc;blockText[(v.location+'|'+v.state).toLowerCase()]+=' '+line;made=v;});
-      vac=made;continue;}
-    var th=__townHeader(line);
-    if(th){__flush(vac);vac=reg(__newVac(th.town,th.state||currentState||__stFallback(line,currentState)));
-      if(th.rest&&/\b(gp|vmo|ed|locum|smo|registrar|generalist|anaesth)\b/i.test(th.rest)&&!/^\d/.test(th.rest)){var rr=th.rest.replace(/\$[\s\S]*$/,'').replace(/\s*[-–]\s*(SA|VIC|QLD|NSW|WA|TAS|NT|ACT)\b.*$/i,'').trim();if(rr&&rr.length<40)vac.title=th.town+' – '+rr;}
-      attach(vac,line);continue;}
-    if(vac)attach(vac,line);
-  }
-  __flush(vac);for(var k in seen){__flush(seen[k]);}
-  var gInfo=null;for(var i=0;i<rawLines.length;i++){var gi=__rateFromLine(rawLines[i]);if(gi){gInfo=gi;break;}}
-  for(var k in seen){var v=seen[k];var bt=blockText[k]||v.location;if(!v.rate&&gInfo)__applyRate(v,gInfo);v.role_type=detectRoleTypeFromText(bt+' '+raw.slice(0,300));v.inclusions_raw=extractInclusions(bt+' '+raw);if(!v.state)v.state=detectState(__FULLRAW)||'';var goc=__oncall(bt);if(goc&&(!v.on_call||v.on_call==='TBC'))v.on_call=goc;delete v.__db;}
-  if(importedVacancies.length===0){try{smartExtract(raw,rawLines.map(function(l){return l.trim();}).filter(function(l){return l.length>0;}));}catch(e){}
-    importedVacancies.forEach(function(v){if(!v.rate&&gInfo)__applyRate(v,gInfo);if(!v.state)v.state=detectState(__FULLRAW)||'';v.on_call=v.on_call||__oncall(raw)||'TBC';});}
-  try{applyZoneRates(raw);}catch(e){}
-  importedVacancies=importedVacancies.filter(function(v){return isValidLocation(v.location||v.title);});
-  renderImportResults();
-}
-
-/* === Tracker table tab: paste TSV tracker rows; column-mapped; rates as-is; UCC support === */
-
-function __navTab(){
-  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
-  var view=document.getElementById('view-tabimport');if(view){view.classList.add('active');view.style.display='';}
-  document.querySelectorAll('.sb-item').forEach(function(s){s.classList.remove('active');});
-  var sb=document.getElementById('sb-tabimport');if(sb)sb.classList.add('active');
-  var h=document.querySelector('.tb h2,.tb .tt,.tb h1,header h2,.topbar h2');if(h)h.textContent='Paste tracker table';
-}
-function parseTrackerTable(){
-  var raw=(document.getElementById('tbl-paste').value||'').replace(/\r/g,'').trim();
-  if(!raw){notify('Paste the tracker table first');return;}
-  var lines=raw.split('\n').filter(function(l){return l.trim().length;});
-  var hi=-1;for(var i=0;i<lines.length;i++){if(/\blocation\b/i.test(lines[i])&&/\brate\b/i.test(lines[i])){hi=i;break;}}
-  if(hi<0){notify('Could not find a header row (needs Location and Rate columns)');return;}
-  var headers=lines[hi].split('\t').map(function(h){return h.trim().toLowerCase();});
-  function col(row,name){var idx=headers.indexOf(name);return idx>=0?(row[idx]||'').trim():'';}
-  importedVacancies.length=0;
-  for(var i=hi+1;i<lines.length;i++){
-    var row=lines[i].split('\t');if(row.length<3)continue;
-    var loc=col(row,'location');if(!loc)continue;
-    var rateRaw=col(row,'rate');
-    var rn=(rateRaw.match(/\$?\s*([\d,]+(?:\.\d+)?)/)||['',''])[1].replace(/,/g,'');
-    if(/tbc/i.test(rateRaw)&&!rn)rn='';
-    var vt=col(row,'vacancy type');
-    var role=/ucc/i.test(vt)?'UCC':(/ed\s*vmo/i.test(vt)?'ED VMO':(/\bvmo\b/i.test(vt)?'GP VMO':'GP Only'));
-    var notes=col(row,'notes');
-    var extra=[];['hours','software','min block','billing','solo gp','end date','mm'].forEach(function(c){var val=col(row,c);if(val&&!/^(n\/a|no|tbc)$/i.test(val))extra.push(c.replace(/\b\w/g,function(m){return m.toUpperCase();})+': '+val);});
-    var fullNotes=[notes].concat(extra).filter(Boolean).join(' | ');
-    var oc=__oncall(notes)||'TBC';
-    importedVacancies.push({id:'mp'+Math.random().toString(36).slice(2,12),title:loc,client:col(row,'client'),location:loc,state:col(row,'state').toUpperCase(),role_type:role,rate:rn,rate_raw:rateRaw,dates_raw:col(row,'date range'),inclusions_raw:col(row,'inclusions'),notes:fullNotes,on_call:oc,ams:/yes/i.test(col(row,'ams')),featured:/yes/i.test(col(row,'featured')),status:'Open',urgency:'normal',created_at:new Date().toISOString(),_existing:null});
-  }
-  var imp=document.querySelector('.sb-item[data-view="import"]');
-  if(imp&&typeof nav==='function'){try{nav(imp,'import');}catch(e){}}
-  renderImportResults();
-  notify(importedVacancies.length+' vacancies loaded — review & Save all');
-}
-(function(){
-  if(document.getElementById('sb-tabimport'))return;
-  var impSb=document.querySelector('.sb-item[data-view="import"]');
-  if(impSb){var nb=document.createElement('div');nb.className='sb-item';nb.id='sb-tabimport';nb.setAttribute('data-view','tabimport');nb.setAttribute('onclick','__navTab()');nb.innerHTML='<span class="ico">📋</span> Paste tracker table';impSb.parentNode.insertBefore(nb,impSb.nextSibling);}
-  var impView=document.getElementById('view-import');
-  if(impView){var v=document.createElement('div');v.id='view-tabimport';v.className='view';
-    v.innerHTML='<div style="background:#fff;border:1px solid var(--g200);border-radius:10px;padding:16px;max-width:980px;">'
-    +'<h3 style="margin:0 0 6px;">Paste tracker table</h3>'
-    +'<p style="font-size:12px;color:var(--g500);margin:0 0 10px;">Paste rows copied from your vacancy tracker (tab-separated, including the header row with Location, Rate, etc.). Each row becomes a vacancy. Rates are taken exactly as written.</p>'
-    +'<textarea id="tbl-paste" style="width:100%;height:300px;padding:10px;border:1px solid var(--g300);border-radius:8px;font-size:12px;font-family:monospace;resize:vertical;" placeholder="Status&#9;Featured&#9;Broadcast&#9;State&#9;Location&#9;Client&#9;...&#10;Active&#9;Yes&#9;&#9;NSW&#9;Broken Hill&#9;Maari Ma&#9;..."></textarea>'
-    +'<div style="margin-top:10px;display:flex;gap:8px;"><button class="btn btn-pri" onclick="parseTrackerTable()">Load table</button><button class="btn btn-sec" onclick="document.getElementById(\'tbl-paste\').value=\'\'">Clear</button></div>'
-    +'<p style="font-size:11px;color:var(--g400);margin-top:8px;">After loading, you\'ll jump to the Import vacancies preview to review and Save all.</p></div>';
-    impView.parentNode.appendChild(v);}
-})();
-
-</script>
-
-
-
-
-<script>
-/* === Add candidate feature v10: ALL candidates editable/deletable (samples migrated to storage once); add/edit/delete; availability date pickers; billing preference; matching prefs; async-safe unified render === */
-
-function __cesc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
-function __loadStoredCands(){var s=[];try{s=JSON.parse(localStorage.getItem('mp_locum_candidates')||'[]');}catch(e){}s.forEach(function(c){if(typeof c.dpa_areas==='string')c.dpa_areas=c.dpa_areas?c.dpa_areas.split(/[,;]/).map(function(x){return x.trim();}).filter(Boolean):[];if(c.dpa_areas==null)c.dpa_areas=[];});return s;}
-function __candPrefs(){try{return JSON.parse(localStorage.getItem('mp_locum_cand_prefs')||'{}');}catch(e){return {};}}
-function __fmtAvail(v){if(!v)return '';var d=new Date(v);if(!isNaN(d.getTime())&&/\d{4}-\d{2}-\d{2}/.test(v))return d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});return v;}
-window.__syncing=false;
-function __row(c){var P=__candPrefs();var rate=c.daily_rate_min?('$'+c.daily_rate_min+(c.daily_rate_max&&c.daily_rate_max!=c.daily_rate_min?'–$'+c.daily_rate_max:'')+'/day'):(c.hourly_rate_min?('$'+c.hourly_rate_min+'/hr'):'—');var av=c.available_from?(__fmtAvail(c.available_from)+(c.available_to?(' – '+__fmtAvail(c.available_to)):'')):'Not set';var dpa=Array.isArray(c.dpa_areas)?c.dpa_areas.join(', '):(c.dpa_areas||'');var ps=P[c.id]?'✓':'Needed';var tr=document.createElement('tr');tr.setAttribute('data-cid',c.id);tr.innerHTML='<td style="font-weight:600;">'+__cesc(c.name)+'</td><td>'+__cesc(c.current_location||'—')+'</td><td>'+rate+'</td><td>'+av+'</td><td>'+__cesc(dpa||'—')+'</td><td>'+ps+'</td><td>—</td><td style="text-align:right;white-space:nowrap;"><button class="btn btn-sec btn-xs" onclick="openCandProfile(\''+c.id+'\')">Prefs →</button> <button class="btn btn-sec btn-xs" onclick="openAddCandidate(\''+c.id+'\')">Edit</button> <button class="btn btn-xs" style="background:var(--red-l,#fef2f2);color:var(--red,#dc2626);border:1px solid #fecaca;" onclick="__deleteCand(\''+c.id+'\')">✕</button></td>';return tr;}
-function __migrate(){if(localStorage.getItem('__cands_migrated'))return;if(typeof candidates==='undefined'||!candidates.length)return;var stored=__loadStoredCands();candidates.forEach(function(c){if(c&&c.id&&!stored.some(function(x){return x.id===c.id;}))stored.push(c);});localStorage.setItem('mp_locum_candidates',JSON.stringify(stored));localStorage.setItem('__cands_migrated','1');}
-function __renderAll(){if(window.__syncing)return;var tbody=document.querySelector('#cand-table-wrap tbody');if(!tbody)return;__migrate();var stored=__loadStoredCands();var rows=tbody.querySelectorAll('tr');var allMine=rows.length===stored.length&&Array.prototype.every.call(rows,function(r){return r.hasAttribute('data-cid');});if(allMine)return;window.__syncing=true;tbody.innerHTML='';if(typeof candidates!=='undefined')candidates.length=0;var P=__candPrefs();stored.forEach(function(c){if(typeof candidates!=='undefined')candidates.push(c);if(typeof candPrefs!=='undefined'&&candPrefs&&P[c.id]&&!candPrefs[c.id])candPrefs[c.id]=P[c.id];tbody.appendChild(__row(c));});window.__syncing=false;}
-(function(){if(!window.__origLoadCandidates)window.__origLoadCandidates=window.loadCandidates;window.loadCandidates=function(){try{window.__origLoadCandidates();}catch(e){}setTimeout(__renderAll,0);setTimeout(__renderAll,250);setTimeout(__renderAll,800);};var wrap=document.getElementById('cand-table-wrap');if(wrap&&!wrap.__obs){var mo=new MutationObserver(function(){__renderAll();});mo.observe(wrap,{childList:true,subtree:true});wrap.__obs=mo;}})();
-function __deleteCand(id){var stored=__loadStoredCands();var c=stored.find(function(x){return x.id===id;});if(!c)return;if(!confirm('Delete candidate "'+c.name+'"? This cannot be undone.'))return;stored=stored.filter(function(x){return x.id!==id;});localStorage.setItem('mp_locum_candidates',JSON.stringify(stored));var P=__candPrefs();delete P[id];localStorage.setItem('mp_locum_cand_prefs',JSON.stringify(P));if(typeof candPrefs!=='undefined'&&candPrefs)delete candPrefs[id];if(typeof candidates!=='undefined'){var i=candidates.findIndex(function(x){return x.id===id;});if(i>=0)candidates.splice(i,1);}var tr=document.querySelector('tr[data-cid="'+id+'"]');if(tr)tr.remove();notify('Candidate deleted: '+c.name);}
-function openAddCandidate(id){var m=document.getElementById('addcand-modal');if(!m)return;function s(f,v){var e=document.getElementById(f);if(e)e.value=v==null?'':v;}function toISO(v){if(!v)return '';var d=new Date(v);return (!isNaN(d.getTime()))?d.toISOString().slice(0,10):'';}var title=document.getElementById('ac-modal-title');Array.prototype.forEach.call(m.querySelectorAll('input,textarea'),function(e){if(e.type==='checkbox')e.checked=false;else e.value='';});Array.prototype.forEach.call(m.querySelectorAll('select'),function(x){x.selectedIndex=0;});if(id){var c=(__loadStoredCands().find(function(x){return x.id===id;}))||(typeof candidates!=='undefined'&&candidates.find(function(x){return x.id===id;}));if(c){s('ac-editid',id);if(title)title.textContent='Edit candidate';s('ac-name',c.name);s('ac-email',c.email);s('ac-phone',c.phone);s('ac-type',c.type||c.specialty);s('ac-loc',c.current_location);s('ac-state',c.state);s('ac-dpa',Array.isArray(c.dpa_areas)?c.dpa_areas.join(', '):c.dpa_areas);s('ac-dmin',c.daily_rate_min);s('ac-dmax',c.daily_rate_max);s('ac-hmin',c.hourly_rate_min);s('ac-hmax',c.hourly_rate_max);s('ac-from',toISO(c.available_from));s('ac-to',toISO(c.available_to));s('ac-reg',c.registration_status);s('ac-visa',c.visa_type);s('ac-mm',c.mm_level);s('ac-relocate',c.willing_to_relocate);s('ac-notes',c.notes);var P=__candPrefs()[id]||{};s('ac-role',P.role_types||'both');s('ac-block',P.block_pref||'any');s('ac-rural',P.rural_ok||'');s('ac-fifo',P.fifo||'');s('ac-billing',c.billing_pref||P.billing_pref||'any');(P.preferred_states||[]).forEach(function(stt){var cb=m.querySelector('input.acp[data-state="'+stt+'"]');if(cb)cb.checked=true;});(P.avoided_states||[]).forEach(function(stt){var cb=m.querySelector('input.aca[data-state="'+stt+'"]');if(cb)cb.checked=true;});}}else{s('ac-editid','');if(title)title.textContent='Add candidate';}m.style.display='flex';}
-function closeAddCand(){var m=document.getElementById('addcand-modal');if(m)m.style.display='none';}
-function saveNewCandidate(){function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}var name=g('ac-name');if(!name){notify('Enter a candidate name');return;}var editid=g('ac-editid');var now=new Date().toISOString();var id=editid||('cand'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));var stored=__loadStoredCands();var existing=stored.find(function(x){return x.id===id;});var c=existing||{id:id,created_at:now};c.name=name;c.email=g('ac-email');c.phone=g('ac-phone');c.type=g('ac-type');c.specialty=g('ac-type');c.current_location=g('ac-loc');c.state=g('ac-state');c.country='Australia';c.dpa_areas=g('ac-dpa')?g('ac-dpa').split(/[,;]/).map(function(x){return x.trim();}).filter(Boolean):[];c.mm_level=g('ac-mm');c.willing_to_relocate=g('ac-relocate');c.visa_type=g('ac-visa');c.registration_status=g('ac-reg');c.available_from=g('ac-from');c.available_to=g('ac-to');c.daily_rate_min=g('ac-dmin');c.daily_rate_max=g('ac-dmax');c.hourly_rate_min=g('ac-hmin');c.hourly_rate_max=g('ac-hmax');c.billing_pref=g('ac-billing');c.status=c.status||'Active';c.source=c.source||'Manual';c.notes=g('ac-notes');c.updated_at=now;c.pipeline_stage=c.pipeline_stage||'New';var pref=function(sel){return Array.prototype.map.call(document.querySelectorAll('#addcand-modal '+sel+':checked'),function(x){return x.getAttribute('data-state');});};var prefs={role_types:g('ac-role')||'both',block_pref:g('ac-block')||'any',rural_ok:g('ac-rural'),fifo:g('ac-fifo'),billing_pref:g('ac-billing')||'any',last_contact:(__candPrefs()[id]||{}).last_contact||'',preferred_states:pref('input.acp'),avoided_states:pref('input.aca')};if(!existing)stored.push(c);localStorage.setItem('mp_locum_candidates',JSON.stringify(stored));var P=__candPrefs();P[id]=prefs;localStorage.setItem('mp_locum_cand_prefs',JSON.stringify(P));if(typeof candPrefs!=='undefined'&&candPrefs)candPrefs[id]=prefs;if(typeof candidates!=='undefined'){var ix=candidates.findIndex(function(x){return x.id===id;});if(ix>=0)candidates[ix]=c;else candidates.push(c);}closeAddCand();document.querySelectorAll('#cand-table-wrap tbody tr').forEach(function(tr){tr.remove();});__renderAll();notify((editid?'Candidate updated: ':'Candidate added: ')+name);}
-(function(){var cv=document.getElementById('view-candidates');if(!cv)return;var ch=cv.querySelector('.ch');if(ch&&!document.getElementById('add-cand-btn')){var b=document.createElement('button');b.id='add-cand-btn';b.className='btn btn-pri btn-sm';b.style.marginLeft='8px';b.textContent='+ Add candidate';b.setAttribute('onclick','openAddCandidate()');ch.appendChild(b);}if(!document.getElementById('addcand-modal')){var st='width:100%;padding:8px;border:1px solid var(--g300);border-radius:6px;font-size:13px;font-family:inherit;box-sizing:border-box;';var lab='display:block;font-size:11px;color:var(--g600,#666);margin:8px 0 3px;font-weight:600;';function f(l,id,ph,ty){return '<label style="'+lab+'">'+l+'</label><input id="'+id+'" type="'+(ty||'text')+'" placeholder="'+(ph||'')+'" style="'+st+'">';}function sel(l,id,opts){return '<label style="'+lab+'">'+l+'</label><select id="'+id+'" style="'+st+'">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join('')+'</select>';}var STATES=['NSW','VIC','QLD','WA','SA','TAS','NT','ACT'];function cbs(cls){return '<div style="display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:4px;">'+STATES.map(function(s){return '<label style="font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:3px;"><input type="checkbox" class="'+cls+'" data-state="'+s+'"> '+s+'</label>';}).join('')+'</div>';}var stateSel='<label style="'+lab+'">State</label><select id="ac-state" style="'+st+'"><option value=""></option>'+STATES.map(function(s){return '<option>'+s+'</option>';}).join('')+'</select>';var d=document.createElement('div');d.id='addcand-modal';d.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 12px;';d.innerHTML='<div style="background:#fff;border-radius:12px;max-width:660px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.2);"><input type="hidden" id="ac-editid"><div style="display:flex;align-items:center;margin-bottom:6px;"><h3 id="ac-modal-title" style="margin:0;flex:1;">Add candidate</h3><button class="btn btn-sec btn-xs" onclick="closeAddCand()">✕</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;"><div style="grid-column:1/3;">'+f('Name *','ac-name','Dr Jane Smith')+'</div>'+f('Email','ac-email','')+f('Phone','ac-phone','')+f('Type / specialty','ac-type','GP, GP/ED…')+f('Current location','ac-loc','Town/suburb')+stateSel+f('DPA / eligible areas','ac-dpa','e.g. DPA, MM3+')+f('Daily rate min ($)','ac-dmin','1600')+f('Daily rate max ($)','ac-dmax','2000')+f('Hourly rate min ($)','ac-hmin','')+f('Hourly rate max ($)','ac-hmax','')+f('Available from','ac-from','','date')+f('Available to','ac-to','','date')+f('Registration status','ac-reg','e.g. FRACGP')+f('Visa type','ac-visa','e.g. Citizen, 482')+f('MM level','ac-mm','e.g. MM3')+f('Willing to relocate','ac-relocate','Yes/No')+'</div><div style="margin-top:14px;border-top:1px solid var(--g200,#eee);padding-top:6px;"><div style="font-size:12px;font-weight:700;color:var(--pri,#2563eb);text-transform:uppercase;letter-spacing:.04em;">Matching preferences</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">'+sel('Role type','ac-role',[['both','Both / any'],['GP Only','GP Only'],['GP VMO','GP VMO'],['ED VMO','ED VMO'],['UCC','UCC'],['Interventional Radiologist','Interventional Radiologist'],['General Radiologist','General Radiologist']])+sel('Billing preference','ac-billing',[['any','Any'],['bulk','Bulk billing'],['mixed','Mixed billing'],['private','Private billing']])+sel('Block length preference','ac-block',[['any','Any'],['short','Short (1–2 weeks)'],['long','Long (3+ weeks)']])+sel('Rural / remote OK?','ac-rural',[['','—'],['true','Yes'],['false','No — metro/regional only']])+sel('FIFO willing?','ac-fifo',[['','—'],['true','Yes'],['false','No']])+'</div><label style="'+lab+'">Preferred states (tick all that apply)</label>'+cbs('acp')+'<label style="'+lab+'">Avoided states (will reduce match score)</label>'+cbs('aca')+'</div><div style="grid-column:1/3;"><label style="'+lab+'">Notes</label><textarea id="ac-notes" style="'+st+'height:55px;resize:vertical;"></textarea></div><div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-sec" onclick="closeAddCand()">Cancel</button><button class="btn btn-pri" onclick="saveNewCandidate()">Save candidate</button></div></div>';document.body.appendChild(d);}})();
-
-</script>
-
-
-<script>
-/* === Broadcast select-all/clear-all + count === */
-
-(function(){
- function init(){
-  var bv=document.getElementById('view-broadcast');if(!bv)return;
-  var hdr=null;Array.prototype.forEach.call(bv.querySelectorAll('h3'),function(h){if(/select vacancies/i.test(h.textContent))hdr=h;});
-  if(!hdr)return;var ch=hdr.closest('.ch')||hdr.parentElement;var card=ch.parentElement;
-  if(!document.getElementById('bc-selall')){
-   var sp=document.createElement('span');sp.style.cssText='margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;';
-   sp.innerHTML='<span id="bc-count" style="color:var(--g500,#6b7280);"></span> <button id="bc-selall" class="btn btn-sec btn-xs" type="button">Select all</button> <button id="bc-clrall" class="btn btn-sec btn-xs" type="button">Clear all</button>';
-   ch.appendChild(sp);
-   var cbs=function(){return Array.prototype.slice.call(card.querySelectorAll('input[type=checkbox]'));};
-   var count=function(){var a=cbs();var n=a.filter(function(x){return x.checked;}).length;var el=document.getElementById('bc-count');if(el)el.textContent=n+' of '+a.length+' selected';};
-   var setAll=function(v){cbs().forEach(function(x){x.checked=v;});if(typeof renderBroadcastPreview==='function'){try{renderBroadcastPreview();}catch(e){}}count();};
-   document.getElementById('bc-selall').onclick=function(){setAll(true);};
-   document.getElementById('bc-clrall').onclick=function(){setAll(false);};
-   card.addEventListener('change',function(e){if(e.target&&e.target.type==='checkbox')count();});
-   bv.__bcCount=count;
-  }
-  if(bv.__bcCount)bv.__bcCount();
- }
- if(document.getElementById('view-broadcast'))init();
- document.addEventListener('click',function(e){var t=e.target&&e.target.closest&&e.target.closest('.sb-item[data-view="broadcast"]');if(t)setTimeout(init,150);});
-})();
-
-/* === Broadcast extra-message box === */
-
-(function(){
- function injectExtra(){var pv=document.getElementById('bc-preview');var ta=document.getElementById('bc-extra');if(!pv||!ta)return;var txt=(ta.value||'').trim();var prev=pv.querySelector('#__bc_extra_block');if(prev)prev.remove();if(!txt)return;var block=document.createElement('div');block.id='__bc_extra_block';block.style.cssText='background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;margin:0 0 16px;font-size:14px;line-height:1.5;color:#92400e;white-space:pre-wrap;';block.textContent=txt;var anchor=null;Array.prototype.forEach.call(pv.children,function(el){if(!anchor&&/opportunities available|please see the current|locum opportunities/i.test(el.textContent||''))anchor=el;});if(anchor&&anchor.nextSibling)pv.insertBefore(block,anchor.nextSibling);else if(anchor)pv.appendChild(block);else pv.insertBefore(block,pv.firstChild);}
- if(typeof renderBroadcastPreview==='function'&&!window.__origRBP){window.__origRBP=renderBroadcastPreview;window.renderBroadcastPreview=function(){var r;try{r=window.__origRBP.apply(this,arguments);}catch(e){}injectExtra();return r;};}
- window.copyBroadcastHTML=function(){var pv=document.getElementById('bc-preview');if(!pv)return;try{renderBroadcastPreview();}catch(e){}navigator.clipboard.writeText(pv.innerHTML).then(function(){if(typeof notify==='function')notify('Broadcast HTML copied (incl. extra message)');}).catch(function(){});};
- window.copyBroadcastPlain=function(){var pv=document.getElementById('bc-preview');if(!pv)return;try{renderBroadcastPreview();}catch(e){}navigator.clipboard.writeText(pv.innerText).then(function(){if(typeof notify==='function')notify('Broadcast text copied (incl. extra message)');}).catch(function(){});};
- function addCard(){var bv=document.getElementById('view-broadcast');if(!bv)return;if(document.getElementById('bc-extra'))return;var hdr=null;Array.prototype.forEach.call(bv.querySelectorAll('h3'),function(h){if(/select vacancies/i.test(h.textContent))hdr=h;});if(!hdr)return;var selCard=hdr.closest('.card');if(!selCard)return;var leftCol=selCard.parentElement;var card=document.createElement('div');card.className='card';card.style.cssText='margin-top:14px;padding:14px;';card.innerHTML='<div style="font-size:14px;font-weight:600;margin-bottom:4px;">Extra message (optional)</div><div style="font-size:12px;color:var(--g500,#6b7280);margin-bottom:8px;">Shown near the top of the broadcast and included when you Copy.</div><textarea id="bc-extra" placeholder="e.g. Resending with updated rates — please reply ASAP if interested." style="width:100%;height:90px;padding:8px;border:1px solid var(--g300,#d1d5db);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>';leftCol.insertBefore(card,selCard.nextSibling);document.getElementById('bc-extra').addEventListener('input',function(){if(typeof renderBroadcastPreview==='function')renderBroadcastPreview();});}
- if(document.getElementById('view-broadcast'))addCard();
- document.addEventListener('click',function(e){var t=e.target&&e.target.closest&&e.target.closest('.sb-item[data-view="broadcast"]');if(t)setTimeout(addCard,150);});
-})();
-
 </script>
 </body>
 </html>
