@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MediPeople — Locum Placement Tracker</title>
+<title>MediPeople — Locum Tracker</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
 
@@ -25,15 +25,11 @@
   --blue-light: #e8f0fc;
   --red: #c0392b;
   --red-light: #fdecea;
-  --teal: #0d7a73;
-  --teal-light: #e3f5f4;
-  --purple: #7b4ea0;
-  --purple-light: #f0e8fc;
   --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
   --radius: 10px;
   --radius-sm: 6px;
-  --panel-width: 420px;
+  --panel-width: 440px;
   --font: 'DM Sans', sans-serif;
   --mono: 'DM Mono', monospace;
 }
@@ -78,7 +74,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .main { display: flex; flex: 1; overflow: hidden; }
 
 .sidebar {
-  width: 200px; flex-shrink: 0; background: var(--surface);
+  width: 210px; flex-shrink: 0; background: var(--surface);
   border-right: 1px solid var(--border); padding: 20px 16px;
   display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
 }
@@ -86,8 +82,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .metric-card { padding: 12px; background: var(--surface2); border-radius: var(--radius-sm); }
 .metric-val { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; color: var(--text); }
 .metric-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.metric-card.accent { background: var(--accent-light); }
-.metric-card.accent .metric-val { color: var(--accent); }
+.metric-card.green { background: var(--accent-light); }
+.metric-card.green .metric-val { color: var(--accent); }
 .metric-card.amber { background: var(--amber-light); }
 .metric-card.amber .metric-val { color: var(--amber); }
 .metric-card.blue { background: var(--blue-light); }
@@ -95,21 +91,25 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 
 .sidebar-filters { display: flex; flex-direction: column; gap: 8px; }
 .filter-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
-.filter-select, .filter-input {
+.filter-select {
   width: 100%; padding: 6px 8px; font-size: 12px; font-family: var(--font);
   border: 1px solid var(--border); border-radius: var(--radius-sm);
   background: var(--surface); color: var(--text); outline: none;
 }
-.filter-select:focus, .filter-input:focus { border-color: var(--accent); }
+.filter-select:focus { border-color: var(--accent); }
 
-.reminders-list { display: flex; flex-direction: column; gap: 6px; }
-.reminder-item {
+.followup-list { display: flex; flex-direction: column; gap: 6px; }
+.followup-item {
   padding: 8px 10px; border-radius: var(--radius-sm);
-  background: var(--amber-light); border-left: 3px solid var(--amber);
-  font-size: 11px; color: var(--amber); cursor: pointer;
+  border-left: 3px solid; font-size: 11px; cursor: pointer;
 }
-.reminder-item:hover { background: #fde8c4; }
-.reminder-name { font-weight: 600; }
+.followup-item:hover { filter: brightness(0.96); }
+.followup-overdue { background: var(--red-light); border-color: var(--red); color: var(--red); }
+.followup-today { background: var(--amber-light); border-color: var(--amber); color: var(--amber); }
+.followup-soon { background: var(--surface2); border-color: var(--border2); color: var(--text2); }
+.followup-name { font-weight: 600; }
+.followup-date { font-size: 10px; margin-top: 1px; opacity: 0.8; }
+.followup-status { font-size: 10px; opacity: 0.7; }
 
 .content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
@@ -148,32 +148,36 @@ tr:hover td { background: #fafaf7; cursor: pointer; }
 tr.selected td { background: var(--accent-light); }
 .td-doctor { font-weight: 500; }
 .td-rate { font-family: var(--mono); font-size: 12px; }
-.td-comm { font-family: var(--mono); font-size: 12px; color: var(--accent); }
-.td-notes { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text2); font-size: 12px; }
+.td-comm { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 600; }
+.td-notes { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text2); font-size: 12px; }
+.td-followup { font-size: 12px; white-space: nowrap; }
+.td-followup.overdue { color: var(--red); font-weight: 600; }
+.td-followup.today { color: var(--amber); font-weight: 600; }
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 12px; color: var(--text3); padding: 60px; }
 .empty-state svg { width: 40px; height: 40px; opacity: 0.3; }
 .empty-state p { font-size: 14px; }
 
+/* Status badges — clickable in table */
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 8px; border-radius: 100px; font-size: 11px; font-weight: 500;
+  padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+  user-select: none;
 }
-.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
-.badge-available { background: var(--accent-light); color: var(--accent); }
+.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.badge-available { background: var(--accent-light); color: var(--accent); border-color: rgba(26,107,74,0.2); }
 .badge-available::before { background: var(--accent); }
-.badge-pending { background: var(--amber-light); color: var(--amber); }
+.badge-available:hover { background: #d4eddf; }
+.badge-pending { background: var(--amber-light); color: var(--amber); border-color: rgba(184,92,0,0.2); }
 .badge-pending::before { background: var(--amber); }
-.badge-interested { background: var(--amber-light); color: var(--amber); }
-.badge-interested::before { background: var(--amber); }
-.badge-awaiting-dates { background: var(--teal-light); color: var(--teal); }
-.badge-awaiting-dates::before { background: var(--teal); }
-.badge-in-registration { background: var(--purple-light); color: var(--purple); }
-.badge-in-registration::before { background: var(--purple); }
-.badge-placed { background: var(--blue-light); color: var(--blue); }
+.badge-pending:hover { background: #fde8c4; }
+.badge-placed { background: var(--blue-light); color: var(--blue); border-color: rgba(26,75,140,0.2); }
 .badge-placed::before { background: var(--blue); }
+.badge-placed:hover { background: #d4e3f8; }
 
+/* Kanban */
 .kanban-board { display: flex; gap: 16px; padding: 20px; flex: 1; overflow-x: auto; overflow-y: hidden; }
-.kanban-col { display: flex; flex-direction: column; min-width: 220px; max-width: 260px; flex: 1; }
+.kanban-col { display: flex; flex-direction: column; min-width: 240px; max-width: 300px; flex: 1; }
 .kanban-col-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px; border-radius: var(--radius) var(--radius) 0 0;
@@ -186,12 +190,6 @@ tr.selected td { background: var(--accent-light); }
 .kcol-available .kanban-col-header .count { background: var(--accent); color: #fff; }
 .kcol-pending .kanban-col-header { background: var(--amber-light); color: var(--amber); }
 .kcol-pending .kanban-col-header .count { background: var(--amber); color: #fff; }
-.kcol-interested .kanban-col-header { background: var(--amber-light); color: var(--amber); }
-.kcol-interested .kanban-col-header .count { background: var(--amber); color: #fff; }
-.kcol-awaiting-dates .kanban-col-header { background: var(--teal-light); color: var(--teal); }
-.kcol-awaiting-dates .kanban-col-header .count { background: var(--teal); color: #fff; }
-.kcol-in-registration .kanban-col-header { background: var(--purple-light); color: var(--purple); }
-.kcol-in-registration .kanban-col-header .count { background: var(--purple); color: #fff; }
 .kcol-placed .kanban-col-header { background: var(--blue-light); color: var(--blue); }
 .kcol-placed .kanban-col-header .count { background: var(--blue); color: #fff; }
 .kanban-cards { flex: 1; overflow-y: auto; padding: 8px; background: var(--surface2); border-radius: 0 0 var(--radius) var(--radius); display: flex; flex-direction: column; gap: 8px; }
@@ -202,16 +200,21 @@ tr.selected td { background: var(--accent-light); }
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .kanban-card:hover { border-color: var(--border2); box-shadow: var(--shadow); transform: translateY(-1px); }
+.kanban-card.overdue-card { border-left: 3px solid var(--red); }
+.kanban-card.today-card { border-left: 3px solid var(--amber); }
 .kcard-name { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
-.kcard-facility { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+.kcard-sub { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
 .kcard-meta { display: flex; flex-wrap: wrap; gap: 6px; }
 .kcard-pill {
   font-size: 11px; padding: 2px 7px; border-radius: 4px;
   background: var(--surface2); color: var(--text2); font-family: var(--mono);
 }
+.kcard-followup { font-size: 11px; color: var(--text3); margin-top: 6px; }
+.kcard-followup.overdue { color: var(--red); font-weight: 500; }
+.kcard-followup.today { color: var(--amber); font-weight: 500; }
 .kcard-note { font-size: 11px; color: var(--text3); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; line-height: 1.4; }
-.kcard-flag { color: var(--amber); }
 
+/* Charts */
 .charts-view { padding: 24px; flex: 1; overflow-y: auto; }
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .chart-card {
@@ -231,6 +234,7 @@ tr.selected td { background: var(--accent-light); }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .legend-val { font-family: var(--mono); font-weight: 500; margin-left: auto; padding-left: 16px; }
 
+/* Slide-out panel */
 .panel-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.2);
   z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s;
@@ -259,8 +263,9 @@ tr.selected td { background: var(--accent-light); }
 .panel-body { flex: 1; overflow-y: auto; padding: 20px; }
 .panel-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0; }
 
+/* Form */
 .form-section { margin-bottom: 20px; }
-.form-section-title { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+.form-section-title { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
 .form-label { font-size: 11px; font-weight: 500; color: var(--text2); }
@@ -270,29 +275,34 @@ tr.selected td { background: var(--accent-light); }
   background: var(--surface); color: var(--text); outline: none; width: 100%;
 }
 .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,107,74,0.1); }
-.form-textarea { resize: vertical; min-height: 70px; }
+.form-textarea { resize: vertical; min-height: 65px; }
+.form-hint { font-size: 11px; color: var(--text3); margin-top: 2px; }
 
-.status-toggle { display: flex; flex-wrap: wrap; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+/* Status toggle */
+.status-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 4px; }
 .status-opt {
-  flex: 1; min-width: 80px; padding: 7px; text-align: center; font-size: 12px; font-weight: 500;
+  flex: 1; padding: 8px 6px; text-align: center; font-size: 12px; font-weight: 500;
   cursor: pointer; border: none; background: transparent; font-family: var(--font);
-  color: var(--text2); transition: all 0.15s;
+  color: var(--text2); transition: all 0.15s; border-right: 1px solid var(--border);
 }
+.status-opt:last-child { border-right: none; }
 .status-opt.sel-available { background: var(--accent-light); color: var(--accent); }
 .status-opt.sel-pending { background: var(--amber-light); color: var(--amber); }
-.status-opt.sel-interested { background: var(--amber-light); color: var(--amber); }
-.status-opt.sel-awaiting-dates { background: var(--teal-light); color: var(--teal); }
-.status-opt.sel-in-registration { background: var(--purple-light); color: var(--purple); }
 .status-opt.sel-placed { background: var(--blue-light); color: var(--blue); }
 
-.flag-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--amber-light); border-radius: var(--radius-sm); border: 1px solid #fcd8a0; }
-.flag-checkbox { width: 15px; height: 15px; accent-color: var(--amber); }
-.flag-label { font-size: 12px; color: var(--amber); font-weight: 500; }
+.followup-date-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--amber-light); border-radius: var(--radius-sm);
+  border: 1px solid rgba(184,92,0,0.2); margin-bottom: 10px;
+}
+.followup-date-row label { font-size: 12px; font-weight: 500; color: var(--amber); flex-shrink: 0; }
+.followup-date-row .form-input { background: #fff; border-color: rgba(184,92,0,0.3); font-size: 12px; padding: 5px 8px; }
 
-.calc-result { background: var(--accent-light); border-radius: var(--radius-sm); padding: 12px; margin-top: 12px; text-align: center; }
+.calc-result { background: var(--accent-light); border-radius: var(--radius-sm); padding: 12px; margin-top: 4px; text-align: center; }
 .calc-amount { font-size: 22px; font-weight: 600; color: var(--accent); font-family: var(--mono); }
 .calc-desc { font-size: 11px; color: var(--accent); opacity: 0.7; margin-top: 2px; }
 
+/* Toast */
 .toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
   background: var(--text); color: #fff; padding: 10px 20px; border-radius: 100px;
@@ -301,7 +311,7 @@ tr.selected td { background: var(--accent-light); }
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* Modal */
+/* Confirm modal */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
   z-index: 300; display: flex; align-items: center; justify-content: center;
@@ -310,7 +320,7 @@ tr.selected td { background: var(--accent-light); }
 .modal-overlay.open { opacity: 1; pointer-events: all; }
 .modal {
   background: var(--surface); border-radius: var(--radius); padding: 28px;
-  width: 420px; max-width: 90vw; box-shadow: var(--shadow-lg);
+  width: 400px; max-width: 90vw; box-shadow: var(--shadow-lg);
 }
 .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
 .modal p { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
@@ -350,42 +360,32 @@ tr.selected td { background: var(--accent-light); }
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export CSV
       </button>
-      <button class="btn btn-ghost btn-sm" onclick="showMigrateModal()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Migrate from browser
-      </button>
       <button class="btn btn-primary btn-sm" onclick="openPanel(null)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add placement
+        Add locum
       </button>
     </div>
   </div>
 
   <div class="main">
+
     <!-- Sidebar -->
     <div class="sidebar">
+
       <div>
         <div class="sidebar-section-label">Overview</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div class="metric-card">
             <div class="metric-val" id="mv-total">0</div>
-            <div class="metric-label">Total candidates</div>
+            <div class="metric-label">Total locums</div>
           </div>
-          <div class="metric-card accent">
+          <div class="metric-card green">
             <div class="metric-val" id="mv-available">0</div>
             <div class="metric-label">Available</div>
           </div>
           <div class="metric-card amber">
-            <div class="metric-val" id="mv-interested">0</div>
-            <div class="metric-label">Interested</div>
-          </div>
-          <div class="metric-card" style="background:var(--teal-light);">
-            <div class="metric-val" id="mv-awaiting-dates" style="color:var(--teal)">0</div>
-            <div class="metric-label">Awaiting Dates</div>
-          </div>
-          <div class="metric-card" style="background:var(--purple-light);">
-            <div class="metric-val" id="mv-in-registration" style="color:var(--purple)">0</div>
-            <div class="metric-label">In Registration</div>
+            <div class="metric-val" id="mv-pending">0</div>
+            <div class="metric-label">Pending</div>
           </div>
           <div class="metric-card blue">
             <div class="metric-val" id="mv-placed">0</div>
@@ -395,23 +395,30 @@ tr.selected td { background: var(--accent-light); }
       </div>
 
       <div>
-        <div class="sidebar-section-label" id="sidebar-q-label">Commission</div>
+        <div class="sidebar-section-label">⏰ Follow-ups</div>
+        <div class="followup-list" id="followup-list">
+          <div style="font-size:11px;color:var(--text3)">Loading…</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sidebar-section-label" id="sidebar-comm-label">Commission — Q? ????</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="metric-card accent">
+          <div class="metric-card green">
             <div class="metric-val" id="mv-comm-m0">$0</div>
             <div class="metric-label" id="mv-comm-m0-label">Month 1</div>
           </div>
-          <div class="metric-card accent">
+          <div class="metric-card green">
             <div class="metric-val" id="mv-comm-m1">$0</div>
             <div class="metric-label" id="mv-comm-m1-label">Month 2</div>
           </div>
-          <div class="metric-card accent">
+          <div class="metric-card green">
             <div class="metric-val" id="mv-comm-m2">$0</div>
             <div class="metric-label" id="mv-comm-m2-label">Month 3</div>
           </div>
-          <div class="metric-card" style="border-top:2px solid var(--accent-light)">
+          <div class="metric-card" style="border-top:2px solid var(--accent-light);">
             <div class="metric-val" id="mv-comm-quarter" style="color:var(--accent)">$0</div>
-            <div class="metric-label" id="mv-comm-quarter-label">Quarter total</div>
+            <div class="metric-label" id="mv-comm-quarter-label">Q? total</div>
           </div>
           <div class="metric-card">
             <div class="metric-val" id="mv-comm-total" style="color:var(--accent)">$0</div>
@@ -428,9 +435,7 @@ tr.selected td { background: var(--accent-light); }
             <select class="filter-select" id="f-status" onchange="applyFilters()">
               <option value="">All</option>
               <option value="available">Available</option>
-              <option value="interested">Interested</option>
-              <option value="awaiting-dates">Awaiting Dates</option>
-              <option value="in-registration">In Registration</option>
+              <option value="pending">Pending</option>
               <option value="placed">Placed</option>
             </select>
           </div>
@@ -440,24 +445,12 @@ tr.selected td { background: var(--accent-light); }
               <option value="">All</option>
             </select>
           </div>
-          <div>
-            <div class="filter-label">Facility</div>
-            <select class="filter-select" id="f-facility" onchange="applyFilters()">
-              <option value="">All</option>
-            </select>
-          </div>
         </div>
       </div>
 
-      <div>
-        <div class="sidebar-section-label">⚑ Follow-ups</div>
-        <div class="reminders-list" id="reminders-list">
-          <div style="font-size:11px;color:var(--text3)">Loading…</div>
-        </div>
-      </div>
     </div>
 
-    <!-- Content -->
+    <!-- Content area -->
     <div class="content">
 
       <!-- Table view -->
@@ -465,7 +458,7 @@ tr.selected td { background: var(--accent-light); }
         <div class="table-toolbar">
           <div class="search-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input class="search-input" type="text" placeholder="Search placements…" id="search-input" oninput="applyFilters()">
+            <input class="search-input" type="text" placeholder="Search locums…" id="search-input" oninput="applyFilters()">
           </div>
           <div class="record-count" id="record-count"></div>
         </div>
@@ -474,23 +467,22 @@ tr.selected td { background: var(--accent-light); }
             <thead>
               <tr>
                 <th onclick="sortBy('doctor')">Doctor</th>
-                <th onclick="sortBy('facility')">Facility</th>
                 <th onclick="sortBy('specialty')">Specialty</th>
                 <th onclick="sortBy('status')">Status</th>
-                <th onclick="sortBy('dateAvailable')">Start date</th>
-                <th onclick="sortBy('datePlaced')">End date</th>
+                <th onclick="sortBy('facility')">Facility / Location</th>
+                <th onclick="sortBy('dateAvailable')">Dates</th>
                 <th onclick="sortBy('durationDays')">Duration</th>
                 <th onclick="sortBy('rate')">Rate</th>
                 <th onclick="sortBy('commissionPct')">Comm $</th>
+                <th onclick="sortBy('followUpDate')">Follow-up</th>
                 <th>Notes</th>
-                <th>Flag</th>
               </tr>
             </thead>
             <tbody id="table-body"></tbody>
           </table>
           <div class="empty-state" id="empty-state" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <p>No placements found</p>
+            <p>No locums found</p>
           </div>
         </div>
       </div>
@@ -502,17 +494,9 @@ tr.selected td { background: var(--accent-light); }
             <div class="kanban-col-header">Available <span class="count" id="k-count-available">0</span></div>
             <div class="kanban-cards" id="k-available"></div>
           </div>
-          <div class="kanban-col kcol-interested">
-            <div class="kanban-col-header">Interested <span class="count" id="k-count-interested">0</span></div>
-            <div class="kanban-cards" id="k-interested"></div>
-          </div>
-          <div class="kanban-col kcol-awaiting-dates">
-            <div class="kanban-col-header">Awaiting Dates <span class="count" id="k-count-awaiting-dates">0</span></div>
-            <div class="kanban-cards" id="k-awaiting-dates"></div>
-          </div>
-          <div class="kanban-col kcol-in-registration">
-            <div class="kanban-col-header">In Registration <span class="count" id="k-count-in-registration">0</span></div>
-            <div class="kanban-cards" id="k-in-registration"></div>
+          <div class="kanban-col kcol-pending">
+            <div class="kanban-col-header">Pending <span class="count" id="k-count-pending">0</span></div>
+            <div class="kanban-cards" id="k-pending"></div>
           </div>
           <div class="kanban-col kcol-placed">
             <div class="kanban-col-header">Placed <span class="count" id="k-count-placed">0</span></div>
@@ -526,22 +510,22 @@ tr.selected td { background: var(--accent-light); }
         <div class="charts-view">
           <div class="charts-grid">
             <div class="chart-card">
-              <div class="chart-title">Placements by specialty</div>
+              <div class="chart-title">Locums by specialty</div>
               <div class="bar-chart" id="chart-specialty"></div>
             </div>
             <div class="chart-card">
-              <div class="chart-title">Status breakdown</div>
+              <div class="chart-title">Pipeline breakdown</div>
               <div class="donut-wrap">
                 <canvas id="donut-canvas" width="120" height="120"></canvas>
                 <div class="donut-legend" id="donut-legend"></div>
               </div>
             </div>
             <div class="chart-card">
-              <div class="chart-title">Rate by placement</div>
+              <div class="chart-title">Rate by placed locum</div>
               <div class="bar-chart" id="chart-rate"></div>
             </div>
             <div class="chart-card" style="grid-column: span 2;">
-              <div class="chart-title" id="chart-comm-title">Commission tracker</div>
+              <div class="chart-title" id="chart-comm-title">Commission tracker — Placed only</div>
 
               <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;" id="chart-curr-q-label">Current quarter</div>
               <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;" id="chart-q-months">
@@ -587,49 +571,74 @@ tr.selected td { background: var(--accent-light); }
 <!-- Slide-out panel -->
 <div class="panel" id="panel">
   <div class="panel-header">
-    <div class="panel-title" id="panel-title">Add placement</div>
+    <div class="panel-title" id="panel-title">Add locum</div>
     <button class="panel-close" onclick="closePanel()">×</button>
   </div>
   <div class="panel-body">
 
+    <!-- Status selector — always visible, drives form sections -->
     <div class="form-section">
-      <div class="form-section-title">Doctor & role</div>
+      <div class="form-section-title">Status</div>
+      <div class="status-toggle" id="status-toggle">
+        <button class="status-opt" data-status="available" onclick="selectStatus('available')">Available</button>
+        <button class="status-opt" data-status="pending" onclick="selectStatus('pending')">Pending</button>
+        <button class="status-opt" data-status="placed" onclick="selectStatus('placed')">Placed</button>
+      </div>
+      <div class="form-hint" id="status-hint"></div>
+    </div>
+
+    <!-- Section: Doctor & specialty — always visible -->
+    <div class="form-section" id="fs-doctor">
+      <div class="form-section-title">Doctor</div>
       <div class="form-group">
         <label class="form-label">Doctor name *</label>
         <input class="form-input" id="f-doctor" type="text" placeholder="e.g. Dr Sarah Kim">
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Specialty</label>
-          <input class="form-input" id="f-specialty-in" type="text" placeholder="e.g. ED, GP, Radiology">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Facility</label>
-          <input class="form-input" id="f-facility-in" type="text" placeholder="e.g. Royal North Shore">
-        </div>
+      <div class="form-group">
+        <label class="form-label">Specialty</label>
+        <input class="form-input" id="f-specialty-in" type="text" placeholder="e.g. GP Only, GP VMO, GP UCC">
       </div>
     </div>
 
-    <div class="form-section">
-      <div class="form-section-title">Dates & duration</div>
+    <!-- Section: Available — shown only when status = Available -->
+    <div class="form-section" id="fs-available" style="display:none">
+      <div class="form-section-title">Availability</div>
+      <div class="form-group">
+        <label class="form-label">Available dates / months</label>
+        <input class="form-input" id="f-available-dates" type="text" placeholder="e.g. December 2026, Jan–Feb 2027">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location preference</label>
+        <input class="form-input" id="f-location-pref" type="text" placeholder="e.g. NSW, rural QLD, anywhere">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rate expectation ($/day)</label>
+        <input class="form-input" id="f-rate-avail" type="number" min="0" placeholder="e.g. 3000">
+      </div>
+    </div>
+
+    <!-- Section: Pending / Placed — facility & dates -->
+    <div class="form-section" id="fs-placement" style="display:none">
+      <div class="form-section-title" id="fs-placement-title">Placement details</div>
+      <div class="form-group">
+        <label class="form-label" id="f-facility-label">Facility *</label>
+        <input class="form-input" id="f-facility-in" type="text" placeholder="e.g. Ochre Health Lightning Ridge">
+      </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Date available</label>
+          <label class="form-label" id="f-start-label">Start date</label>
           <input class="form-input" id="f-dateAvailable" type="date">
         </div>
         <div class="form-group">
-          <label class="form-label">Date placed</label>
-          <input class="form-input" id="f-datePlaced" type="date">
+          <label class="form-label">Duration (days)</label>
+          <input class="form-input" id="f-durationDays" type="number" min="1" placeholder="e.g. 5" oninput="updateCalc()">
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Duration (days)</label>
-        <input class="form-input" id="f-durationDays" type="number" min="1" placeholder="e.g. 5" oninput="updateCalc()">
       </div>
     </div>
 
-    <div class="form-section">
-      <div class="form-section-title">Rate & commission</div>
+    <!-- Section: Rate & commission — shown for Pending and Placed -->
+    <div class="form-section" id="fs-rate" style="display:none">
+      <div class="form-section-title">Rate &amp; commission</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Rate ($)</label>
@@ -643,7 +652,8 @@ tr.selected td { background: var(--accent-light); }
           </select>
         </div>
       </div>
-      <div class="form-group">
+      <!-- Commission % — only shown for Placed -->
+      <div class="form-group" id="fg-commission" style="display:none">
         <label class="form-label">Commission %</label>
         <input class="form-input" id="f-commissionPct" type="number" min="0" max="100" step="0.5" placeholder="e.g. 15" oninput="updateCalc()">
       </div>
@@ -653,45 +663,40 @@ tr.selected td { background: var(--accent-light); }
       </div>
     </div>
 
-    <div class="form-section">
-      <div class="form-section-title">Status</div>
-      <div class="status-toggle" id="status-toggle">
-        <button class="status-opt" data-status="available" onclick="selectStatus('available')">Available</button>
-        <button class="status-opt" data-status="interested" onclick="selectStatus('interested')">Interested</button>
-        <button class="status-opt" data-status="awaiting-dates" onclick="selectStatus('awaiting-dates')">Awaiting Dates</button>
-        <button class="status-opt" data-status="in-registration" onclick="selectStatus('in-registration')">In Registration</button>
-        <button class="status-opt" data-status="placed" onclick="selectStatus('placed')">Placed</button>
+    <!-- Section: Follow-up date — shown for Available and Pending -->
+    <div class="form-section" id="fs-followup" style="display:none">
+      <div class="form-section-title">Follow-up</div>
+      <div class="followup-date-row">
+        <label>⏰ Follow-up date</label>
+        <input class="form-input" id="f-followUpDate" type="date">
       </div>
+      <div class="form-hint" id="followup-hint"></div>
     </div>
 
+    <!-- Section: Notes — always visible -->
     <div class="form-section">
-      <div class="form-section-title">Notes & follow-up</div>
+      <div class="form-section-title">Notes</div>
       <div class="form-group">
-        <label class="form-label">Notes</label>
-        <textarea class="form-textarea" id="f-notes" placeholder="Any freeform notes…"></textarea>
-      </div>
-      <div class="flag-row">
-        <input type="checkbox" class="flag-checkbox" id="f-flag">
-        <label class="flag-label" for="f-flag">⚑ Flag for follow-up</label>
+        <textarea class="form-textarea" id="f-notes" placeholder="Any additional notes…"></textarea>
       </div>
     </div>
 
   </div>
   <div class="panel-footer">
-    <button class="btn btn-primary" onclick="savePlacement()" style="flex:1">Save placement</button>
-    <button class="btn btn-danger btn-sm" id="delete-btn" onclick="deletePlacement()" style="display:none">Delete</button>
+    <button class="btn btn-primary" onclick="savePlacement()" style="flex:1" id="save-btn">Save</button>
+    <button class="btn btn-danger btn-sm" id="delete-btn" onclick="confirmDelete()" style="display:none">Delete</button>
     <button class="btn btn-ghost btn-sm" onclick="closePanel()">Cancel</button>
   </div>
 </div>
 
-<!-- Migrate modal -->
-<div class="modal-overlay" id="migrate-overlay">
+<!-- Delete confirm modal -->
+<div class="modal-overlay" id="delete-modal">
   <div class="modal">
-    <h3>Migrate from browser</h3>
-    <p id="migrate-msg">Looking for local data in this browser…</p>
+    <h3>Delete this record?</h3>
+    <p>This cannot be undone.</p>
     <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="closeMigrateModal()">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="migrate-btn" onclick="runMigration()" style="display:none">Run Migration</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="deletePlacement()">Delete</button>
     </div>
   </div>
 </div>
@@ -701,67 +706,83 @@ tr.selected td { background: var(--accent-light); }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// ── Supabase config ───────────────────────────────────────
+// ── Supabase ──────────────────────────────────────────────
 const SUPABASE_URL      = 'https://qoyokyuzkpfvaakdkmxg.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
+const SUPABASE_ANON_KEY = 'sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16[';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── Status helpers ────────────────────────────────────────
-// Normalise legacy 'pending' records to 'interested'
+// Map old 5-status records to new 3-status model
 function normaliseStatus(s) {
-  return s === 'pending' ? 'interested' : (s || 'interested');
+  if (s === 'placed') return 'placed';
+  if (s === 'pending') return 'pending';
+  if (s === 'available') return 'available';
+  // Legacy: interested / awaiting-dates / in-registration → pending
+  if (s === 'interested' || s === 'awaiting-dates' || s === 'in-registration') return 'pending';
+  return 'available';
 }
+
+const STATUS_LABELS = { available: 'Available', pending: 'Pending', placed: 'Placed' };
+const STATUS_HINTS  = {
+  available: 'GP registered — has available dates, waiting for a matching vacancy',
+  pending:   'Sent to client for approval — waiting on dates to be confirmed',
+  placed:    'Confirmed placement — start/end dates locked in'
+};
 
 // ── Field mapping ─────────────────────────────────────────
 function fromDb(row) {
   return {
-    id:            row.id,
-    doctor:        row.doctor         || '',
-    facility:      row.facility       || '',
-    specialty:     row.specialty      || '',
-    dateAvailable: row.date_available || '',
-    datePlaced:    row.date_placed    || '',
-    durationDays:  row.duration_days  != null ? Number(row.duration_days)  : null,
-    rate:          row.rate           != null ? Number(row.rate)           : null,
-    rateType:      row.rate_type      || 'daily',
-    commissionPct: row.commission_pct != null ? Number(row.commission_pct) : null,
-    status:        normaliseStatus(row.status),
-    notes:         row.notes          || '',
-    flag:          row.flag           || false
+    id:             row.id,
+    doctor:         row.doctor          || '',
+    facility:       row.facility        || '',
+    specialty:      row.specialty       || '',
+    dateAvailable:  row.date_available  || '',
+    datePlaced:     row.date_placed     || '',
+    durationDays:   row.duration_days   != null ? Number(row.duration_days)   : null,
+    rate:           row.rate            != null ? Number(row.rate)            : null,
+    rateType:       row.rate_type       || 'daily',
+    commissionPct:  row.commission_pct  != null ? Number(row.commission_pct)  : null,
+    status:         normaliseStatus(row.status),
+    notes:          row.notes           || '',
+    flag:           row.flag            || false,
+    followUpDate:   row.follow_up_date  || '',
+    availableDates: row.available_dates || ''
   };
 }
 
 function toDb(p) {
   return {
-    doctor:         p.doctor        || '',
-    facility:       p.facility      || '',
-    specialty:      p.specialty     || '',
-    date_available: p.dateAvailable || null,
-    date_placed:    p.datePlaced    || null,
-    duration_days:  p.durationDays  != null ? Number(p.durationDays)  : null,
-    rate:           p.rate          != null ? Number(p.rate)          : null,
-    rate_type:      p.rateType      || 'daily',
-    commission_pct: p.commissionPct != null ? Number(p.commissionPct) : null,
-    status:         p.status        || 'interested',
-    notes:          p.notes         || '',
-    flag:           p.flag          || false
+    doctor:          p.doctor         || '',
+    facility:        p.facility       || '',
+    specialty:       p.specialty      || '',
+    date_available:  p.dateAvailable  || null,
+    date_placed:     p.datePlaced     || null,
+    duration_days:   p.durationDays   != null ? Number(p.durationDays)   : null,
+    rate:            p.rate           != null ? Number(p.rate)           : null,
+    rate_type:       p.rateType       || 'daily',
+    commission_pct:  p.commissionPct  != null ? Number(p.commissionPct)  : null,
+    status:          p.status         || 'available',
+    notes:           p.notes          || '',
+    flag:            p.flag           || false,
+    follow_up_date:  p.followUpDate   || null,
+    available_dates: p.availableDates || null
   };
 }
 
 // ── State ─────────────────────────────────────────────────
 let placements = [];
 let filtered   = [];
-let sortKey    = 'date_available';
+let sortKey    = 'doctor';
 let sortDir    = 1;
 let editingId  = null;
-let selectedStatus = 'interested';
+let selectedStatus = 'available';
 
-// ── Load from Supabase ────────────────────────────────────
+// ── Load ──────────────────────────────────────────────────
 async function loadPlacements() {
   const { data, error } = await db
     .from('locum_placements')
     .select('*')
-    .order('date_available', { ascending: true });
+    .order('created_at', { ascending: false });
   if (error) { showToast('Error loading data'); console.error(error); return; }
   placements = (data || []).map(fromDb);
   applyFilters();
@@ -782,14 +803,12 @@ function applyFilters() {
   const search   = document.getElementById('search-input').value.toLowerCase();
   const status   = document.getElementById('f-status').value;
   const specialty = document.getElementById('f-specialty').value;
-  const facility  = document.getElementById('f-facility').value;
 
   filtered = placements.filter(p => {
     if (status    && p.status    !== status)    return false;
     if (specialty && p.specialty !== specialty) return false;
-    if (facility  && p.facility  !== facility)  return false;
     if (search) {
-      const hay = [p.doctor, p.facility, p.specialty, p.notes].join(' ').toLowerCase();
+      const hay = [p.doctor, p.facility, p.specialty, p.notes, p.availableDates].join(' ').toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;
@@ -813,73 +832,93 @@ function sortBy(key) {
 
 // ── Commission calc ───────────────────────────────────────
 function calcComm(p) {
+  if (p.status !== 'placed') return null;
   if (!p.rate || !p.commissionPct || !p.durationDays) return null;
   const daily = p.rateType === 'hourly' ? p.rate * 8 : p.rate;
   return daily * p.durationDays * p.commissionPct / 100;
 }
 
+// ── Follow-up helpers ─────────────────────────────────────
+const TODAY_STR = new Date().toISOString().slice(0,10);
+function followUpClass(dateStr) {
+  if (!dateStr) return '';
+  if (dateStr < TODAY_STR) return 'overdue';
+  if (dateStr === TODAY_STR) return 'today';
+  return 'soon';
+}
+function fmtFollowUp(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  const diff = Math.round((d - new Date(TODAY_STR + 'T00:00:00')) / 86400000);
+  const base = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  if (diff < 0) return base + ` (${Math.abs(diff)}d overdue)`;
+  if (diff === 0) return base + ' (today!)';
+  if (diff <= 7) return base + ` (in ${diff}d)`;
+  return base;
+}
+
 // ── Sidebar ───────────────────────────────────────────────
 function updateSidebar() {
   const all = placements;
-  document.getElementById('mv-total').textContent          = all.length;
-  document.getElementById('mv-available').textContent      = all.filter(p => p.status === 'available').length;
-  document.getElementById('mv-interested').textContent     = all.filter(p => p.status === 'interested').length;
-  document.getElementById('mv-awaiting-dates').textContent = all.filter(p => p.status === 'awaiting-dates').length;
-  document.getElementById('mv-in-registration').textContent= all.filter(p => p.status === 'in-registration').length;
-  document.getElementById('mv-placed').textContent         = all.filter(p => p.status === 'placed').length;
 
-  // Populate filter dropdowns
-  const specs = [...new Set(all.map(p => p.specialty).filter(Boolean))].sort();
-  const facs  = [...new Set(all.map(p => p.facility).filter(Boolean))].sort();
-  const curSpec = document.getElementById('f-specialty').value;
-  const curFac  = document.getElementById('f-facility').value;
+  document.getElementById('mv-total').textContent     = all.length;
+  document.getElementById('mv-available').textContent = all.filter(p => p.status === 'available').length;
+  document.getElementById('mv-pending').textContent   = all.filter(p => p.status === 'pending').length;
+  document.getElementById('mv-placed').textContent    = all.filter(p => p.status === 'placed').length;
 
+  // Specialty filter dropdown
+  const specs  = [...new Set(all.map(p => p.specialty).filter(Boolean))].sort();
+  const curSp  = document.getElementById('f-specialty').value;
   document.getElementById('f-specialty').innerHTML =
-    '<option value="">All</option>' + specs.map(s => `<option value="${s}" ${s===curSpec?'selected':''}>${s}</option>`).join('');
-  document.getElementById('f-facility').innerHTML =
-    '<option value="">All</option>' + facs.map(s => `<option value="${s}" ${s===curFac?'selected':''}>${s}</option>`).join('');
+    '<option value="">All</option>' + specs.map(s => `<option value="${s}"${s===curSp?' selected':''}>${s}</option>`).join('');
 
-  // Commission by quarter
-  const now   = new Date();
-  const thisM = now.getMonth(), thisY = now.getFullYear();
-  const thisQ = Math.floor(thisM / 3);
-  const MN    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Follow-up list — Available & Pending with a follow_up_date set
+  const withDate = all
+    .filter(p => (p.status === 'available' || p.status === 'pending') && p.followUpDate)
+    .sort((a, b) => a.followUpDate.localeCompare(b.followUpDate));
+
+  const fuEl = document.getElementById('followup-list');
+  if (!withDate.length) {
+    fuEl.innerHTML = '<div style="font-size:11px;color:var(--text3)">No follow-ups set</div>';
+  } else {
+    fuEl.innerHTML = withDate.map(p => {
+      const cls = followUpClass(p.followUpDate);
+      const itemCls = cls === 'overdue' ? 'followup-overdue' : cls === 'today' ? 'followup-today' : 'followup-soon';
+      return `<div class="followup-item ${itemCls}" onclick="openPanel('${p.id}')">
+        <div class="followup-name">${p.doctor}</div>
+        <div class="followup-date">${fmtFollowUp(p.followUpDate)}</div>
+        <div class="followup-status">${STATUS_LABELS[p.status]}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Commission — Placed only
+  const now    = new Date();
+  const thisM  = now.getMonth(), thisY = now.getFullYear();
+  const thisQ  = Math.floor(thisM / 3);
+  const MN     = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const qStart = thisQ * 3;
   const qMonths = [qStart, qStart + 1, qStart + 2];
 
-  function pDate(p) { const d = p.datePlaced || p.dateAvailable; return d ? new Date(d + 'T00:00:00') : null; }
+  function placedDate(p) { const d = p.datePlaced || p.dateAvailable; return d ? new Date(d + 'T00:00:00') : null; }
   function commForMonth(yr, mo) {
     return all.filter(p => p.status === 'placed').reduce((s, p) => {
-      const d = pDate(p);
-      return (d && d.getFullYear() === yr && d.getMonth() === mo) ? s + (calcComm(p) || 0) : s;
+      const d = placedDate(p); return (d && d.getFullYear()===yr && d.getMonth()===mo) ? s+(calcComm(p)||0) : s;
     }, 0);
   }
 
-  const placed = all.filter(p => p.status === 'placed');
+  const placed    = all.filter(p => p.status === 'placed');
   const totalComm = placed.reduce((s, p) => s + (calcComm(p) || 0), 0);
   const qComm     = qMonths.reduce((s, mo) => s + commForMonth(thisY, mo), 0);
 
   qMonths.forEach((mo, i) => {
-    document.getElementById('mv-comm-m' + i).textContent        = '$' + Math.round(commForMonth(thisY, mo)).toLocaleString();
+    document.getElementById('mv-comm-m' + i).textContent       = '$' + Math.round(commForMonth(thisY, mo)).toLocaleString();
     document.getElementById('mv-comm-m' + i + '-label').textContent = MN[mo] + ' ' + thisY;
   });
-  document.getElementById('mv-comm-quarter').textContent       = '$' + Math.round(qComm).toLocaleString();
-  document.getElementById('mv-comm-quarter-label').textContent = 'Q' + (thisQ + 1) + ' ' + thisY + ' total';
-  document.getElementById('mv-comm-total').textContent         = '$' + Math.round(totalComm).toLocaleString();
-  document.getElementById('sidebar-q-label').textContent       = 'Commission — Q' + (thisQ + 1) + ' ' + thisY;
-
-  // Flagged reminders
-  const flagged = placements.filter(p => p.flag);
-  const rem = document.getElementById('reminders-list');
-  if (!flagged.length) {
-    rem.innerHTML = '<div style="font-size:11px;color:var(--text3)">No flags set</div>';
-  } else {
-    rem.innerHTML = flagged.map(p => `
-      <div class="reminder-item" onclick="openPanel('${p.id}')">
-        <div class="reminder-name">${p.doctor}</div>
-        <div>${p.facility || ''}</div>
-      </div>`).join('');
-  }
+  document.getElementById('mv-comm-quarter').textContent      = '$' + Math.round(qComm).toLocaleString();
+  document.getElementById('mv-comm-quarter-label').textContent = 'Q' + (thisQ+1) + ' ' + thisY + ' total';
+  document.getElementById('mv-comm-total').textContent        = '$' + Math.round(totalComm).toLocaleString();
+  document.getElementById('sidebar-comm-label').textContent   = 'Commission — Q' + (thisQ+1) + ' ' + thisY;
 }
 
 // ── Table ─────────────────────────────────────────────────
@@ -888,88 +927,117 @@ function renderTable() {
   const empty = document.getElementById('empty-state');
   document.getElementById('record-count').textContent = `${filtered.length} of ${placements.length} records`;
 
-  if (!filtered.length) {
-    tbody.innerHTML = '';
-    empty.style.display = 'flex';
-    return;
-  }
+  if (!filtered.length) { tbody.innerHTML = ''; empty.style.display = 'flex'; return; }
   empty.style.display = 'none';
 
   function fmtDate(d) {
     if (!d) return '—';
-    const dt = new Date(d + 'T00:00:00');
-    return dt.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
   }
   function fmtDur(days) {
     if (!days) return '—';
-    if (days % 7 === 0 && days >= 7) { const w = days / 7; return w === 1 ? '1 week' : `${w} weeks`; }
-    return days === 1 ? '1 day' : `${days} days`;
-  }
-  function calcEndDate(startStr, days) {
-    if (!startStr || !days) return '—';
-    const dt = new Date(startStr + 'T00:00:00');
-    dt.setDate(dt.getDate() + Number(days) - 1);
-    return fmtDate(dt.toISOString().slice(0, 10));
-  }
-
-  function statusLabel(s) {
-    const labels = { available: 'Available', interested: 'Interested', 'awaiting-dates': 'Awaiting Dates', 'in-registration': 'In Registration', placed: 'Placed' };
-    return labels[s] || s;
+    if (days % 7 === 0 && days >= 7) { const w = days/7; return w===1?'1 wk':`${w} wks`; }
+    return days===1?'1 day':`${days} days`;
   }
 
   tbody.innerHTML = filtered.map(p => {
-    const rateStr = p.rate != null ? `$${Number(p.rate).toLocaleString()}/${p.rateType === 'hourly' ? 'hr' : 'day'}` : '—';
-    const commStr = (p.commissionPct != null && p.rate != null && p.durationDays != null) ? '$' + Math.round(p.rate * p.durationDays * p.commissionPct / 100).toLocaleString() : '—';
-    const startDate = fmtDate(p.dateAvailable);
-    const endDate   = calcEndDate(p.dateAvailable, p.durationDays);
+    const rateStr = p.rate != null ? `$${Number(p.rate).toLocaleString()}/${p.rateType==='hourly'?'hr':'day'}` : '—';
+
+    // Comm $ — only Placed records
+    let commStr = '—';
+    if (p.status === 'placed') {
+      const c = calcComm(p);
+      commStr = c != null ? '$' + Math.round(c).toLocaleString() : '—';
+    }
+
+    // Dates column: for Available show availableDates text, for Pending/Placed show start date
+    let datesStr = '—';
+    if (p.status === 'available') {
+      datesStr = p.availableDates || (p.dateAvailable ? fmtDate(p.dateAvailable) : '—');
+    } else {
+      datesStr = fmtDate(p.dateAvailable);
+    }
+
+    // Facility/location: for Available show as location pref, else facility name
+    const facilityStr = p.facility || '—';
+
+    const fuCls = followUpClass(p.followUpDate);
+    const fuStr = p.followUpDate ? fmtFollowUp(p.followUpDate) : '—';
+
     return `<tr onclick="openPanel('${p.id}')">
-      <td class="td-doctor">${p.doctor || '—'}${p.flag ? ' <span style="color:var(--amber)">⚑</span>' : ''}</td>
-      <td>${p.facility || '—'}</td>
-      <td>${p.specialty || '—'}</td>
-      <td><span class="badge badge-${p.status || 'interested'}">${statusLabel(p.status)}</span></td>
-      <td style="font-size:12px">${startDate}</td>
-      <td style="font-size:12px">${endDate}</td>
-      <td style="font-size:12px;white-space:nowrap">${fmtDur(p.durationDays)}</td>
+      <td class="td-doctor">${esc(p.doctor) || '—'}</td>
+      <td>${esc(p.specialty) || '—'}</td>
+      <td onclick="event.stopPropagation();cycleStatus('${p.id}')">
+        <span class="badge badge-${p.status}" title="Click to change status">${STATUS_LABELS[p.status]}</span>
+      </td>
+      <td>${esc(facilityStr)}</td>
+      <td style="font-size:12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(datesStr)}">${esc(datesStr)}</td>
+      <td style="font-size:12px;white-space:nowrap">${p.status!=='available'?fmtDur(p.durationDays):'—'}</td>
       <td class="td-rate">${rateStr}</td>
       <td class="td-comm">${commStr}</td>
-      <td class="td-notes">${p.notes || ''}</td>
-      <td style="text-align:center">${p.flag ? '⚑' : ''}</td>
+      <td class="td-followup ${fuCls}">${p.status!=='placed'?fuStr:'—'}</td>
+      <td class="td-notes">${esc(p.notes)}</td>
     </tr>`;
   }).join('');
 }
 
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Cycle status Available → Pending → Placed → Available
+async function cycleStatus(id) {
+  const p = placements.find(x => x.id === id);
+  if (!p) return;
+  const order = ['available','pending','placed'];
+  const next  = order[(order.indexOf(p.status)+1) % order.length];
+  const { error } = await db.from('locum_placements').update({ status: next }).eq('id', id);
+  if (error) { showToast('Error: ' + error.message); return; }
+  p.status = next;
+  applyFilters();
+  showToast(`${p.doctor} → ${STATUS_LABELS[next]}`);
+}
+
 // ── Kanban ────────────────────────────────────────────────
 function renderKanban() {
-  const statusLabels = {
-    available: 'Available',
-    interested: 'Interested',
-    'awaiting-dates': 'Awaiting Dates',
-    'in-registration': 'In Registration',
-    placed: 'Placed'
-  };
-  ['available', 'interested', 'awaiting-dates', 'in-registration', 'placed'].forEach(status => {
-    const cards = placements.filter(p => p.status === status);
+  ['available','pending','placed'].forEach(status => {
+    const cards   = placements.filter(p => p.status === status);
     const countEl = document.getElementById('k-count-' + status);
-    const el = document.getElementById('k-' + status);
+    const el      = document.getElementById('k-' + status);
     if (!countEl || !el) return;
     countEl.textContent = cards.length;
     if (!cards.length) {
-      el.innerHTML = `<div style="font-size:12px;color:var(--text3);text-align:center;padding:20px">No placements</div>`;
+      el.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:20px">No locums</div>';
       return;
     }
     el.innerHTML = cards.map(p => {
-      const rateStr = p.rate != null ? `$${Number(p.rate).toLocaleString()}/${p.rateType === 'hourly' ? 'hr' : 'day'}` : null;
-      const comm = calcComm(p);
-      return `<div class="kanban-card" onclick="openPanel('${p.id}')">
-        <div class="kcard-name">${p.flag ? '<span class="kcard-flag">⚑ </span>' : ''}${p.doctor}</div>
-        <div class="kcard-facility">${p.facility || ''}</div>
+      const rateStr = p.rate != null ? `$${Number(p.rate).toLocaleString()}/${p.rateType==='hourly'?'hr':'day'}` : null;
+      const comm    = calcComm(p);
+      const fuCls   = followUpClass(p.followUpDate);
+      const cardCls = fuCls === 'overdue' ? 'overdue-card' : fuCls === 'today' ? 'today-card' : '';
+
+      // Sub-line: facility for Pending/Placed, location pref for Available
+      const subLine = status === 'available'
+        ? (p.facility ? `📑 ${p.facility}` : '')
+        : (p.facility || '');
+
+      const dateChip = status === 'available'
+        ? (p.availableDates ? `<span class="kcard-pill">${p.availableDates}</span>` : '')
+        : (p.dateAvailable  ? `<span class="kcard-pill">${new Date(p.dateAvailable+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</span>` : '');
+
+      return `<div class="kanban-card ${cardCls}" onclick="openPanel('${p.id}')">
+        <div class="kcard-name">${esc(p.doctor)}</div>
+        ${subLine ? `<div class="kcard-sub">${esc(subLine)}</div>` : ''}
         <div class="kcard-meta">
-          ${p.specialty    ? `<span class="kcard-pill">${p.specialty}</span>` : ''}
-          ${p.durationDays ? `<span class="kcard-pill">${p.durationDays}d</span>` : ''}
-          ${rateStr        ? `<span class="kcard-pill">${rateStr}</span>` : ''}
-          ${comm           ? `<span class="kcard-pill" style="color:var(--accent)">$${Math.round(comm).toLocaleString()} comm</span>` : ''}
+          ${p.specialty  ? `<span class="kcard-pill">${esc(p.specialty)}</span>` : ''}
+          ${dateChip}
+          ${rateStr      ? `<span class="kcard-pill">${rateStr}</span>` : ''}
+          ${p.durationDays && status!=='available' ? `<span class="kcard-pill">${p.durationDays}d</span>` : ''}
+          ${comm         ? `<span class="kcard-pill" style="color:var(--accent)">$${Math.round(comm).toLocaleString()} comm</span>` : ''}
         </div>
-        ${p.notes ? `<div class="kcard-note">${p.notes}</div>` : ''}
+        ${p.followUpDate && status !== 'placed' ? `<div class="kcard-followup ${fuCls}">⏰ ${fmtFollowUp(p.followUpDate)}</div>` : ''}
+        ${p.notes ? `<div class="kcard-note">${esc(p.notes)}</div>` : ''}
       </div>`;
     }).join('');
   });
@@ -980,180 +1048,150 @@ function renderCharts() {
   const all    = placements;
   const colors = ['#1a6b4a','#b85c00','#1a4b8c','#7b4ea0','#c0392b'];
 
-  // Specialty bar chart
+  // Specialty bar
   const specMap = {};
-  all.forEach(p => { if (p.specialty) specMap[p.specialty] = (specMap[p.specialty] || 0) + 1; });
-  const specEntries = Object.entries(specMap).sort((a, b) => b[1] - a[1]);
-  const maxSpec = Math.max(...specEntries.map(e => e[1]), 1);
-  document.getElementById('chart-specialty').innerHTML = specEntries.map(([name, val], i) => `
+  all.forEach(p => { if (p.specialty) specMap[p.specialty] = (specMap[p.specialty]||0)+1; });
+  const specEntries = Object.entries(specMap).sort((a,b)=>b[1]-a[1]);
+  const maxSpec = Math.max(...specEntries.map(e=>e[1]),1);
+  document.getElementById('chart-specialty').innerHTML = specEntries.map(([name,val],i) => `
     <div class="bar-row">
       <div class="bar-label" title="${name}">${name}</div>
-      <div class="bar-track">
-        <div class="bar-fill" style="width:${Math.round(val/maxSpec*100)}%;background:${colors[i%colors.length]}">
-          <span class="bar-val">${val}</span>
-        </div>
-      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(val/maxSpec*100)}%;background:${colors[i%colors.length]}">
+        <span class="bar-val">${val}</span></div></div>
     </div>`).join('') || '<div style="font-size:12px;color:var(--text3)">No data</div>';
 
-  // Donut — all 5 statuses
-  const statusCounts = { available: 0, interested: 0, 'awaiting-dates': 0, 'in-registration': 0, placed: 0 };
-  all.forEach(p => {
-    const s = p.status;
-    if (s && statusCounts.hasOwnProperty(s)) statusCounts[s]++;
-  });
+  // Donut — 3 statuses
+  const statusCounts = { available: 0, pending: 0, placed: 0 };
+  all.forEach(p => { if (statusCounts.hasOwnProperty(p.status)) statusCounts[p.status]++; });
+  const donutColors  = { available: '#1a6b4a', pending: '#b85c00', placed: '#1a4b8c' };
   const total = all.length || 1;
-  const donutColors = {
-    available: '#1a6b4a',
-    interested: '#b85c00',
-    'awaiting-dates': '#0d7a73',
-    'in-registration': '#7b4ea0',
-    placed: '#1a4b8c'
-  };
-  const statusLabels = {
-    available: 'Available',
-    interested: 'Interested',
-    'awaiting-dates': 'Awaiting Dates',
-    'in-registration': 'In Registration',
-    placed: 'Placed'
-  };
   const canvas = document.getElementById('donut-canvas');
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 120, 120);
-  let angle = -Math.PI / 2;
-  Object.entries(statusCounts).forEach(([status, count]) => {
-    if (!count) return;
-    const slice = (count / total) * 2 * Math.PI;
-    ctx.beginPath(); ctx.moveTo(60, 60);
-    ctx.arc(60, 60, 54, angle, angle + slice);
-    ctx.fillStyle = donutColors[status]; ctx.fill();
-    angle += slice;
+  ctx.clearRect(0,0,120,120);
+  let angle = -Math.PI/2;
+  Object.entries(statusCounts).forEach(([s,c]) => {
+    if (!c) return;
+    const slice = (c/total)*2*Math.PI;
+    ctx.beginPath(); ctx.moveTo(60,60); ctx.arc(60,60,54,angle,angle+slice);
+    ctx.fillStyle = donutColors[s]; ctx.fill(); angle += slice;
   });
-  ctx.beginPath(); ctx.arc(60, 60, 32, 0, 2 * Math.PI);
-  ctx.fillStyle = '#ffffff'; ctx.fill();
-  ctx.fillStyle = '#1a1916'; ctx.font = '600 18px DM Sans,sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(all.length, 60, 60);
-  document.getElementById('donut-legend').innerHTML = Object.entries(statusCounts).map(([s, c]) => `
+  ctx.beginPath(); ctx.arc(60,60,32,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#1a1916'; ctx.font='600 18px DM Sans,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(all.length,60,60);
+  document.getElementById('donut-legend').innerHTML = Object.entries(statusCounts).map(([s,c]) => `
     <div class="legend-item">
       <div class="legend-dot" style="background:${donutColors[s]}"></div>
-      <span>${statusLabels[s]}</span>
+      <span>${STATUS_LABELS[s]}</span>
       <span class="legend-val">${c}</span>
     </div>`).join('');
 
-  // Rate bar chart
-  const rateData = all.filter(p => p.rate).map(p => ({
-    name: p.doctor, val: p.rateType === 'hourly' ? p.rate * 8 : p.rate
-  })).sort((a, b) => b.val - a.val).slice(0, 6);
-  const maxRate = Math.max(...rateData.map(d => d.val), 1);
-  document.getElementById('chart-rate').innerHTML = rateData.map((d, i) => `
+  // Rate bar — placed only
+  const placed = all.filter(p => p.status==='placed');
+  const rateData = placed.filter(p=>p.rate).map(p=>({name:p.doctor,val:p.rateType==='hourly'?p.rate*8:p.rate}))
+    .sort((a,b)=>b.val-a.val).slice(0,6);
+  const maxRate = Math.max(...rateData.map(d=>d.val),1);
+  document.getElementById('chart-rate').innerHTML = rateData.map((d,i) => `
     <div class="bar-row">
       <div class="bar-label" title="${d.name}">${d.name}</div>
-      <div class="bar-track">
-        <div class="bar-fill" style="width:${Math.round(d.val/maxRate*100)}%;background:${colors[i%colors.length]}">
-          <span class="bar-val">$${d.val.toLocaleString()}/day</span>
-        </div>
-      </div>
-    </div>`).join('') || '<div style="font-size:12px;color:var(--text3)">No data</div>';
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.val/maxRate*100)}%;background:${colors[i%colors.length]}">
+        <span class="bar-val">$${d.val.toLocaleString()}/day</span></div></div>
+    </div>`).join('') || '<div style="font-size:12px;color:var(--text3)">No placed locums yet</div>';
 
   // Commission tracker
-  const now = new Date();
+  const now      = new Date();
   const thisMonth = now.getMonth(), thisYear = now.getFullYear();
-  const thisQ = Math.floor(thisMonth / 3);
-  const MNC   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const thisQ    = Math.floor(thisMonth/3);
+  const MNC      = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const qStart   = thisQ*3;
+  const qMonths  = [qStart,qStart+1,qStart+2];
 
-  function pDate(p) { const d = p.datePlaced || p.dateAvailable; return d ? new Date(d + 'T00:00:00') : null; }
-  function commForMonth(yr, mo) {
-    return all.filter(p => p.status === 'placed').reduce((s, p) => {
-      const d = pDate(p);
-      return (d && d.getFullYear() === yr && d.getMonth() === mo) ? s + (calcComm(p) || 0) : s;
-    }, 0);
+  function pDate(p) { const d = p.datePlaced||p.dateAvailable; return d?new Date(d+'T00:00:00'):null; }
+  function commForMonth(yr,mo) {
+    return placed.reduce((s,p)=>{ const d=pDate(p); return (d&&d.getFullYear()===yr&&d.getMonth()===mo)?s+(calcComm(p)||0):s; },0);
   }
 
-  const placed     = all.filter(p => p.status === 'placed');
-  const totalComm  = placed.reduce((s, p) => s + (calcComm(p) || 0), 0);
-  const qStart     = thisQ * 3;
-  const qMonths    = [qStart, qStart + 1, qStart + 2];
-  const qComm      = qMonths.reduce((s, mo) => s + commForMonth(thisYear, mo), 0);
+  const totalComm = placed.reduce((s,p)=>s+(calcComm(p)||0),0);
+  const qComm     = qMonths.reduce((s,mo)=>s+commForMonth(thisYear,mo),0);
 
-  qMonths.forEach((mo, i) => {
-    document.getElementById('chart-m' + i + '-label').textContent  = MNC[mo] + ' ' + thisYear;
-    document.getElementById('chart-comm-m' + i).textContent = '$' + Math.round(commForMonth(thisYear, mo)).toLocaleString();
+  qMonths.forEach((mo,i) => {
+    document.getElementById('chart-m'+i+'-label').textContent  = MNC[mo]+' '+thisYear;
+    document.getElementById('chart-comm-m'+i).textContent      = '$'+Math.round(commForMonth(thisYear,mo)).toLocaleString();
   });
-  document.getElementById('chart-q-label').textContent      = 'Q' + (thisQ + 1) + ' ' + thisYear;
-  document.getElementById('chart-comm-quarter').textContent = '$' + Math.round(qComm).toLocaleString();
-  document.getElementById('comm-total-val').textContent     = '$' + Math.round(totalComm).toLocaleString();
-  document.getElementById('chart-curr-q-label').textContent = 'Current quarter — Q' + (thisQ + 1) + ' ' + thisYear;
+  document.getElementById('chart-q-label').textContent         = 'Q'+(thisQ+1)+' '+thisYear;
+  document.getElementById('chart-comm-quarter').textContent    = '$'+Math.round(qComm).toLocaleString();
+  document.getElementById('comm-total-val').textContent        = '$'+Math.round(totalComm).toLocaleString();
+  document.getElementById('chart-curr-q-label').textContent    = 'Current quarter — Q'+(thisQ+1)+' '+thisYear;
 
   // Historical quarters
   const qMap = {};
   placed.forEach(p => {
-    const d = pDate(p);
-    if (!d) return;
-    const yr = d.getFullYear(), mo = d.getMonth(), q = Math.floor(mo / 3);
-    const key = yr + '-Q' + (q + 1);
-    if (yr === thisYear && q === thisQ) return;
-    if (!qMap[key]) qMap[key] = { yr, q, label: 'Q' + (q + 1) + ' ' + yr, months: [q*3, q*3+1, q*3+2] };
+    const d = pDate(p); if (!d) return;
+    const yr=d.getFullYear(),mo=d.getMonth(),q=Math.floor(mo/3);
+    const key=yr+'-Q'+(q+1);
+    if (yr===thisYear&&q===thisQ) return;
+    if (!qMap[key]) qMap[key]={yr,q,label:'Q'+(q+1)+' '+yr,months:[q*3,q*3+1,q*3+2]};
   });
   const histKeys = Object.keys(qMap).sort().reverse();
   const histEl   = document.getElementById('chart-history');
-  if (!histKeys.length) {
-    histEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">No historical data yet</div>';
-  } else {
-    histEl.innerHTML = histKeys.map(key => {
-      const { yr, q, label, months } = qMap[key];
-      const qTotal = months.reduce((s, mo) => s + commForMonth(yr, mo), 0);
-      const mCells = months.map(mo => {
-        const v = commForMonth(yr, mo);
-        return `<div style="text-align:center;padding:8px 4px;background:var(--surface2);border-radius:var(--radius-sm);flex:1;">
+  histEl.innerHTML = histKeys.length ? histKeys.map(key => {
+    const {yr,q,label,months} = qMap[key];
+    const qTotal = months.reduce((s,mo)=>s+commForMonth(yr,mo),0);
+    return `<div style="display:flex;align-items:center;gap:8px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);width:60px;flex-shrink:0;">${label}</div>
+      <div style="display:flex;gap:6px;flex:1;">${months.map(mo=>`
+        <div style="text-align:center;padding:8px 4px;background:var(--surface2);border-radius:var(--radius-sm);flex:1;">
           <div style="font-size:10px;color:var(--text3)">${MNC[mo]}</div>
-          <div style="font-size:13px;font-weight:600;color:var(--accent);font-family:var(--mono);">$${Math.round(v).toLocaleString()}</div>
-        </div>`;
-      }).join('');
-      return `<div style="display:flex;align-items:center;gap:8px;">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);width:60px;flex-shrink:0;">${label}</div>
-        <div style="display:flex;gap:6px;flex:1;">${mCells}</div>
-        <div style="text-align:right;width:70px;flex-shrink:0;">
-          <div style="font-size:10px;color:var(--text3)">total</div>
-          <div style="font-size:13px;font-weight:600;color:var(--accent);font-family:var(--mono);">$${Math.round(qTotal).toLocaleString()}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }
+          <div style="font-size:13px;font-weight:600;color:var(--accent);font-family:var(--mono);">$${Math.round(commForMonth(yr,mo)).toLocaleString()}</div>
+        </div>`).join('')}</div>
+      <div style="text-align:right;width:70px;flex-shrink:0;">
+        <div style="font-size:10px;color:var(--text3)">total</div>
+        <div style="font-size:13px;font-weight:600;color:var(--accent);font-family:var(--mono);">$${Math.round(qTotal).toLocaleString()}</div>
+      </div>
+    </div>`;
+  }).join('') : '<div style="font-size:12px;color:var(--text3)">No historical data yet</div>';
 
   document.getElementById('comm-breakdown').innerHTML = placed.length
     ? placed.map(p => {
-        const c = calcComm(p);
-        const d = pDate(p);
-        const tag = d ? MNC[d.getMonth()] + ' ' + d.getFullYear() : '';
+        const c=calcComm(p), d=pDate(p);
+        const tag = d ? MNC[d.getMonth()]+' '+d.getFullYear() : '';
         return `<div style="display:flex;justify-content:space-between;font-size:12px;">
-          <span style="color:var(--text2)">${p.doctor} <span style="color:var(--text3);font-size:11px">${tag}</span></span>
-          <span style="font-family:var(--mono);font-weight:500;color:var(--accent)">${c ? '$' + Math.round(c).toLocaleString() : '—'}</span>
+          <span style="color:var(--text2)">${esc(p.doctor)} <span style="color:var(--text3);font-size:11px">${tag}</span></span>
+          <span style="font-family:var(--mono);font-weight:500;color:var(--accent)">${c?'$'+Math.round(c).toLocaleString():'—'}</span>
         </div>`;
       }).join('')
-    : '<div style="font-size:12px;color:var(--text3)">No placed doctors yet</div>';
+    : '<div style="font-size:12px;color:var(--text3)">No placed locums yet</div>';
 }
 
-// ── Panel ─────────────────────────────────────────────────
+// ── Panel / form ──────────────────────────────────────────
 function openPanel(id) {
   editingId = id;
   const p = id ? placements.find(x => x.id === id) : null;
 
-  document.getElementById('panel-title').textContent = p ? 'Edit placement' : 'Add placement';
+  document.getElementById('panel-title').textContent = p ? 'Edit locum' : 'Add locum';
   document.getElementById('delete-btn').style.display = p ? 'inline-flex' : 'none';
 
-  document.getElementById('f-doctor').value       = p?.doctor        || '';
-  document.getElementById('f-specialty-in').value = p?.specialty     || '';
-  document.getElementById('f-facility-in').value  = p?.facility      || '';
-  document.getElementById('f-dateAvailable').value = p?.dateAvailable || '';
-  document.getElementById('f-datePlaced').value   = p?.datePlaced    || '';
-  document.getElementById('f-durationDays').value = p?.durationDays  ?? '';
-  document.getElementById('f-rate').value         = p?.rate          ?? '';
-  document.getElementById('f-rateType').value     = p?.rateType      || 'daily';
-  document.getElementById('f-commissionPct').value = p?.commissionPct ?? '';
-  document.getElementById('f-notes').value        = p?.notes         || '';
-  document.getElementById('f-flag').checked       = p?.flag          || false;
+  // Always-visible fields
+  document.getElementById('f-doctor').value         = p?.doctor        || '';
+  document.getElementById('f-specialty-in').value   = p?.specialty     || '';
+  document.getElementById('f-notes').value           = p?.notes         || '';
 
-  selectStatus(p?.status || 'interested');
+  // Available fields
+  document.getElementById('f-available-dates').value = p?.availableDates || '';
+  document.getElementById('f-location-pref').value   = (p?.status === 'available') ? (p?.facility || '') : '';
+  document.getElementById('f-rate-avail').value       = (p?.status === 'available') ? (p?.rate ?? '') : '';
+
+  // Pending/Placed fields
+  document.getElementById('f-facility-in').value    = p?.facility      || '';
+  document.getElementById('f-dateAvailable').value   = p?.dateAvailable || '';
+  document.getElementById('f-durationDays').value    = p?.durationDays  ?? '';
+  document.getElementById('f-rate').value            = p?.rate          ?? '';
+  document.getElementById('f-rateType').value        = p?.rateType      || 'daily';
+  document.getElementById('f-commissionPct').value   = p?.commissionPct ?? '';
+
+  // Follow-up
+  document.getElementById('f-followUpDate').value    = p?.followUpDate  || '';
+
+  selectStatus(p?.status || 'available');
   updateCalc();
 
   document.getElementById('panel-overlay').classList.add('open');
@@ -1169,13 +1207,49 @@ function closePanel() {
 
 function selectStatus(s) {
   selectedStatus = s;
+
+  // Update toggle buttons
   document.querySelectorAll('.status-opt').forEach(btn => {
     btn.className = 'status-opt';
     if (btn.dataset.status === s) btn.classList.add('sel-' + s);
   });
+
+  // Status hint text
+  document.getElementById('status-hint').textContent = STATUS_HINTS[s] || '';
+
+  // Show/hide form sections
+  document.getElementById('fs-available').style.display  = s === 'available' ? '' : 'none';
+  document.getElementById('fs-placement').style.display  = (s === 'pending' || s === 'placed') ? '' : 'none';
+  document.getElementById('fs-rate').style.display       = (s === 'pending' || s === 'placed') ? '' : 'none';
+  document.getElementById('fs-followup').style.display   = (s === 'available' || s === 'pending') ? '' : 'none';
+  document.getElementById('fg-commission').style.display = s === 'placed' ? '' : 'none';
+
+  // Labels
+  if (s === 'pending') {
+    document.getElementById('fs-placement-title').textContent = 'Placement details';
+    document.getElementById('f-start-label').textContent = 'Proposed start date';
+    document.getElementById('f-facility-label').textContent = 'Facility';
+  } else if (s === 'placed') {
+    document.getElementById('fs-placement-title').textContent = 'Placement details';
+    document.getElementById('f-start-label').textContent = 'Start date';
+    document.getElementById('f-facility-label').textContent = 'Facility *';
+  }
+
+  // Follow-up hint
+  if (s === 'available') {
+    document.getElementById('followup-hint').textContent = 'When to check back — e.g. once December vacancies come through';
+  } else if (s === 'pending') {
+    document.getElementById('followup-hint').textContent = 'When to follow up with the client if no response';
+  }
+
+  updateCalc();
 }
 
 function updateCalc() {
+  if (selectedStatus === 'available') {
+    document.getElementById('calc-result').style.display = 'none';
+    return;
+  }
   const rate     = parseFloat(document.getElementById('f-rate').value);
   const rateType = document.getElementById('f-rateType').value;
   const comm     = parseFloat(document.getElementById('f-commissionPct').value);
@@ -1198,130 +1272,88 @@ async function savePlacement() {
   const doctor = document.getElementById('f-doctor').value.trim();
   if (!doctor) { document.getElementById('f-doctor').focus(); showToast('Doctor name is required'); return; }
 
-  const record = {
+  let record = {
     doctor,
-    facility:      document.getElementById('f-facility-in').value.trim(),
-    specialty:     document.getElementById('f-specialty-in').value.trim(),
-    dateAvailable: document.getElementById('f-dateAvailable').value,
-    datePlaced:    document.getElementById('f-datePlaced').value,
-    durationDays:  document.getElementById('f-durationDays').value  ? Number(document.getElementById('f-durationDays').value)  : null,
-    rate:          document.getElementById('f-rate').value          ? Number(document.getElementById('f-rate').value)          : null,
-    rateType:      document.getElementById('f-rateType').value,
-    commissionPct: document.getElementById('f-commissionPct').value ? Number(document.getElementById('f-commissionPct').value) : null,
-    status:        selectedStatus,
-    notes:         document.getElementById('f-notes').value.trim(),
-    flag:          document.getElementById('f-flag').checked,
+    specialty:      document.getElementById('f-specialty-in').value.trim(),
+    notes:          document.getElementById('f-notes').value.trim(),
+    status:         selectedStatus,
+    followUpDate:   document.getElementById('f-followUpDate').value || '',
+    // defaults
+    facility: '', dateAvailable: '', datePlaced: '', durationDays: null,
+    rate: null, rateType: 'daily', commissionPct: null,
+    availableDates: '', flag: false
   };
+
+  if (selectedStatus === 'available') {
+    record.availableDates = document.getElementById('f-available-dates').value.trim();
+    record.facility       = document.getElementById('f-location-pref').value.trim();
+    const rv = document.getElementById('f-rate-avail').value;
+    record.rate = rv ? Number(rv) : null;
+  } else {
+    record.facility       = document.getElementById('f-facility-in').value.trim();
+    record.dateAvailable  = document.getElementById('f-dateAvailable').value;
+    record.durationDays   = document.getElementById('f-durationDays').value ? Number(document.getElementById('f-durationDays').value) : null;
+    record.rate           = document.getElementById('f-rate').value ? Number(document.getElementById('f-rate').value) : null;
+    record.rateType       = document.getElementById('f-rateType').value;
+    if (selectedStatus === 'placed') {
+      record.commissionPct = document.getElementById('f-commissionPct').value ? Number(document.getElementById('f-commissionPct').value) : null;
+    }
+  }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
 
   if (editingId) {
     const { error } = await db.from('locum_placements').update(toDb(record)).eq('id', editingId);
-    if (error) { showToast('Error saving: ' + error.message); return; }
+    if (error) { showToast('Error: ' + error.message); btn.disabled=false; btn.textContent='Save'; return; }
     const idx = placements.findIndex(p => p.id === editingId);
     if (idx >= 0) placements[idx] = { id: editingId, ...record };
   } else {
     const { data: row, error } = await db.from('locum_placements').insert([toDb(record)]).select().single();
-    if (error) { showToast('Error saving: ' + error.message); return; }
+    if (error) { showToast('Error: ' + error.message); btn.disabled=false; btn.textContent='Save'; return; }
     placements.push(fromDb(row));
   }
 
+  btn.disabled = false; btn.textContent = 'Save';
   closePanel();
   applyFilters();
   if (document.getElementById('view-charts').classList.contains('active')) renderCharts();
-  showToast(editingId ? 'Placement updated' : 'Placement added');
+  showToast(editingId ? 'Saved' : 'Added');
 }
 
+function confirmDelete() {
+  document.getElementById('delete-modal').classList.add('open');
+}
+function closeDeleteModal() {
+  document.getElementById('delete-modal').classList.remove('open');
+}
 async function deletePlacement() {
   if (!editingId) return;
-  if (!confirm('Delete this placement? This cannot be undone.')) return;
   const { error } = await db.from('locum_placements').delete().eq('id', editingId);
-  if (error) { showToast('Error deleting: ' + error.message); return; }
+  if (error) { showToast('Error: ' + error.message); return; }
   placements = placements.filter(p => p.id !== editingId);
+  closeDeleteModal();
   closePanel();
   applyFilters();
-  showToast('Placement deleted');
+  showToast('Deleted');
 }
 
 // ── Export CSV ────────────────────────────────────────────
 function exportCSV() {
-  const headers = ['Doctor','Facility','Specialty','Date Available','Date Placed','Duration (Days)','Rate','Rate Type','Commission %','Status','Notes','Flag'];
+  const headers = ['Doctor','Specialty','Status','Facility/Location','Available Dates','Start Date','Duration (Days)','Rate','Rate Type','Commission %','Commission $','Follow-up Date','Notes'];
   const rows = placements.map(p => [
-    p.doctor, p.facility, p.specialty, p.dateAvailable, p.datePlaced,
-    p.durationDays, p.rate, p.rateType, p.commissionPct, p.status,
-    `"${(p.notes||'').replace(/"/g,'""')}"`, p.flag ? 'Yes' : 'No'
+    p.doctor, p.specialty, p.status, p.facility, p.availableDates,
+    p.dateAvailable, p.durationDays, p.rate, p.rateType, p.commissionPct,
+    calcComm(p) != null ? Math.round(calcComm(p)) : '',
+    p.followUpDate, `"${(p.notes||'').replace(/"/g,'""')}"`
   ]);
-  const csv  = [headers, ...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const csv  = [headers,...rows].map(r=>r.join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
   const a    = document.createElement('a');
   a.href     = URL.createObjectURL(blob);
-  a.download = `locum-placements-${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = `locum-tracker-${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   showToast('CSV exported');
-}
-
-// ── Migrate from browser ──────────────────────────────────
-function showMigrateModal() {
-  const raw = localStorage.getItem('medip-placements-v2');
-  const overlay = document.getElementById('migrate-overlay');
-  const msg     = document.getElementById('migrate-msg');
-  const btn     = document.getElementById('migrate-btn');
-  overlay.classList.add('open');
-  if (!raw) {
-    msg.textContent = 'No local data found in this browser. Nothing to migrate.';
-    btn.style.display = 'none';
-  } else {
-    try {
-      const data = JSON.parse(raw);
-      const count = (data.placements || []).length;
-      msg.textContent = `Found ${count} placement${count !== 1 ? 's' : ''} in local browser storage. Click Run Migration to upload them to Supabase.`;
-      btn.style.display = count > 0 ? 'inline-flex' : 'none';
-    } catch(e) {
-      msg.textContent = 'Could not read local data — it may be corrupted.';
-      btn.style.display = 'none';
-    }
-  }
-}
-
-function closeMigrateModal() {
-  document.getElementById('migrate-overlay').classList.remove('open');
-}
-
-async function runMigration() {
-  const raw = localStorage.getItem('medip-placements-v2');
-  if (!raw) return;
-  const data = JSON.parse(raw);
-  const local = data.placements || [];
-  if (!local.length) return;
-
-  document.getElementById('migrate-btn').disabled    = true;
-  document.getElementById('migrate-btn').textContent = 'Migrating…';
-
-  const rows = local.map(p => ({
-    doctor:         p.doctor        || '',
-    facility:       p.facility      || '',
-    specialty:      p.specialty     || '',
-    date_available: p.dateAvailable || null,
-    date_placed:    p.datePlaced    || null,
-    duration_days:  p.durationDays  != null ? Number(p.durationDays)  : null,
-    rate:           p.rate          != null ? Number(p.rate)          : null,
-    rate_type:      p.rateType      || 'daily',
-    commission_pct: p.commissionPct != null ? Number(p.commissionPct) : null,
-    status:         normaliseStatus(p.status),
-    notes:          p.notes         || '',
-    flag:           p.flag          || false
-  }));
-
-  const { error } = await db.from('locum_placements').insert(rows);
-  if (error) {
-    document.getElementById('migrate-msg').textContent = 'Migration failed: ' + error.message;
-    document.getElementById('migrate-btn').disabled    = false;
-    document.getElementById('migrate-btn').textContent = 'Run Migration';
-    return;
-  }
-
-  localStorage.removeItem('medip-placements-v2');
-  closeMigrateModal();
-  showToast(`Migrated ${rows.length} placements successfully`);
-  await loadPlacements();
 }
 
 // ── Toast ─────────────────────────────────────────────────
@@ -1334,8 +1366,8 @@ function showToast(msg) {
 
 // ── Keyboard ──────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closePanel(); closeMigrateModal(); }
-  if ((e.metaKey || e.ctrlKey) && e.key === 'n') { e.preventDefault(); openPanel(null); }
+  if (e.key === 'Escape') { closePanel(); closeDeleteModal(); }
+  if ((e.metaKey||e.ctrlKey) && e.key==='n') { e.preventDefault(); openPanel(null); }
 });
 
 // ── Init ──────────────────────────────────────────────────
