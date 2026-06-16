@@ -708,7 +708,7 @@ tr.selected td { background: var(--accent-light); }
 <script>
 // ── Supabase ──────────────────────────────────────────────
 const SUPABASE_URL      = 'https://qoyokyuzkpfvaakdkmxg.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16[';
+const SUPABASE_ANON_KEY = 'sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── Status helpers ────────────────────────────────────────
@@ -1019,7 +1019,7 @@ function renderKanban() {
 
       // Sub-line: facility for Pending/Placed, location pref for Available
       const subLine = status === 'available'
-        ? (p.facility ? `📑 ${p.facility}` : '')
+        ? (p.facility ? `📍 ${p.facility}` : '')
         : (p.facility || '');
 
       const dateChip = status === 'available'
