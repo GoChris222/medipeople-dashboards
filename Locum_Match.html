@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MediPeople Â· Locum GP Matcher</title>
+<title>MediPeople · Locum GP Matcher</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -188,33 +188,33 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
   </div>
   <div class="sb-sec">Navigation</div>
   <div class="sb-item active" data-view="dash" onclick="nav(this,'dash')">
-    <span class="ico">ð</span> Dashboard
+    <span class="ico">📊</span> Dashboard
   </div>
   <div class="sb-item" data-view="match" onclick="nav(this,'match')">
-    <span class="ico">ð¯</span> Match engine
+    <span class="ico">🎯</span> Match engine
   </div>
   <div class="sb-item" data-view="vacancies" onclick="nav(this,'vacancies')">
-    <span class="ico">ð¼</span> Vacancies
+    <span class="ico">💼</span> Vacancies
   </div>
   <div class="sb-item" data-view="candidates" onclick="nav(this,'candidates')">
-    <span class="ico">ð¨ââï¸</span> Candidates
+    <span class="ico">👨‍⚕️</span> Candidates
   </div>
   <div class="sb-divider"></div>
   <div class="sb-sec">Tools</div>
   <div class="sb-item" data-view="import" onclick="nav(this,'import')">
-    <span class="ico">ð¥</span> Import vacancies
+    <span class="ico">📥</span> Import vacancies
   </div>
   <div class="sb-item" data-view="broadcast" onclick="nav(this,'broadcast')">
-    <span class="ico">ð£</span> Broadcast
+    <span class="ico">📣</span> Broadcast
   </div>
   <div class="sb-divider"></div>
   <div class="sb-sec">History</div>
   <div class="sb-item" data-view="outcomes" onclick="nav(this,'outcomes')">
-    <span class="ico">ð</span> Outcome log
+    <span class="ico">📋</span> Outcome log
   </div>
   <div style="margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,.06);">
     <a href="https://gochris222.github.io/medipeople-dashboards/CRM.html" style="font-size:12px;color:var(--g400);text-decoration:none;display:flex;align-items:center;gap:6px;">
-      â Back to CRM
+      ← Back to CRM
     </a>
   </div>
 </div>
@@ -231,18 +231,18 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <!-- DASHBOARD VIEW -->
     <div id="view-dash" class="view active">
       <div class="stats" id="dash-stats">
-        <div class="stat"><div class="lbl">Open vacancies</div><div class="val" id="s-vac">â</div><div class="sub">Needing to be filled</div></div>
-        <div class="stat"><div class="lbl">Active locum GPs</div><div class="val" id="s-cands">â</div><div class="sub">In system</div></div>
-        <div class="stat"><div class="lbl">Hot matches today</div><div class="val" id="s-hot">â</div><div class="sub">Across all vacancies</div></div>
-        <div class="stat"><div class="lbl">Outcomes logged</div><div class="val" id="s-outcomes">â</div><div class="sub">Accepted + declined</div></div>
+        <div class="stat"><div class="lbl">Open vacancies</div><div class="val" id="s-vac">—</div><div class="sub">Needing to be filled</div></div>
+        <div class="stat"><div class="lbl">Active locum GPs</div><div class="val" id="s-cands">—</div><div class="sub">In system</div></div>
+        <div class="stat"><div class="lbl">Hot matches today</div><div class="val" id="s-hot">—</div><div class="sub">Across all vacancies</div></div>
+        <div class="stat"><div class="lbl">Outcomes logged</div><div class="val" id="s-outcomes">—</div><div class="sub">Accepted + declined</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="card">
-          <div class="ch"><h3>ð¥ Hottest matches right now</h3><div class="sp"></div><button class="btn btn-sec btn-sm" onclick="nav(document.querySelector('[data-view=match]'),'match')">View all â</button></div>
+          <div class="ch"><h3>🔥 Hottest matches right now</h3><div class="sp"></div><button class="btn btn-sec btn-sm" onclick="nav(document.querySelector('[data-view=match]'),'match')">View all →</button></div>
           <div id="dash-hot-list" style="padding:4px 0;"></div>
         </div>
         <div class="card">
-          <div class="ch"><h3>ð¼ Open vacancies</h3><div class="sp"></div><button class="btn btn-pri btn-sm" onclick="openAddVacancy()">+ Add vacancy</button></div>
+          <div class="ch"><h3>💼 Open vacancies</h3><div class="sp"></div><button class="btn btn-pri btn-sm" onclick="openAddVacancy()">+ Add vacancy</button></div>
           <div id="dash-vac-list" style="padding:4px 0;"></div>
         </div>
       </div>
@@ -264,7 +264,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
         <!-- Right: match results -->
         <div id="match-results">
           <div class="empty" style="background:#fff;border:1px solid var(--g200);border-radius:10px;">
-            <div class="ei">ð¯</div>
+            <div class="ei">🎯</div>
             <p>Select a vacancy on the left<br>to see ranked candidate matches.</p>
           </div>
         </div>
@@ -283,7 +283,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <div id="view-candidates" class="view">
       <div class="card">
         <div class="ch"><h3>Locum GP candidates</h3><div class="sp"></div>
-          <button class="btn btn-sec btn-sm" onclick="loadCandidates()" style="margin-right:6px;">â» Refresh</button>
+          <button class="btn btn-sec btn-sm" onclick="loadCandidates()" style="margin-right:6px;">↻ Refresh</button>
           <button class="btn btn-pri btn-sm" onclick="openAddCandModal()">+ Add Candidate</button>
         </div>
         <div id="cand-table-wrap"></div>
@@ -293,13 +293,13 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <!-- ADD/EDIT CANDIDATE MODAL -->
     <div id="cand-edit-modal" class="ov hidden">
       <div class="modal">
-        <div class="mh"><h3 id="cand-edit-title">Add Candidate</h3><button class="x" onclick="closeCandEditModal()">â</button></div>
+        <div class="mh"><h3 id="cand-edit-title">Add Candidate</h3><button class="x" onclick="closeCandEditModal()">✕</button></div>
         <div class="mb">
           <div class="fg">
             <div class="fi s2"><label>Full Name *</label><input id="ce-name" type="text" placeholder="Dr. Jane Smith"></div>
             <div class="fi"><label>State</label>
               <select id="ce-state">
-                <option value="">â Select â</option>
+                <option value="">— Select —</option>
                 <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
                 <option>SA</option><option>TAS</option><option>NT</option><option>ACT</option><option>NZ</option>
               </select>
@@ -349,7 +349,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
           <div class="ch"><h3>Paste vacancy email</h3></div>
           <div style="padding:14px;">
             <p style="font-size:12px;color:var(--g500);margin-bottom:10px;">Paste the plain text of your vacancy email below. The system will extract each vacancy automatically.</p>
-            <textarea id="import-paste" style="width:100%;height:320px;padding:10px;border:1px solid var(--g300);border-radius:8px;font-size:12px;font-family:inherit;resize:vertical;" placeholder="Paste email text here...&#10;&#10;e.g.&#10;SOUTH AUSTRALIA&#10;&#10;Naracoorte â GP/ED On-Call    $3,000/24hr&#10;Dates&#10;12â15 Jun â¢ 26â29 Jun&#10;Inclusions&#10;Flights â¢ Accommodation&#10;Notes&#10;ALS required."></textarea>
+            <textarea id="import-paste" style="width:100%;height:320px;padding:10px;border:1px solid var(--g300);border-radius:8px;font-size:12px;font-family:inherit;resize:vertical;" placeholder="Paste email text here...&#10;&#10;e.g.&#10;SOUTH AUSTRALIA&#10;&#10;Naracoorte – GP/ED On-Call    $3,000/24hr&#10;Dates&#10;12–15 Jun • 26–29 Jun&#10;Inclusions&#10;Flights • Accommodation&#10;Notes&#10;ALS required."></textarea>
             <div style="display:flex;gap:8px;margin-top:10px;">
               <button class="btn btn-pri" onclick="parseImport()">Extract vacancies</button>
               <button class="btn btn-sec" onclick="document.getElementById('import-paste').value=''">Clear</button>
@@ -383,9 +383,9 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
             <div class="ch"><h3>Audience</h3></div>
             <div style="padding:12px;">
               <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastView()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list â ED + clinic roles</span></span></label>
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastView()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list â private clinic roles</span></span></label>
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="UCC" onchange="renderBroadcastView()"> <span><strong>UCC</strong><br><span style="font-size:11px;color:var(--g500);">Urgent Care Clinic list â ALS2 required</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastView()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list — ED + clinic roles</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastView()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list — private clinic roles</span></span></label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="UCC" onchange="renderBroadcastView()"> <span><strong>UCC</strong><br><span style="font-size:11px;color:var(--g500);">Urgent Care Clinic list — ALS2 required</span></span></label>
                 <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="Interventional Radiologist" onchange="renderBroadcastView()"> <span><strong>Interventional Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">IR list</span></span></label>
                 <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="General Radiologist" onchange="renderBroadcastView()"> <span><strong>General Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">Gen Rad list</span></span></label>
               </div>
@@ -409,7 +409,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
               <label style="font-size:11px;font-weight:600;color:var(--g600);">Subject line</label>
               <input id="bc-subject" style="width:100%;margin-top:4px;padding:7px 9px;border:1px solid var(--g300);border-radius:7px;font-size:13px;" readonly>
             </div>
-            <div id="bc-preview" style="border:1px solid var(--g200);border-radius:8px;padding:16px;background:#fff;min-height:200px;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;}</div>
+            <div id="bc-preview" style="border:1px solid var(--g200);border-radius:8px;padding:16px;background:#fff;min-height:200px;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;}></div>
           </div>
         </div>
       </div>
@@ -421,10 +421,10 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
 <!-- ADD/EDIT VACANCY MODAL -->
 <div class="ov hidden" id="vac-modal">
   <div class="modal modal-lg">
-    <div class="mh"><h3 id="vac-modal-title">Add vacancy</h3><button class="x" onclick="closeModal('vac-modal')">â</button></div>
+    <div class="mh"><h3 id="vac-modal-title">Add vacancy</h3><button class="x" onclick="closeModal('vac-modal')">✕</button></div>
     <div class="mb">
       <div class="fg fg3">
-        <div class="fi s3"><label>Job title / clinic name *</label><input id="v-title" placeholder="e.g. Dubbo GP Clinic â July locum"></div>
+        <div class="fi s3"><label>Job title / clinic name *</label><input id="v-title" placeholder="e.g. Dubbo GP Clinic — July locum"></div>
         <div class="fi s3"><label>Client / facility *</label><input id="v-client" placeholder="e.g. Western NSW Primary Health Network"></div>
         <div class="fi"><label>Location (town/suburb)</label><input id="v-location" placeholder="e.g. Dubbo"></div>
         <div class="fi"><label>State *</label>
@@ -438,10 +438,10 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
           <select id="v-role-type">
             <option value="">Select type</option>
             <option value="GP Only">GP Only</option>
-            <option value="GP VMO">GP VNO</option>
+            <option value="GP VMO">GP VMO</option>
             <option value="Interventional Radiologist">Interventional Radiologist</option>
             <option value="General Radiologist">General Radiologist</option>
-            <option value="ED VMO">ED VNO</option>
+            <option value="ED VMO">ED VMO</option>
             <option value="UCC">UCC</option>
             <option value="Either">Either</option>
           </select>
@@ -473,957 +473,1594 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
         <div class="fi"><label>Urgency</label>
           <select id="v-urgency">
             <option value="normal">Normal</option>
-            <option value="high">High ¸ %[Ú][ÙYZÜÏÛÜ[ÛÜ[Û[YOHÜ]XØ[Ü]XØ[8 %[TÐTÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHX[Ý]\ÏÛX[Ù[XÝYH\Ý]\ÈÜ[Û[YOHÜ[Ü[ÛÜ[ÛÜ[Û[YOH[Y[YÛÜ[ÛÜ[Û[YOHØ[Ù[YØ[Ù[YÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHX[[[ÜÈ	H
-Y\XØXJOÛX[[]YHX[[ÜÈ\OH[X\XÙZÛ\HKË
-ÍHZ[HX^HLÝ[OHÚYL	NÈÙ]]Û\ÜÏHHX[SÌ\]Z\YÏÛX[Ù[XÝYHX[ÌÜ[Û[YOH[ÙHÏÛÜ[ÛÜ[Û[YOHYHY\È8 %SÌÙ\YXØ]H\]Z\YÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHX[STÈXØ[ÞOÏÛX[Ù[XÝYHX[\ÈÜ[Û[YOH[ÙHÏÛÜ[ÛÜ[Û[YOHYHY\È8 %XÜYÚ[[YYXØ[Ù\XÙOÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHYH\Ù\ÜÚ[ÛË]Ü\X[Ù\ÜÚ[ÛÈ
-ÔÛJOÛX[Ù[XÝYH\Ù\ÜÚ[ÛÈÜ[Û[YOHÝÜXÚYYYÛÜ[ÛÜ[Û[YOH[Û^HÈY^H[Û^HÈY^OÛÜ[ÛÜ[Û[YOH[Û^HÈ\Ù^H[Û^HÈ\Ù^OÛÜ[ÛÜ[Û[YOHH^\ËÝÙYZÈH^\ËÝÙYZÏÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHYH[Z[ÙYZÜË]Ü\X[Z[[][HÙYZÜÈ
-ÔÛJOÛX[Ù[XÝYH[Z[]ÙYZÜÈÜ[Û[YOHÜ[Ü[ÛÜ[ÛÜ[Û[YOHHÙYZÈHÙYZÏÛÜ[ÛÜ[Û[YOHÙYZÜÈÙYZÜÏÛÜ[ÛÜ[Û[YOHÈÙYZÜÈÈÙYZÜÏÛÜ[ÛÜ[Û[YOHÙYZÜÈÙYZÜÏÛÜ[ÛÜ[Û[YOHÙYZÜÈÙYZÜÏÛÜ[ÛÜ[Û[YOHÙYZÜÈÙYZÜÏÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHYH[ÛØ[]Ü\X[ÛXØ[ÛÛ\Û[
-ÔSÊOÛX[Ù[XÝYH[ÛXØ[Ü[Û[YOHÈÏÛÜ[ÛÜ[Û[YOH[\HØÚÈ[\HØÚÏÛÜ[ÛÜ[Û[YOHNNÛÜ[ÛÜ[Û[YOHNÈNÏÛÜ[ÛÜ[Û[YOHNNÛÜ[ÛÜ[Û[YOH\È\ÜÝ\\È\ÜÝ\ÛÜ[ÛÜ[Û[YOHÛHÛOÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHÌÈX[Ý\ÏÛX[^\XHYH[Ý\ÈXÙZÛ\H[H^H]Z[È8 %QÙ\ÜÚ[ÛË[[È\KØ\\]Z\Y]ËÝ^\XOÙ]Ù]Ù]]Û\ÜÏHY]ÛÛ\ÜÏH\ÙXÈÛÛXÚÏHÛÜÙS[Ù[
-	ÝXË[[Ù[	ÊHØ[Ù[Ø]Û]ÛÛ\ÜÏH\HÛÛXÚÏHØ]UXØ[ÞJ
-HØ]HXØ[ÞOØ]ÛÙ]Ù]Ù]KKHÐSQUHÑSHÈQÈSÑSKO]Û\ÜÏHÝY[YHØ[[[Ù[]Û\ÜÏH[Ù[[Ù[[È]Û\ÜÏHZÈYHØ[[[Ù[[[YHØ[Y]HÙ[OÚÏ]ÛÛ\ÜÏHÛÛXÚÏHÛÜÙS[Ù[
-	ØØ[[[Ù[	ÊH¸§%OØ]ÛÙ]]Û\ÜÏHXYHØ[[[Ù[XÙHÙ]]Û\ÜÏHY]ÛÛ\ÜÏH\ÙXÈÛÛXÚÏHÛÜÙS[Ù[
-	ØØ[[[Ù[	ÊHÛÜÙOØ]Û]ÛÛ\ÜÏH\HÛÛXÚÏHØ]PØ[YÊ
-HØ]HY\[Ù\ÏØ]ÛÙ]Ù]Ù]KKHÕUÓÓQHÑÈSÑSKO]Û\ÜÏHÝY[YHÝ]ÛÛYK[[Ù[]Û\ÜÏH[Ù[]Û\ÜÏHZÏÙÈÝ]ÛÛYOÚÏ]ÛÛ\ÜÏHÛÛXÚÏHÛÜÙS[Ù[
-	ÛÝ]ÛÛYK[[Ù[	ÊH¸§%OØ]ÛÙ]]Û\ÜÏHX]Û\ÜÏHÈÝ[OHX\Ú[XÝÛNLÈ]Û\ÜÏHHX[Ø[Y]OÛX[[]YHËXØ[[[YH\ØXYÝ[OHXÚÙÜÝ[\KYÍL
-NÈÙ]]Û\ÜÏHHX[XØ[ÞOÛX[[]YHË]XË]]H\ØXYÝ[OHXÚÙÜÝ[\KYÍL
-NÈÙ]Ù]]Û\ÜÏHÈ]Û\ÜÏHHX[Ý]ÛÛYH
-ÛX[Ù[XÝYHË[Ý]ÛÛYHÛÚ[ÙOHÙÙÛSÝ]ÛÛYTX\ÛÛ
-HÜ[Û[YOHÙ[XÝÝ]ÛÛYOÛÜ[ÛÜ[Û[YOHXØÙ\Y¸§!HXØÙ\YÛÜ[ÛÜ[Û[YOHXÛ[Y¸§cXÛ[YÛÜ[ÛÜ[Û[YOHÚÜÝY¼'änÈÚÜÝY
-È\JOÛÜ[ÛÜ[Û[YOH[[È¸£ìÈÙ[8 %]ØZ][È\OÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHYHË\X\ÛÛ]Ü\X[X\ÛÛ
-YXÛ[Y
-OÛX[Ù[XÝYHË\X\ÛÛÜ[Û[YOHÙ[XÝX\ÛÛÛÜ[ÛÜ[Û[YOH]WÛÝÈ]HÛÈÝÏÛÜ[ÛÜ[Û[YOHØØ][ÛØØ][ÛÝÝZ]XOÛÜ[ÛÜ[Û[YOH]\È]\ÈÛÝÛÜÏÛÜ[ÛÜ[Û[YOHØÚ×ÝÛ×ÛÛÈØÚÈÛÈÛÏÛÜ[ÛÜ[Û[YOHØÚ×ÝÛ×ÜÚÜØÚÈÛÈÚÜÛÜ[ÛÜ[Û[YOHÝØ]Z[XHÝ]Z[XOÛÜ[ÛÜ[Û[YOH\ÛÛ[\ÛÛ[È[Z[HX\ÛÛÛÜ[ÛÜ[Û[YOHÝ\Ý\ÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHÌX[Ý\ÏÛX[[]YHË[Ý\ÈXÙZÛ\H[H^HÛÛ^Ù]Ù]Ù]]Û\ÜÏHY]ÛÛ\ÜÏH\ÙXÈÛÛXÚÏHÛÜÙS[Ù[
-	ÛÝ]ÛÛYK[[Ù[	ÊHØ[Ù[Ø]Û]ÛÛ\ÜÏH\HÛÛXÚÏHØ]SÝ]ÛÛYJ
-HÙÈÝ]ÛÛYOØ]ÛÙ]Ù]Ù]KKHÐQÐTÕQTÔÐQÑHSÑSKO]Û\ÜÏHÝY[YH\ÙË[[Ù[]Û\ÜÏH[Ù[]Û\ÜÏHZÈYH\ÙË[[Ù[]]HÝ]XXÚY\ÜØYÙOÚÏ]ÛÛ\ÜÏHÛÛXÚÏHÛÜÙS[Ù[
-	Û\ÙË[[Ù[	ÊH¸§%OØ]ÛÙ]]Û\ÜÏHX]Ý[OHX\Ú[XÝÛNLÙÛ\Ú^NLØÛÛÜ\KYÍL
-NÈY]YÜHÙ[[ËÛÜH[\ÝH[È[XZ[ÜÚ]Ð\Ù]^\XHYH\ÙËXÙHÝ[OHÚYL	NÛZ[ZZYÚÜY[ÎLØÜ\\ÛÛY\KYÌÌ
-NØÜ\\Y]\ÎÙÛ\Ú^NLÜÙÛY[Z[N[\]Ü\Ú^N\XØ[ÈÝ^\XOÙ]]Û\ÜÏHY]ÛÛ\ÜÏH\ÙXÈÛÛXÚÏHÛÜÙS[Ù[
-	Û\ÙË[[Ù[	ÊHÛÜÙOØ]Û]ÛÛ\ÜÏH\HÛÛXÚÏHÛÜS\ÙÊ
-HÛÜHY\ÜØYÙOØ]ÛÙ]Ù]Ù]KKHÕQPÐUSÓKO]YHÝYÛ\ÜÏHÝYÙ]ØÜ\ÛÛÝÐÕTIÚÎËÜ[Þ[ÚÞ]^ÜXZÙÛ^ËÝ\X\ÙKÛÉÎÂÛÛÝÐÒÑVOIÜØÜX\ÚXWÑRN[R[ÌMÙ[ÐWÌP[ÕLMÉÎÂÛÛÝØ\Ý\X\ÙKÜX]PÛY[
-ÐÕTÐÒÑVJNÂËÈ8¥ 8¥ 8¥ ÕTPTÑHPTÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ÛÛÝÕPÏIÛØÝ[WÝXØ[ÚY\ÉÎÂÛÛÝÔQÏIÛØÝ[WØØ[ÜYÉÎÂÛÛÝÓÕUÓÓQTÏIÛØÝ[WÛÝ]ÛÛY\ÉÎÂËÈ8¥ 8¥ 8¥ ÕUH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ]XØ[ÚY\ÏV×NÂ]Ø[Y]\ÏV×NÂ]Ø[YÏ^ßNÂ]Ý]ÛÛY\ÏV×NÂ]Y][ÕXÒY[[Â]Ý]ÛÛYPÛÛ^^ØØ[Y[XÒY[NÂ]Ý\[Ø[Y[[ÂËÈ8¥ 8¥ 8¥ SU8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ \Þ[È[Ý[Û[]
+            <option value="high">High — fill within 2 weeks</option>
+            <option value="critical">Critical — fill ASAP</option>
+          </select>
+        </div>
+        <div class="fi"><label>Status</label>
+          <select id="v-status">
+            <option value="Open">Open</option>
+            <option value="Filled">Filled</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="fi"><label>Billings % (if applicable)</label>
+          <input id="v-billings" type="number" placeholder="e.g. 75" min="0" max="100" style="width:100%;">
+        </div>
+        <div class="fi"><label>ALS2 required?</label>
+          <select id="v-als2">
+            <option value="false">No</option>
+            <option value="true">Yes — ALS2 certificate required</option>
+          </select>
+        </div>
+        <div class="fi"><label>AMS vacancy?</label>
+          <select id="v-ams">
+            <option value="false">No</option>
+            <option value="true">Yes — Aboriginal Medical Service</option>
+          </select>
+        </div>
+        <div class="fi" id="v-sessions-wrap"><label>Sessions (GP Only)</label>
+          <select id="v-sessions">
+            <option value="">Not specified</option>
+            <option value="Monday to Friday">Monday to Friday</option>
+            <option value="Monday to Thursday">Monday to Thursday</option>
+            <option value="5 days/week">5 days/week</option>
+          </select>
+        </div>
+        <div class="fi" id="v-minweeks-wrap"><label>Minimum weeks (GP Only)</label>
+          <select id="v-min-weeks">
+            <option value="Open">Open</option>
+            <option value="1 week">1 week</option>
+            <option value="2 weeks">2 weeks</option>
+            <option value="3 weeks">3 weeks</option>
+            <option value="4 weeks">4 weeks</option>
+            <option value="6 weeks">6 weeks</option>
+            <option value="8 weeks">8 weeks</option>
+          </select>
+        </div>
+        <div class="fi" id="v-oncall-wrap"><label>On-call component (GP VMO)</label>
+          <select id="v-on-call">
+            <option value="TBC">TBC</option>
+            <option value="Entire block">Entire block</option>
+            <option value="1:2">1:2</option>
+            <option value="1:3">1:3</option>
+            <option value="1:4">1:4</option>
+            <option value="As per roster">As per roster</option>
+            <option value="None">None</option>
+          </select>
+        </div>
+        <div class="fi s3"><label>Notes</label><textarea id="v-notes" placeholder="Any extra details — ED sessions, billing type, car required, etc."></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('vac-modal')">Cancel</button>
+      <button class="btn btn-pri" onclick="saveVacancy()">Save vacancy</button>
+    </div>
+  </div>
+</div>
 
-^ÂÛÛÝÝXÔ\ËY\ËÝ]\×OX]ØZ]ÛZ\ÙK[
-ÂØÛJÕPÊKÙ[XÝ
-	ÊÊKÜ\	ØÜX]YØ]	ËØ\ØÙ[[Î[Ù_JKØÛJÔQÊKÙ[XÝ
-	ÊÊKØÛJÓÕUÓÓQTÊKÙ[XÝ
-	ÊÊKÜ\	Ù]IËØ\ØÙ[[Î[Ù_JBJNÂYXÔ\Ë\ÜXÛÛÛÛK\Ü	ÝXÈØYËXÔ\Ë\ÜNÂYY\Ë\ÜXÛÛÛÛK\Ü	ÜYÈØYËY\Ë\ÜNÂYÝ]\Ë\ÜXÛÛÛÛK\Ü	ÛÝ]ÛÛY\ÈØYËÝ]\Ë\ÜNÂXØ[ÚY\Ï]XÔ\Ë]_×NÂØ[YÏ^ßNÂ
-Y\Ë]_×JKÜXXÚ
-OØØ[YÖÜØ[ÚYO\ßJNÂÝ]ÛÛY\Ï[Ý]\Ë]_×NÂ]ØZ]ØYØ[Y]\Ê
-NÂ[\\Ú
+<!-- CANDIDATE PROFILE / PREFS MODAL -->
+<div class="ov hidden" id="cand-modal">
+  <div class="modal modal-lg">
+    <div class="mh"><h3 id="cand-modal-name">Candidate profile</h3><button class="x" onclick="closeModal('cand-modal')">✕</button></div>
+    <div class="mb" id="cand-modal-body"></div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('cand-modal')">Close</button>
+      <button class="btn btn-pri" onclick="saveCandPrefs()">Save preferences</button>
+    </div>
+  </div>
+</div>
 
-NÂBËÈ8¥ 8¥ 8¥ UQÐUSÓ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[Û][Y]Ê^ÂØÝ[Y[]Y\TÙ[XÝÜ[
-	ËØZ][IÊKÜXXÚ
-OOKÛ\ÜÓ\Ý[[ÝJ	ØXÝ]IÊJNÂ[Û\ÜÓ\ÝY
-	ØXÝ]IÊNÂØÝ[Y[]Y\TÙ[XÝÜ[
-	ËY]ÉÊKÜXXÚ
-OÛ\ÜÓ\Ý[[ÝJ	ØXÝ]IÊJNÂØÝ[Y[Ù][[Y[RY
-	ÝY]ËIÊÝY]ÊKÛ\ÜÓ\ÝY
-	ØXÝ]IÊNÂÛÛÝ]\Ï^Ù\ÚÑ\ÚØ\	ËX]ÚÓX]Ú[Ú[IËXØ[ÚY\ÎÕXØ[ÚY\ÉËØ[Y]\ÎÐØ[Y]\ÉËÝ]ÛÛY\ÎÓÝ]ÛÛYHÙÉË[\ÜÒ[\ÜXØ[ÚY\ÉËØYØ\ÝÐØYØ\Ý	ßNÂØÝ[Y[Ù][[Y[RY
-	Ý]]IÊK^ÛÛ[]]\ÖÝY]×_Y]ÎÂØÝ[Y[Ù][[Y[RY
-	ÝXXÝ[ÛÉÊK[\SIÉÎÂYY]ÏOOIÙ\Ú	ÊH[\\Ú
+<!-- OUTCOME LOG MODAL -->
+<div class="ov hidden" id="outcome-modal">
+  <div class="modal">
+    <div class="mh"><h3>Log outcome</h3><button class="x" onclick="closeModal('outcome-modal')">✕</button></div>
+    <div class="mb">
+      <div class="fg" style="margin-bottom:12px;">
+        <div class="fi"><label>Candidate</label><input id="o-cand-name" disabled style="background:var(--g50);"></div>
+        <div class="fi"><label>Vacancy</label><input id="o-vac-title" disabled style="background:var(--g50);"></div>
+      </div>
+      <div class="fg">
+        <div class="fi"><label>Outcome *</label>
+          <select id="o-outcome" onchange="toggleOutcomeReason()">
+            <option value="">Select outcome</option>
+            <option value="accepted">✅ Accepted</option>
+            <option value="declined">❌ Declined</option>
+            <option value="ghosted">👻 Ghosted (no reply)</option>
+            <option value="pending">⏳ Sent — awaiting reply</option>
+          </select>
+        </div>
+        <div class="fi" id="o-reason-wrap">
+          <label>Reason (if declined)</label>
+          <select id="o-reason">
+            <option value="">Select reason</option>
+            <option value="rate_low">Rate too low</option>
+            <option value="location">Location not suitable</option>
+            <option value="dates">Dates don't work</option>
+            <option value="block_too_long">Block too long</option>
+            <option value="block_too_short">Block too short</option>
+            <option value="not_available">Not available</option>
+            <option value="personal">Personal / family reason</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="fi s2"><label>Notes</label><input id="o-notes" placeholder="Any extra context..."></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('outcome-modal')">Cancel</button>
+      <button class="btn btn-pri" onclick="saveOutcome()">Log outcome</button>
+    </div>
+  </div>
+</div>
 
-NÂYY]ÏOOIÛX]Ú	ÊH[\X]ÚY]Ê
-NÂYY]ÏOOIÝXØ[ÚY\ÉÊH[\XØ[ÚY\ÕXJ
-NÂYY]ÏOOIØØ[Y]\ÉÊH[\Ø[Y]\ÕXJ
-NÂYY]ÏOOIÛÝ]ÛÛY\ÉÊH[\Ý]ÛÛYSÙÊ
-NÂYY]ÏOOIØØYØ\Ý	ÊH[\ØYØ\ÝY]Ê
-NÂBËÈ8¥ 8¥ 8¥ ÐQÐSQUTÈÓHÕTPTÑH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ \Þ[È[Ý[ÛØYØ[Y]\Ê
-^ÂÛÛÝÙ]K\ÜOX]ØZ]ØÛJ	ØÜWÜÙ[\ÉÊBÙ[XÝ
-	ÊÊB\J	Ý\IË	ÛØÝ[IÊB\J	ÜÝ]\ÉË	ÐXÝ]IÊBÜ\	Û[YIÊNÂY\Ü^ØÛÛÛÛK\Ü\ÜNØØ[Y]\ÏV×NÜ]\ßBØ[Y]\ÏY]_×NÂBËÈ8¥ 8¥ 8¥ ÐUKÓÐQSTÈ
-Ý\X\ÙJH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ \Þ[È[Ý[ÛØ]UXÜÊ^Ø]ØZ]ØÛJÕPÊK\Ù\
-NßB\Þ[È[Ý[ÛØ]TYÊÚYYÊ^Ü]\]ØZ]ØÛJÔQÊK\Ù\
-ØØ[ÚYÚYYßJNßB\Þ[È[Ý[ÛØ]SÝ]ÛÛY\ÊÊ^Ø]ØZ]ØÛJÓÕUÓÓQTÊK[Ù\
-ÊNßB[Ý[ÛZY
+<!-- BROADCAST MESSAGE MODAL -->
+<div class="ov hidden" id="msg-modal">
+  <div class="modal">
+    <div class="mh"><h3 id="msg-modal-title">Outreach message</h3><button class="x" onclick="closeModal('msg-modal')">✕</button></div>
+    <div class="mb">
+      <div style="margin-bottom:10px;font-size:12px;color:var(--g500);">Edit before sending. Copy and paste into email or WhatsApp.</div>
+      <textarea id="msg-body" style="width:100%;min-height:200px;padding:10px;border:1px solid var(--g300);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;"></textarea>
+    </div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('msg-modal')">Close</button>
+      <button class="btn btn-pri" onclick="copyMsg()">Copy message</button>
+    </div>
+  </div>
+</div>
 
-^Ü]\]KÝÊ
-KÔÝ[ÊÍJÓX][ÛJ
-KÔÝ[ÊÍKÛXÙJ
-NßB[Ý[Û\ØÊÊ^ÚY\Ê\]\	ÉÎÜ]\Ý[ÊÊK\XÙJÉÙË	É[\ÉÊK\XÙJÏÙË	ÉÉÊK\XÙJÏÙË	ÉÝÉÊNßBËÈ8¥ 8¥ 8¥ PUÒSÈSÒSH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[ÛØÛÜPØ[Y]JØ[XÊ^ÂÛÛÝYÏXØ[YÖØØ[Y_ßNÂ]ØÛÜOLÂ]X\ÛÛÏV×NÂ]Ø\[ÜÏV×NÂ]ØÚÜÏV×NÂËÈKÓHTH
-M\ÊBÛÛÝ\YËÛWÝ\\ß	ØÝ	ÎÂYXËÛWÝ\OOOIÑZ]\ßOOIØÝ	Ê^ÂØÛÜJÏLMNÜX\ÛÛË\Ú
-	ÔÛH\N[H]	ÊNÂH[ÙHYXËÛWÝ\OOO\
-OOIÑÔÛIÉXËÛWÝ\OOOIÑÔÛIÊ_
-OOIÑÔHSÉÉXËÛWÝ\OOOIÑÔHSÉÊJ^ÂØÛÜJÏLMNÜX\ÛÛË\Ú
-	ø§$ÈÛH\HX]Ú
-	ÊÝXËÛWÝ\JÉÊIÊNÂH[ÙHÂØÚÜË\Ú
-	ø§%ÈÛH\HZ\ÛX]Ú
-ØÝÜY\È	ÊÜ
-ÉÊIÊNÂBËÈURSPSUH
-\ÊBÛÛÝ]ÛOXØ[]Z[X[]WÙÛNÂÛÛÝ]ÏXØ[]Z[X[]WÝÎÂYXËÝ\Ù]I]ÛI]Ê^ÂÛÛÝÏ[]È]JXËÝ\Ù]JKO[]È]JXË[Ù]_XËÝ\Ù]JNÂÛÛÝ\Ï[]È]J]ÛJKYO[]È]J]ÊNÂY\Ï]ÉYO]J^ÜØÛÜJÏLNÜX\ÛÛË\Ú
-	ø§$È]Z[XH	ÊÙ]]JXËÝ\Ù]JJÊXË[Ù]OÉÈ8 $È	ÊÙ]]JXË[Ù]JNÉÊJNßB[ÙHY\Ï]IYO]Ê^ÜØÛÜJÏLLÝØ\[ÜË\Ú
-	ø¦¨\X[]Z[X[]HÝ\\	ÊNßB[Ù^ØØÚÜË\Ú
-	ø§%ÈÝ]Z[XH\ÙH]\ÉÊNßBH[ÙHY]ÛJ^ÂØÛÜJÏLLÝØ\[ÜË\Ú
-	ø¦¨]Z[X[]H\ÝY]È[]IÊNÂH[ÙHÂØÛÜJÏNÝØ\[ÜË\Ú
-	ø¦¨]Z[X[]HÝÛÛ\YY	ÊNÂBËÈËÐÐUSÓÈÕUH
-ÊBÛÛÝYÝ]\Ï\YËY\YÜÝ]\ß×NÂÛÛÝ]ÚYÝ]\Ï\YË]ÚYYÜÝ]\ß×NÂY]ÚYÝ]\Ë[ÛY\ÊXËÝ]JJ^ÂØÚÜË\Ú
-	ø§%È]ÚYÈ	ÊÝXËÝ]JNÂH[ÙHYYÝ]\Ë[ÝOOL
-^ÂØÛÜJÏLLÝØ\[ÜË\Ú
-	ø¦¨ÈØØ][ÛY\[ÙHÙ]	ÊNÂH[ÙHYYÝ]\Ë[ÛY\ÊXËÝ]JJ^ÂØÛÜJÏLÜX\ÛÛË\Ú
-	ø§$ÈY\È	ÊÝXËÝ]JNÂH[ÙHÂØÛÜJÏMNÝØ\[ÜË\Ú
-	ø¦¨	ÊÝXËÝ]JÉÈÝ[Y\YÝ]\ÉÊNÂBËÈ
-UH
-ÊBÛÛÝ]SZ[XØ[Z[WÜ]WÛZ[ÂÛÛÝYÙ]]XË]NÂY]SZ[YÙ]
-^ÂY]SZ[XYÙ]
-^ÜØÛÜJÏLÜX\ÛÛË\Ú
-	ø§$È]HÚÈ
-		ÊÜ]SZ[ÉËÙ^HZ[YÙ]		ÊØYÙ]
-ÉÊIÊNßB[ÙHY]SZ[XYÙ]
-KJ^ÜØÛÜJÏLLÝØ\[ÜË\Ú
-	ø¦¨]H		ÊÜ]SZ[ÉÈÛYÚHÝ\YÙ]		ÊØYÙ]
-NßB[Ù^ØØÚÜË\Ú
-	ø§%È]H		ÊÜ]SZ[ÉÈÝ\YÙ]		ÊØYÙ]
-NßBH[ÙHY]SZ[^ÂØÛÜJÏLLÝØ\[ÜË\Ú
-	ø¦¨ÈYÙ]Ù]ÜXØ[ÞIÊNÂH[ÙHÂØÛÜJÏLLÝØ\[ÜË\Ú
-	ø¦¨Ø[Y]H]HÝÛ[IÊNÂBËÈ
-KH
-LÊBYXËOOOIÝYIßXËOOO]YJ^ÂÛÛÝP\X\ÏXØ[WØ\X\ß×NÂYP\X\Ë[ÝØ[WÜÝ]\Ê^ÜØÛÜJÏLLÜX\ÛÛË\Ú
-	ø§$ÈH[YÚXIÊNßB[Ù^ØØÚÜË\Ú
-	ø§%ÈH\]Z\Y]Ø[Y]HÝH[YÚXIÊNßBH[ÙHÂØÛÜJÏMNËËÈÈ[[HÜÛQHØÂBËÈ
-ÐÒÈSÕ
-LÊBÛÛÝØÚÔY\YËØÚ×ÜY	Ø[IÎÂÛÛÝØÚÕÚÜÏ\\ÙR[
-XËØÚ×ÝÙYZÜÊ_ÂYØÚÔYOOIØ[IßXØÚÕÚÜÊ^ÂØÛÜJÏLLÂH[ÙHYØÚÔYOOIÜÚÜ	ÉØÚÕÚÜÏL^ÂØÛÜJÏLLÜX\ÛÛË\Ú
-	ø§$ÈÚÜØÚÈY\Y
-	ÊØØÚÕÚÜÊÉÈÚÊIÊNÂH[ÙHYØÚÔYOOIÛÛÉÉØÚÕÚÜÏLÊ^ÂØÛÜJÏLLÜX\ÛÛË\Ú
-	ø§$ÈÛÈØÚÈY\Y
-	ÊØØÚÕÚÜÊÉÈÚÊIÊNÂH[ÙHYØÚÔYOOIÜÚÜ	ÉØÚÕÚÜÏ^ÂØ\[ÜË\Ú
-	ø¦¨Y\ÈÚÜØÚÜË\È\È	ÊØØÚÕÚÜÊÉÈÚÜÉÊNÂØÛÜJÏLÎÂH[ÙHYØÚÔYOOIÛÛÉÉØÚÕÚÜÏÊ^ÂØ\[ÜË\Ú
-	ø¦¨Y\ÈÛÙ\ØÚÜË\È\ÈÛH	ÊØØÚÕÚÜÊÉÈÚÜÉÊNÂØÛÜJÏLÎÂBËÈ
-ËTSQTSÑH
-Û\ËÜ[[KÈÈØ\
-BÛÛÝ\[ÚÏ\YË\[ÛÚÎÂY
-XË\[OOIÝYIßXË\[OO]YJJ^ÂY\[ÚÏOO]Y_\[ÚÏOOIÝYIÊ^ÜØÛÜJÏMNÜX\ÛÛË\Ú
-	ø§$ÈÜ[È\[Ü[[ÝIÊNßB[ÙHY\[ÚÏOOY[Ù_\[ÚÏOOIÙ[ÙIÊ^ØØÚÜË\Ú
-	ø§%ÈÝ[\\ÝY[\[Ü[[ÝIÊNßB[Ù^ÝØ\[ÜË\Ú
-	ø¦¨\[ÛH8 %Y\[ÙHÝÙ]	ÊNßBBËÈRÑSRÓÑSÑQQT8 %ÛHÝ]ÛÛYH\ÝÜBÛÛÝØ[Ý]ÛÛY\Ï[Ý]ÛÛY\Ë[\ÏOËØ[ÚYOOXØ[Y
-NÂÛÛÝXØÙ\YXØ[Ý]ÛÛY\Ë[\ÏOËÝ]ÛÛYOOOIØXØÙ\Y	ÊK[ÝÂÛÛÝXÛ[YXØ[Ý]ÛÛY\Ë[\ÏOËÝ]ÛÛYOOOIÙXÛ[Y	ÊK[ÝÂÛÛÝÚÜÝYXØ[Ý]ÛÛY\Ë[\ÏOËÝ]ÛÛYOOOIÙÚÜÝY	ÊK[ÝÂËÈÚXÚÈÜÚ[Z[\Ý]HÝ]ÛÛY\ÂÛÛÝÝ]PXØÙ\Y[Ý]ÛÛY\Ë[\ÏOËØ[ÚYOOXØ[Y	ËÝ]ÛÛYOOOIØXØÙ\Y	ÉËX×ÜÝ]OOO]XËÝ]JK[ÝÂÛÛÝÝ]QXÛ[Y[Ý]ÛÛY\Ë[\ÏOËØ[ÚYOOXØ[Y	ËÝ]ÛÛYOOOIÙXÛ[Y	ÉËX×ÜÝ]OOO]XËÝ]IËX\ÛÛOOIÛØØ][ÛÊK[ÝÂYÝ]PXØÙ\Y
-^ÜØÛÜJÏNÜX\ÛÛË\Ú
-	ø§$ÈXÙY[	ÊÝXËÝ]JÉÈYÜIÊNßBYÝ]QXÛ[Y
-^ÜØÛÜKOLLÝØ\[ÜË\Ú
-	ø¦¨][Ý\ÛHXÛ[Y	ÊÝXËÝ]JÉÈØØ][ÛÊNßBYÚÜÝYL^ÜØÛÜKOLMNÝØ\[ÜË\Ú
-	ø¦¨ÚÜÝY	ÊÙÚÜÝY
-ÉÞ8 %[XX[]H\ÚÉÊNßB[ÙHYÚÜÝYOOLJ^ÜØÛÜKOMNÝØ\[ÜË\Ú
-	ø¦¨ÚÜÝYÛÙH][Ý\ÛIÊNßBYXØÙ\YLÊ^ÜØÛÜJÏMNÜX\ÛÛË\Ú
-	ø§$ÈÝÛÈXØÙ\[ÙH\ÝÜH
-	ÊØXØÙ\Y
-ÉÈXÙ[Y[ÊIÊNßBËÈXÛ[YÜ]HÛÚ[Z[\ØÂÛÛÝ]QXÛ[Y[Ý]ÛÛY\Ë[\ÏOËØ[ÚYOOXØ[Y	ËÝ]ÛÛYOOOIÙXÛ[Y	ÉËX\ÛÛOOIÜ]WÛÝÉÊK[ÝÂY]QXÛ[YL^ÝØ\[ÜË\Ú
-	ø¦¨XÛ[Y	ÊÜ]QXÛ[Y
-ÉÞÜÝÈ]H8 %YÛÝX]HØ\Y[IÊNßBËÈØ\ØÛÜBØÛÜOSX]X^
-X]Z[LØÛÜJJNÂËÈY\]Y\IØÛÛ	ÎÂYØÛÜOM
-]Y\IÚÝ	ÎÂ[ÙHYØÛÜOM]Y\IÝØ\IÎÂ]\ÜØÛÜKY\X\ÛÛËØ\[ÜËØÚÜËØ[Ý]ÛÛY\ßNÂB[Ý[ÛÙ]Y\ØÛÜJ^ÂYØÛÜOM
-\]\ÚÝ	ÎÂYØÛÜOM\]\ÝØ\IÎÂ]\ØÛÛ	ÎÂB[Ý[ÛY\X[
-Y\^ÂYY\OOIÚÝ	Ê\]\ü'å)HÝ	ÎÂYY\OOIÝØ\IÊ\]\ü'çèHØ\IÎÂ]\ø§a;î#ÈÛÛ	ÎÂBËÈ8¥ 8¥ 8¥ TÒÐT8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[Û[\\Ú
+<!-- NOTIFICATION -->
+<div id="notif" class="notif"></div>
 
-^ÂÛÛÝÜ[XÜÏ]XØ[ÚY\Ë[\OÝ]\ÏOOIÓÜ[ÊNÂØÝ[Y[Ù][[Y[RY
-	ÜË]XÉÊK^ÛÛ[[Ü[XÜË[ÝÂØÝ[Y[Ù][[Y[RY
-	ÜËXØ[ÉÊK^ÛÛ[XØ[Y]\Ë[ÝÂØÝ[Y[Ù][[Y[RY
-	ÜË[Ý]ÛÛY\ÉÊK^ÛÛ[[Ý]ÛÛY\Ë[ÝÂËÈÛÝ[ÝX]Ú\ÈXÜÜÜÈ[Ü[XØ[ÚY\Â]ÝÛÝ[LÂ]Ý][\ÏV×NÂÜ[XÜËÜXXÚ
-OÂØ[Y]\ËÜXXÚ
-ÏOÂÛÛÝ\ØÛÜPØ[Y]JËNÂYY\OOIÚÝ	Ê^ÂÝÛÝ[
-ÊÎÂÝ][\Ë\Ú
-ØØ[ËXÎØÛÜNØÛÜKX\ÛÛÎX\ÛÛßJNÂBJNÂJNÂØÝ[Y[Ù][[Y[RY
-	ÜËZÝ	ÊK^ÛÛ[ZÝÛÝ[ÂÝ][\ËÛÜ
+<script>
+const SB_URL='https://qoyokyuzkpfvaakdkmxg.supabase.co';
+const SB_KEY='sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W';
+const sb=supabase.createClient(SB_URL,SB_KEY);
 
-KOOØÛÜKXKØÛÜJNÂÛÛÝÝ\ÝYØÝ[Y[Ù][[Y[RY
-	Ù\ÚZÝ[\Ý	ÊNÂYÝ][\Ë[ÝOOL
-^ÂÝ\Ý[\SIÏ]Û\ÜÏH[\HÈÝX]Ú\ÈY]YXØ[ÚY\È[ÛÛ\HØ[Y]H]Z[X[]KÜÙ]ÎÂH[ÙHÂÝ\Ý[\SZÝ][\ËÛXÙJ
-JKX\
-O]Ý[OHY[ÎLMØÜ\XÝÛN\ÛÛY\KYÌL
-NÙ\Ü^N^Ø[YÛZ][\ÎÙ[\ÙØ\LÈ]Û\ÜÏH]Ý[OHXÚÙÜÝ[ÌMÙXÝÚYÌÚZYÚÌÙÛ\Ú^NLÈÚ[]X[ÊØ[[YJ_OÙ]]Ý[OH^NÈ]Ý[OHÛ\Ú^NLÜÙÛ]ÙZYÚÈÙ\ØÊØ[[YJ_OÙ]]Ý[OHÛ\Ú^NL\ØÛÛÜ\KYÍL
-NÈÙ\ØÊXË]J_H0­ÈØÛÜH	ÚØÛÜ_OÙ]Ù]Ü[Û\ÜÏHYÜ¼'å)HÝÜÜ[Ù]
-KÚ[	ÉÊNÂBÛÛÝXÓ\ÝYØÝ[Y[Ù][[Y[RY
-	Ù\Ú]XË[\Ý	ÊNÂYÜ[XÜË[ÝOOL
-^ÂXÓ\Ý[\SIÏ]Û\ÜÏH[\HÈÜ[XØ[ÚY\ËYÛHÈÙ]Ý\YÜÙ]ÎÂH[ÙHÂXÓ\Ý[\S[Ü[XÜËÛXÙJ
-JKX\
-O]Ý[OHY[ÎLMØÜ\XÝÛN\ÛÛY\KYÌL
-NÙ\Ü^N^Ø[YÛZ][\ÎÙ[\ÙØ\LØÝ\ÛÜÚ[\ÈÛÛXÚÏHÜ[X]ÚÜXÊ	ÉÝYIÊH]Ý[OH^NÈ]Ý[OHÛ\Ú^NLÜÙÛ]ÙZYÚÈÙ\ØÊ]J_OÙ]]Ý[OHÛ\Ú^NL\ØÛÛÜ\KYÍL
-NÈÙ\ØÊÝ]J_H0­È	Ù\ØÊÛWÝ\J_H0­È	Ý]OÉÉ	ÊÝ]JÉËÙ^IÎÉßOÙ]Ù]	Ý\Ù[ÞPYÙJ\Ù[ÞJ_BÙ]
-KÚ[	ÉÊNÂBB[Ý[ÛÜ[X]ÚÜXÊXÒY
-^Â]ØÝ[Y[]Y\TÙ[XÝÜ	ÖÙ]K]Y]Ï[X]ÚIÊK	ÛX]Ú	ÊNÂÙ][Y[Ý]
+// ─── SUPABASE TABLES ──────────────────────────────────────────────────────
+const TBL_VAC='locum_vacancies';
+const TBL_PREFS='locum_cand_prefs';
+const TBL_OUTCOMES='locum_outcomes';
 
+// ─── STATE ────────────────────────────────────────────────────────────────
+let vacancies=[];
+let candidates=[];
+let candPrefs={};
+let outcomes=[];
+let editingVacId=null;
+let outcomeContext={candId:null,vacId:null};
+let currentCandId=null;
 
-OOÙ[XÝXØ[ÞJXÒY
-K
-L
-NÂBËÈ8¥ 8¥ 8¥ PUÒQUÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[Û[\X]ÚY]Ê
-^ÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	ÛX]Ú]XË[\Ý	ÊNÂYXØ[ÚY\Ë[ÝOOL
-^Â[[\SIÏ]Û\ÜÏH[\HÈXØ[ÚY\ÈY]ÜÙ]ÎÂ]\ÂB[[\S]XØ[ÚY\Ë[\OÝ]\ÏOOIÓÜ[ÊKX\
-O]Û\ÜÏHXË[\ÝZ][HYHKIÝYHÛÛXÚÏHÙ[XÝXØ[ÞJ	ÉÝYIÊH]Û\ÜÏH]HÙ\ØÊ]J_OÙ]]Û\ÜÏHY]HÙ\ØÊÝ]_	ÉÊ_H0­È	Ù\ØÊÛWÝ\_	ÉÊ_H	Ý]OÉð­È		ÊÝ]JÉËÙ^IÎÉßOÙ]	Ý\Ù[ÞPYÙJ\Ù[ÞJ_BÙ]
-KÚ[	ÉÊNÂB[Ý[ÛÙ[XÝXØ[ÞJXÒY
-^ÂØÝ[Y[]Y\TÙ[XÝÜ[
-	ËXË[\ÝZ][IÊKÜXXÚ
-[O[Û\ÜÓ\Ý[[ÝJ	ÜÙ[XÝY	ÊJNÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	ÝKIÊÝXÒY
-NÂY[
-Y[Û\ÜÓ\ÝY
-	ÜÙ[XÝY	ÊNÂÛÛÝXÏ]XØ[ÚY\Ë[
-OYOO]XÒY
-NÂY]XÊ\]\Â[\XÑ]Z[
-XÊNÂ[\X]Ú\Ý[ÊXÊNÂB[Ý[Û[\XÑ]Z[
-XÊ^ÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	ÛX]Ú]XËY]Z[	ÊNÂ[Ý[K\Ü^OIØØÚÉÎÂ[[\SX]Û\ÜÏHXËY]Z[]Ý[OH\Ü^N^Ø[YÛZ][\ÎÙ[\ÙØ\ÛX\Ú[XÝÛNÈÜ[Ý[OHÛ\Ú^NLÜÙÛ]ÙZYÚÈÙ\ØÊXË]J_OÜÜ[]Û\ÜÏHÜÝ[OH^NÈÙ]	Ý\Ù[ÞPYÙJXË\Ù[ÞJ_B]ÛÛ\ÜÏH\ÙXÈ^ÈÛÛXÚÏHÜ[Y]XØ[ÞJ	ÉÝXËYIÊHY]Ø]ÛÙ]]Û\ÜÏHYÜY]Û\ÜÏHZ][H]Û\ÜÏH[ØØ][ÛÙ]]Û\ÜÏH][Ù\ØÊXËØØ][Û	ÉÊ_H	Ù\ØÊXËÝ]_	ÉÊ_OÙ]Ù]]Û\ÜÏHZ][H]Û\ÜÏH[ÛH\OÙ]]Û\ÜÏH][Ù\ØÊXËÛWÝ\_	ø %	Ê_OÙ]Ù]]Û\ÜÏHZ][H]Û\ÜÏH[]\ÏÙ]]Û\ÜÏH][ÝXËÝ\Ù]OÙ]]JXËÝ\Ù]JNÕÉßIÝXË[Ù]OÉÈ8 $È	ÊÙ]]JXË[Ù]JNÉßOÙ]Ù]]Û\ÜÏHZ][H]Û\ÜÏH[ØÚÏÙ]]Û\ÜÏH][ÝXËØÚ×ÝÙYZÜÏÝXËØÚ×ÝÙYZÜÊÉÈÙYZÉÊÊXËØÚ×ÝÙYZÜÏOÉÜÉÎÉÊNø %	ßOÙ]Ù]]Û\ÜÏHZ][H]Û\ÜÏH[]OÙ]]Û\ÜÏH][ÝXË]OÉÉ	ÊÝXË]JÉËÙ^IÎø %	ßOÙ]Ù]]Û\ÜÏHZ][H]Û\ÜÏH[OÙ]]Û\ÜÏH][Ý[OHÛÛÜÝXËOOOIÝYIÏÉÝ\KYÜIÎÝ\KYÍL
-IßHÝXËOOOIÝYIÏÉÔ\]Z\Y	ÎÓÉßOÙ]Ù]Ù]	ÝXË][OOIÝYIßXËXØÛÛOOOIÝYIÏØ]Ý[OHÛ\Ú^NL\ØÛÛÜ\KYÜNÛX\Ú[]ÜÈÝXË][OOIÝYIÏÉø§$È][ÝYY	ÎÉßH	ÝXËXØÛÛOOOIÝYIÏÉø§$ÈXØÛÛ[[Ù][ÛÝYY	ÎÉßOÙ]ÉßB	ÝXËÝ\ÏØ]Ý[OHÛ\Ú^NL\ØÛÛÜ\KYÍL
-NÛX\Ú[]ÜØÜ\]Ü\ÛÛY\KYÌL
-NÜY[Ë]ÜÈÙ\ØÊXËÝ\Ê_OÙ]ÉßBÙ]ÂB[Ý[Û[\X]Ú\Ý[ÊXÊ^ÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	ÛX]Ú\\Ý[ÉÊNÂYØ[Y]\Ë[ÝOOL
-^Â[[\SIÏ]Û\ÜÏH[\HÝ[OHXÚÙÜÝ[ÙØÜ\\ÛÛY\KYÌ
-NØÜ\\Y]\ÎLÈ]Û\ÜÏHZH¼'äj8 #x¦¥{î#ÏÙ]ÈØÝ[HÔØ[Y]\ÈÝ[[ÔKYØ[Y]\È[HÔH\ÝÜÙ]ÎÂ]\ÂBËÈØÛÜH[Ø[Y]\ÂÛÛÝØÛÜYXØ[Y]\ËX\
-ÏOØØ[ËØÛÜPØ[Y]JËXÊ_JJNÂØÛÜYÛÜ
+// ─── INIT ─────────────────────────────────────────────────────────────────
+async function init(){
+  const[vacRes,prefRes,outRes]=await Promise.all([
+    sb.from(TBL_VAC).select('*').order('created_at',{ascending:false}),
+    sb.from(TBL_PREFS).select('*'),
+    sb.from(TBL_OUTCOMES).select('*').order('date',{ascending:false})
+  ]);
+  if(vacRes.error)console.error('vac load:',vacRes.error);
+  if(prefRes.error)console.error('prefs load:',prefRes.error);
+  if(outRes.error)console.error('outcomes load:',outRes.error);
+  vacancies=vacRes.data||[];
+  candPrefs={};
+  (prefRes.data||[]).forEach(p=>{candPrefs[p.cand_id]=p;});
+  outcomes=outRes.data||[];
+  await loadCandidates();
+  renderDash();
+}
 
-KOOØÛÜKXKØÛÜJNÂÛÛÝÝ\ØÛÜY[\ÏOËY\OOIÚÝ	ÊNÂÛÛÝØ\O\ØÛÜY[\ÏOËY\OOIÝØ\IÊNÂÛÛÝÛÛ\ØÛÜY[\ÏOËY\OOIØÛÛ	ÊNÂ][X]Ý[OH\Ü^N^Ø[YÛZ][\ÎÙ[\ÙØ\LÛX\Ú[XÝÛNLÈÜ[Ý[OHÛ\Ú^NMÙÛ]ÙZYÚÈÙ\ØÊXË]J_OÜÜ[Ü[Ý[OHÛ\Ú^NLØÛÛÜ\KYÍL
-NÈÜØÛÜY[ÝHØ[Y]\ÈØÛÜYÜÜ[]Ý[OH^NÈÙ]ÂÛÛÝÝØ\PØ[Ï\ØÛÜY[\ÏOËY\OOIØÛÛ	ÊNÂYÝØ\PØ[Ë[Ý
-^Â[
-ÏX]ÛÛ\ÜÏH\ÙXÈ\ÛHÛÛXÚÏHÜ[ØYØ\Ý
-	ÒÓÓÝ[ÚYJXËY
-_K	ÒÓÓÝ[ÚYJÝØ\PØ[ËX\
-ÏOËØ[Y
-J_JH¼'äèÈØYØ\ÝÝ
-ÕØ\H
-	ÚÝØ\PØ[Ë[ÝJOØ]ÛÂB[
-ÏIÏÙ]ÎÂYÝ[Ý
-^Â[
-ÏX]Û\ÜÏHY\\ÙXÝ[ÛY\ZÝ]Û\ÜÏHY\ZXY\¼'å)HÝ8 %ÝÛÈ]ZÙ[HÈXØÙ\
-	ÚÝ[ÝJOÙ]	ÚÝX\
-ÏOX]ÚØ\
-ËXÊJKÚ[	ÉÊ_BÙ]ÂBYØ\K[Ý
-^Â[
-ÏX]Û\ÜÏHY\\ÙXÝ[ÛY\]Ø\H]Û\ÜÏHY\ZXY\¼'çèHØ\H8 %ÛÛÙ]ÛHÜÛÈXÝ[ÛÚ[È
-	ÝØ\K[ÝJOÙ]	ÝØ\KX\
-ÏOX]ÚØ\
-ËXÊJKÚ[	ÉÊ_BÙ]ÂBYÛÛ[Ý
-^Â[
-ÏX]Û\ÜÏHY\\ÙXÝ[ÛY\XÛÛ]Û\ÜÏHY\ZXY\Ý[OHÝ\ÛÜÚ[\ÈÛÛXÚÏHÙÙÛPÛÛ
-\ÊH¸§a;î#ÈÛÛ8 %ÚYÛYXØ[\ÜÝY\Ë\Ý\ÛÜ
-	ØÛÛ[ÝJHÜ[Ý[OHX\Ú[[Y]]ÎÙÛ\Ú^NL\È¸¥¯ÚÝÏÜÜ[Ù]]Û\ÜÏHÛÛXÛÛ[Ý[OH\Ü^NÛNÈØÛÛX\
-ÏOX]ÚØ\
-ËXÊJKÚ[	ÉÊ_OÙ]Ù]ÂB[[\SZ[ÂB[Ý[ÛÙÙÛPÛÛ
-XY\[
-^ÂÛÛÝÛÛ[ZXY\[^[[Y[ÚX[ÎÂÛÛÝ\ÒY[XÛÛ[Ý[K\Ü^OOOIÛÛIÎÂÛÛ[Ý[K\Ü^OZ\ÒY[ÉØØÚÉÎÛÛIÎÂXY\[]Y\TÙ[XÝÜ	ÜÜ[ÊK^ÛÛ[Z\ÒY[Éø¥¬YIÎø¥¯ÚÝÉÎÂB[Ý[ÛX]ÚØ\
-ËXÊ^ÂÛÛÝÏ\ËØ[ÂÛÛÝYÏXØ[YÖØËY_ßNÂÛÛÝÛPÛÛÜ^ÉÑÔÛIÎÙÜË	ÑÔSÉÎÜ\Ë	ÑQSÉÎÜ\Ë	ÕPÐÉÎØ[XË	Ò[\[[Û[Y[ÛÙÚ\Ý	ÎØYIË	ÑÙ[\[Y[ÛÙÚ\Ý	ÎØYIßVÜYËÛWÝ\\×_	ÙÜ^IÎÂÛÛÝÛUYÏ\YËÛWÝ\\ÉYËÛWÝ\\ÈOOIØÝ	ÏØÜ[Û\ÜÏHIÜÛPÛÛÜHÙ\ØÊYËÛWÝ\\Ê_OÜÜ[ÏÜ[Û\ÜÏHYÜ^H\HÝÙ]ÜÜ[ÎÂÛÛÝ[ÚYÛ[ÏVÂËX\ÛÛËX\
-OÜ[Û\ÜÏHÚYÈÚYË[ÚÈÙ\ØÊ_OÜÜ[
-KËØ\[ÜËX\
-ÏOÜ[Û\ÜÏHÚYÈÚYË]Ø\Ù\ØÊÊ_OÜÜ[
-KËØÚÜËX\
-OÜ[Û\ÜÏHÚYÈÚYËXYÙ\ØÊ_OÜÜ[
-BNÂÛÛÝ\ÝÛÛXÝ\YË\ÝØÛÛXÝÉÓ\ÝÛÛXÝ	ÊÙ]]JYË\ÝØÛÛXÝ
-NÉÎÂ]\]Û\ÜÏHX]ÚXØ\]Û\ÜÏH]Ý[OHXÚÙÜÝ[Ø]ÛÛÜË[YJ_NÈÚ[]X[ÊË[YJ_OÙ]]Û\ÜÏHX]ÚZ[È]Û\ÜÏHX]Ú[[YH	Ù\ØÊË[YJ_H	ÜÛUYßB	ØËWØ\X\ÉËWØ\X\Ë[ÝÉÏÜ[Û\ÜÏHXYHOÜÜ[ÎÉßBÜ[Ý[OHX\Ú[[Y]]ÎÙÛ\Ú^NLÙÛ]ÙZYÚÌØÛÛÜÜËY\OOIÚÝ	ÏÉÝ\KYÜIÎËY\OOIÝØ\IÏÉÝ\KX[XIÎÝ\K\Y
-IßHØÛÜN	ÜËØÛÜ_OÜÜ[Ù]]Û\ÜÏHX]Ú\ÚYÛ[ÈØ[ÚYÛ[ËÚ[	ÉÊ_OÙ]]Û\ÜÏHX]ÚXXÝ[ÛÈ]ÛÛ\ÜÏH\ÙXÈ^ÈÛÛXÚÏHÜ[Y\ÙÊ	ÉØËYIË	ÉÝXËYIÊH¸§"HYY\ÜØYÙOØ]Û]ÛÛ\ÜÏH^ÈÝ[OHXÚÙÜÝ[\KYÜ[
-NØÛÛÜ\KYÜNØÜ\\ÛÛYØÙÈÛÛXÚÏHÜ[Ý]ÛÛYJ	ÉØËYIË	ÉÝXËYIÊHÙÈÝ]ÛÛYOØ]Û]ÛÛ\ÜÏH\ÙXÈ^ÈÛÛXÚÏHÜ[Ø[Ù[J	ÉØËYIÊHÙ[OØ]Û	Û\ÝÛÛXÝØÜ[Û\ÜÏHX]Ú[Y]HÛ\ÝÛÛXÝOÜÜ[ÉßBÙ]Ù]Ù]ÂBËÈ8¥ 8¥ 8¥ ÐQÐTÕ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[ÛÜ[ØYØ\Ý
-XÒYØ[YÊ^ÂÛÛÝXÏ]XØ[ÚY\Ë[
-OYOO]XÒY
-NÂY]XÊ\]\ÂÛÛÝ[Y\ÏXØ[YËX\
-YOØÛÛÝÏXØ[Y]\Ë[
-OYOOZY
-NÜ]\ÏØË[YNÉßJK[\ÛÛX[NÂÛÛÝ\ÙÏYYØYØ\Ý\ÙÊXË[Y\ÊNÂØÝ[Y[Ù][[Y[RY
-	Û\ÙË[[Ù[]]IÊK^ÛÛ[IÐØYØ\ÝY\ÜØYÙH8 %	ÊÝXË]NÂØÝ[Y[Ù][[Y[RY
-	Û\ÙËXÙIÊK[YO[\ÙÎÂÚÝÓ[Ù[
-	Û\ÙË[[Ù[	ÊNÂB[Ý[ÛYØYØ\Ý\ÙÊXË[Y\Ê^ÂÛÛÝ]TÝ]XËÝ\Ù]OÊ]]JXËÝ\Ù]JJÊXË[Ù]OÉÈ8 $È	ÊÙ]]JXË[Ù]JNÉÊJNÙ]\ÈÉÎÂ]\HÓ[YWKÜH[ÝIÜHÙ[HH]HHÜX]ØÝ[HÜÜ[]HIÙÝHÈ[H[ÝK¼'äãHØØ][Û	ÝXËØØ][Û	ÉßH	ÝXËÝ]_	ÉßB¼'äáH]\Î	Ù]TÝB¸£ìHØÚÎ	ÝXËØÚ×ÝÙYZÜÏÝXËØÚ×ÝÙYZÜÊÉÈÙYZÉÊÊXËØÚ×ÝÙYZÜÏOÉÜÉÎÉÊNÕÉßB¼'ä¬]N	ÝXË]OÉÉ	ÊÝXË]JÉËÙ^IÎÕÉßB¼'ãéHÛN	ÝXËÛWÝ\_	ÑÔØÝ[IßIÝXËOOOIÝYIÏÉÈ
-HØØ][ÛIÎÉßIÝXË][OOIÝYIÏÉ×¸§";î#È][ÝYY	ÎÉßIÝXËXØÛÛOOOIÝYIÏÉ×¼'ãèXØÛÛ[[Ù][ÛÝYY	ÎÉßBÝXËÝ\ÏÉÐY][Û[]Z[Î	ÊÝXËÝ\ÊÉ×ÎÉßUÛÝ[\ÈÛÜÈÜ[ÝOÈ\HÈÚ]ÝYÚ[H]Z[ËØ\HYØ\ËÖ[Ý\[YWBYYT[ÜXÂBËÈ8¥ 8¥ 8¥ QQTÔÐQÑH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[ÛÜ[Y\ÙÊØ[YXÒY
-^ÂÛÛÝØ[XØ[Y]\Ë[
-ÏOËYOOXØ[Y
-NÂÛÛÝXÏ]XØ[ÚY\Ë[
-OYOO]XÒY
-NÂYXØ[]XÊ\]\ÂÛÛÝYÏXØ[YÖØØ[Y_ßNÂÛÛÝ\Ý[\ØÛÜPØ[Y]JØ[XÊNÂÛÛÝ]TÝ]XËÝ\Ù]OÊ]]JXËÝ\Ù]JJÊXË[Ù]OÉÈ8 $È	ÊÙ]]JXË[Ù]JNÉÊJNÙ]\ÈÉÎÂÛÛÝ\Ý[YOXØ[[YKÜ]
-	È	ÊVÌNÂËÈZ[ÜY\ÜØYÙH\ÙYÛY\[ÛÝÛÚYÛ[Â]ÛÚÏIÉÎÂY\Ý[Y\OOIÚÝ	Ê^ÂÛÛÝÝ]SX]ÚJYËY\YÜÝ]\ß×JK[ÛY\ÊXËÝ]JNÂYÝ]SX]Ú
-ZÛÚÏX\ÈÛHÛÚÜÈZÙHHÜX]]Ü[ÝH8 %]	ÜÈ[	ÝXËÝ]_HÚXÚHÛÝÈ[ÝHY\Â[ÙHY\Ý[X\ÛÛËÛÛYJO[ÛY\Ê	ÔXÙY	ÊJJZÛÚÏXHÛÝÈ[ÝIÝHÛHÙ[[	ÝXËÝ]_HYÜKÛÈHØ[YÈXXÚÝ]XÝ]\ÈÛH\ÝÂ[ÙHÛÚÏX\ÙYÛ[Ý\]Z[X[]H[Y\[Ù\Ë\ÈÛÚÜÈZÙHHÝÛÈ]ÂH[ÙHY\Ý[Y\OOIÝØ\IÊ^ÂÛÛÝØ\\\Ý[Ø\[ÜÖÌ_	ÉÎÂYØ\[ÛY\Ê	Ô]IÊJZÛÚÏXH]H\ÈÛYÚHXÝHYÙ]]IÙÝHÈ\ØÝ\ÜÈ8 %\HX^HHÛÛYH^X[]KÂ[ÙHYØ\[ÛY\Ê	ØØÚÉÊJZÛÚÏXHÛÝÈHØÚÈ[Ý\ÛÝ[Ý\\ÝX[Y\[ÙK]IÙÝHÈÚ]XÝ]Ú]\\ÈÛÝ[ÛÜËÂ[ÙHÛÚÏX\ÈÛH\ÈHÛÝ\HÙ[Ý[È\È]H[È]ÛÝ[ÛÜÈÙ[Ü[ÝKÂH[ÙHÂÛÚÏXH]HHØÝ[HÜÜ[]HÛÛZ[È\[Ø[YÈÙYHY[Ý\Ú]X][Û\ÈÚ[ÙYÂBÛÛÝ\ÙÏXH	Ù\Ý[Y_KÚÛÚßB¼'äãH	ÝXËØØ][Û	ÉßH	ÝXËÝ]_	ÉßB¼'äáH	Ù]TÝB¸£ìH	ÝXËØÚ×ÝÙYZÜÏÝXËØÚ×ÝÙYZÜÊÉÈÙYZÉÊÊXËØÚ×ÝÙYZÜÏOÉÜÉÎÉÊNÕÈØÚÉßB¼'ä¬	ÝXË]OÉÉ	ÊÝXË]JÉËÙ^IÎÔ]HÉßB¼'ãéH	ÝXËÛWÝ\_	ÑÔØÝ[IßIÝXËOOOIÝYIÏÉÈ0­ÈHØØ][ÛÎÉßIÝXË][OOIÝYIÏÉ×¸§";î#È][ÛÝ\Y	ÎÉßIÝXËXØÛÛOOOIÝYIÏÉ×¼'ãèXØÛÛ[[Ù][ÛÝYY	ÎÉßBÝXËÝ\ÏÝXËÝ\ÊÉ×ÎÉßP\H[ÝH]Z[XH[[\\ÝYÈ]YHÛÝÈ[IÛØÚÈ[ÝH[ÚY\ËÖ[Ý\[YWXÂØÝ[Y[Ù][[Y[RY
-	Û\ÙË[[Ù[]]IÊK^ÛÛ[IÓY\ÜØYÙHÜ	ÊØØ[[YNÂØÝ[Y[Ù][[Y[RY
-	Û\ÙËXÙIÊK[YO[\ÙÎÂÚÝÓ[Ù[
-	Û\ÙË[[Ù[	ÊNÂB[Ý[ÛÛÜS\ÙÊ
-^ÂÛÛÝOYØÝ[Y[Ù][[Y[RY
-	Û\ÙËXÙIÊNÂ]YØ]ÜÛ\Ø\Ü]U^
-K[YJK[
-
-OOÝYJ	ÓY\ÜØYÙHÛÜYYÈÛ\Ø\	ÊJNÂBËÈ8¥ 8¥ 8¥ PÐSÒQTÈPH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[Û[\XØ[ÚY\ÕXJ
-^ÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	ÝXË]XK]Ü\	ÊNÂYXØ[ÚY\Ë[ÝOOL
-^Â[[\SIÏ]Û\ÜÏH[\H]Û\ÜÏHZH¼'ä¯Ù]ÈXØ[ÚY\ÈY]Y[Ý\\ÝÛHXÝKÜÙ]ÎÂ]\ÂB[[\SXXOXY]OÝÝ]OÝÛOÝ]\ÏÝ]OÝOÝÝ]\ÏÝ\Ù[ÞOÝÝÝÝXYÙOÝXØ[ÚY\ËX\
-OÝ[OHÛ]ÙZYÚÈÙ\ØÊ]J_OÝÙ\ØÊÝ]_	ø %	Ê_OÝÙ\ØÊÛWÝ\_	ø %	Ê_OÝÝ[OHÛ\Ú^NLÈÝÝ\Ù]OÙ]]JÝ\Ù]JNø %	ßIÝ[Ù]OÉÈ8 $È	ÊÙ]]J[Ù]JNÉßOÝÝ]OÉÉ	ÊÝ]JÉËÙ^IÎø %	ßOÝÝOOOIÝYIÏÉÏÜ[Û\ÜÏHYÜY\ÏÜÜ[ÎÓÉßOÝÜÝ]\ÐYÙJÝ]\Ê_OÝÝ\Ù[ÞPYÙJ\Ù[ÞJ_OÝ]ÛÛ\ÜÏH\ÙXÈ^ÈÛÛXÚÏHÜ[Y]XØ[ÞJ	ÉÝYIÊHÝ[OHX\Ú[\YÚÈY]Ø]Û]ÛÛ\ÜÏH^ÈÝ[OHXÚÙÜÝ[\K\K[
-NØÛÛÜ\K\JNØÜ\\ÛÛYØNÈÛÛXÚÏHÜ[X]ÚÜXÊ	ÉÝYIÊHÝ[OHX\Ú[\YÚÈX]ÚØ]Û]ÛÛ\ÜÏH^ÈÝ[OHXÚÙÜÝ[\K\Y[
-NØÛÛÜ\K\Y
-NØÜ\\ÛÛYÙXØXØNÈÛÛXÚÏH[]UXØ[ÞJ	ÉÝYIÊH[]OØ]ÛÝÝ
-KÚ[	ÉÊ_BÝÙOÝXOÂBËÈ8¥ 8¥ 8¥ ÐSQUTÈPH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[Û[\Ø[Y]\ÕXJ
-^ÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	ØØ[]XK]Ü\	ÊNÂYØ[Y]\Ë[ÝOOL
-^Â[[\SIÏ]Û\ÜÏH[\H]Û\ÜÏHZH¼'äj8 #x¦¥{î#ÏÙ]ÈØÝ[HÔØ[Y]\ÈÝ[[ÔKÚXÚÈ]Ø[Y]\È\HÙ]È\HØÝ[H[Ý]\ÈXÝ]HÜÙ]ÎÂ]\ÂB[[\SXOXY[YOÝØØ][ÛÝ]OÝ]Z[XOÝOÝYÈÙ]ÝÝ]ÛÛY\ÏÝÝÝÝXYÙOØØ[Y]\ËX\
-ÏOÂÛÛÝYÏXØ[YÖØËY_ßNÂÛÛÝÓÝ]ÛÛY\Ï[Ý]ÛÛY\Ë[\ÏOËØ[ÚYOOXËY
-NÂÛÛÝXØÙ\YXÓÝ]ÛÛY\Ë[\ÏOËÝ]ÛÛYOOOIØXØÙ\Y	ÊK[ÝÂÛÛÝXÛ[YXÓÝ]ÛÛY\Ë[\ÏOËÝ]ÛÛYOOOIÙXÛ[Y	ÊK[ÝÂÛÛÝÚÜÝYXÓÝ]ÛÛY\Ë[\ÏOËÝ]ÛÛYOOOIÙÚÜÝY	ÊK[ÝÂÛÛÝYÔÙ]\YËÛWÝ\\ßYËY\YÜÝ]\ÎÂ]\Û\ÜÏHÛÈÛÛXÚÏHÜ[Ø[Ù[J	ÉØËYIÊHÝÛÏÙ\ØÊË[YJ_OÜÝÛÏÝÙ\ØÊØËÝ\[ÛØØ][ÛËÝ]WK[\ÛÛX[KÚ[	Ë	Ê_	ø %	Ê_OÝØËZ[WÜ]WÛZ[ÉÉ	ÊØËZ[WÜ]WÛZ[ÊËZ[WÜ]WÛX^ÉÈ8 $È		ÊØËZ[WÜ]WÛX^ÉÊNËÝ\WÜ]WÛZ[ÉÉ	ÊØËÝ\WÜ]WÛZ[ÉËÚÎø %	ßOÝÝ[OHÛ\Ú^NLÈØË]Z[X[]WÙÛOÙ]]JË]Z[X[]WÙÛJJÊË]Z[X[]WÝÏÉÈ8 $È	ÊÙ]]JË]Z[X[]WÝÊNÉÊNÓÝÙ]	ßOÝØËWØ\X\ÉËWØ\X\Ë[ÝÉÏÜ[Û\ÜÏHYÜOÜÜ[Îø %	ßOÝÜYÔÙ]ÉÏÜ[Û\ÜÏHYÜ¸§$ÏÜÜ[ÎÏÜ[Û\ÜÏHYÜ^HYYYÜÜ[ßOÝÝ[OHÛ\Ú^NLÈØXØÙ\YÉÏÜ[Ý[OHÛÛÜ\KYÜH¸§$ÉÊØXØÙ\Y
-ÉÏÜÜ[	ÎÉßIÙXÛ[YÉÏÜ[Ý[OHÛÛÜ\K\Y
-H¸§%ÉÊÙXÛ[Y
-ÉÏÜÜ[	ÎÉßIÙÚÜÝYÉÏÜ[Ý[OHÛÛÜ\KX[XH¼'änÉÊÙÚÜÝY
-ÉÏÜÜ[ÎÉßH	ÈXXØÙ\Y	YXÛ[Y	YÚÜÝYÉø %	ÎÉßOÝÛÛXÚÏH][ÝÜÜYØ][Û
-HÝ[OHÚ]K\ÜXÙNÝÜ\È]ÛÛ\ÜÏH\ÙXÈ^ÈÛÛXÚÏHÜ[Ø[Ù[J	ÉØËYIÊHÝ[OHX\Ú[\YÚÈYÈ8¡¤Ø]Û]ÛÛ\ÜÏH\ÙXÈ^ÈÛÛXÚÏHÜ[Y]Ø[[Ù[
-	ÉØËYIÊHY]Ø]ÛÝÝÂJKÚ[	ÉÊ_OÝÙOÝXOÂBËÈ8¥ 8¥ 8¥ QÈQUÐSQUH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ]Y][ÐØ[Y[[Â[Ý[ÛÜ[YØ[[Ù[
-
-^ÂY][ÐØ[Y[[ÂØÝ[Y[Ù][[Y[RY
-	ØØ[YY]]]IÊK^ÛÛ[IÐYØ[Y]IÎÂØÝ[Y[Ù][[Y[RY
-	ØÙKY[]KXÊKÝ[K\Ü^OIÛÛIÎÂÉØÙK[[YIË	ØÙK[ØØ][ÛË	ØÙK\ÛIË	ØÙKY[XZ[	Ë	ØÙK\]K[Z[Ë	ØÙK\]K[X^	Ë	ØÙKX]Z[YÛIË	ØÙKX]Z[]ÉË	ØÙK\ÜXÚX[IË	ØÙK[Ý\É×KÜXXÚ
-YOØÝ[Y[Ù][[Y[RY
-Y
-K[YOIÉÊNÂØÝ[Y[Ù][[Y[RY
-	ØÙK\Ý]IÊK[YOIÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙKYIÊK[YOIÉÎÂØÝ[Y[Ù][[Y[RY
-	ØØ[YY][[Ù[	ÊKÛ\ÜÓ\Ý[[ÝJ	ÚY[ÊNÂB[Ý[ÛÜ[Y]Ø[[Ù[
-Ø[Y
-^ÂY][ÐØ[YXØ[YÂÛÛÝÏXØ[Y]\Ë[
-OYOOXØ[Y
-NÂYXÊ\]\ÂØÝ[Y[Ù][[Y[RY
-	ØØ[YY]]]IÊK^ÛÛ[IÑY]Ø[Y]IÎÂØÝ[Y[Ù][[Y[RY
-	ØÙKY[]KXÊKÝ[K\Ü^OIÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙK[[YIÊK[YOXË[Y_	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙK\Ý]IÊK[YOXËÝ]_	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙK[ØØ][ÛÊK[YOXËÝ\[ÛØØ][Û	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙK\ÛIÊK[YOXËÛ_	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙKY[XZ[	ÊK[YOXË[XZ[	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙK\]K[Z[ÊK[YOXËZ[WÜ]WÛZ[	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙK\]K[X^	ÊK[YOXËZ[WÜ]WÛX^	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙKX]Z[YÛIÊK[YOXË]Z[X[]WÙÛ_	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙKX]Z[]ÉÊK[YOXË]Z[X[]WÝß	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙK\ÜXÚX[IÊK[YOXËÜXÚX[_	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙKYIÊK[YOJËWØ\X\ÉËWØ\X\Ë[Ý
-OÉÞY\ÉÎÉÎÂØÝ[Y[Ù][[Y[RY
-	ØÙK[Ý\ÉÊK[YOXËÝ\ß	ÉÎÂØÝ[Y[Ù][[Y[RY
-	ØØ[YY][[Ù[	ÊKÛ\ÜÓ\Ý[[ÝJ	ÚY[ÊNÂB[Ý[ÛÛÜÙPØ[Y][Ù[
-
-^ÂØÝ[Y[Ù][[Y[RY
-	ØØ[YY][[Ù[	ÊKÛ\ÜÓ\ÝY
-	ÚY[ÊNÂY][ÐØ[Y[[ÂB\Þ[È[Ý[ÛØ]PØ[XÛÜ
-
-^ÂÛÛÝ[YOYØÝ[Y[Ù][[Y[RY
-	ØÙK[[YIÊK[YK[J
-NÂY[[YJ^Ø[\
-	Ó[YH\È\]Z\Y	ÊNÜ]\ßBÛÛÝU[YØÝ[Y[Ù][[Y[RY
-	ØÙKYIÊK[YNÂÛÛÝ^[ØY^Â[YK\NÛØÝ[IËÝ]\ÎÐXÝ]IËÝ]NØÝ[Y[Ù][[Y[RY
-	ØÙK\Ý]IÊK[Y_[Ý\[ÛØØ][ÛØÝ[Y[Ù][[Y[RY
-	ØÙK[ØØ][ÛÊK[YK[J
-_[ÛNØÝ[Y[Ù][[Y[RY
-	ØÙK\ÛIÊK[YK[J
-_[[XZ[ØÝ[Y[Ù][[Y[RY
-	ØÙKY[XZ[	ÊK[YK[J
-_[Z[WÜ]WÛZ[ØÝ[Y[Ù][[Y[RY
-	ØÙK\]K[Z[ÊK[Y_[Z[WÜ]WÛX^ØÝ[Y[Ù][[Y[RY
-	ØÙK\]K[X^	ÊK[Y_[]Z[X[]WÙÛNØÝ[Y[Ù][[Y[RY
-	ØÙKX]Z[YÛIÊK[Y_[]Z[X[]WÝÎØÝ[Y[Ù][[Y[RY
-	ØÙKX]Z[]ÉÊK[Y_[ÜXÚX[NØÝ[Y[Ù][[Y[RY
-	ØÙK\ÜXÚX[IÊK[YK[J
-_[WØ\X\ÎU[OOIÞY\ÉÏÖÉÞY\É×N[Ý\ÎØÝ[Y[Ù][[Y[RY
-	ØÙK[Ý\ÉÊK[YK[J
-_[NÂ]\ÜÂYY][ÐØ[Y
-^Â
-Ù\ÜOX]ØZ]ØÛJ	ØÜWÜÙ[\ÉÊK\]J^[ØY
-K\J	ÚY	ËY][ÐØ[Y
-JNÂH[ÙHÂ
-Ù\ÜOX]ØZ]ØÛJ	ØÜWÜÙ[\ÉÊK[Ù\
-^[ØY
-JNÂBY\Ü^Ø[\
-	Ñ\ÜØ][Î	ÊÙ\ÜY\ÜØYÙJNÜ]\ßBÛÜÙPØ[Y][Ù[
-
-NÂ]ØZ]ØYØ[Y]\Ê
-NÂ[\Ø[Y]\ÕXJ
-NÂB\Þ[È[Ý[Û[]PØ[XÛÜ
-
-^ÂYYY][ÐØ[Y
-\]\ÂÛÛÝÏXØ[Y]\Ë[
-OYOOYY][ÐØ[Y
-NÂYXÛÛ\J[]H	ØÏË[Y_	Ý\ÈØ[Y]IßOÈ\ÈØ[ÝH[ÛK
-J\]\ÂÛÛÝÙ\ÜOX]ØZ]ØÛJ	ØÜWÜÙ[\ÉÊK[]J
-K\J	ÚY	ËY][ÐØ[Y
-NÂY\Ü^Ø[\
-	Ñ\Ü[][Î	ÊÙ\ÜY\ÜØYÙJNÜ]\ßBÛÜÙPØ[Y][Ù[
-
-NÂ]ØZ]ØYØ[Y]\Ê
-NÂ[\Ø[Y]\ÕXJ
-NÂBËÈ8¥ 8¥ 8¥ ÐSQUHÑSH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[ÛÜ[Ø[Ù[JØ[Y
-^ÂÝ\[Ø[YXØ[YÂÛÛÝØ[XØ[Y]\Ë[
-ÏOËYOOXØ[Y
-NÂYXØ[
-\]\ÂÛÛÝYÏXØ[YÖØØ[Y_ßNÂÛÛÝÓÝ]ÛÛY\Ï[Ý]ÛÛY\Ë[\ÏOËØ[ÚYOOXØ[Y
-NÂØÝ[Y[Ù][[Y[RY
-	ØØ[[[Ù[[[YIÊK^ÛÛ[XØ[[YNÂÛÛÝ[Ý]\ÏVÉÓÕÉË	ÕPÉË	ÔS	Ë	ÕÐIË	ÔÐIË	ÕTÉË	Ó	Ë	ÐPÕ	Ë	Ó×NÂÛÛÝYÝ]\Ï\YËY\YÜÝ]\ß×NÂÛÛÝ]ÚYÝ]\Ï\YË]ÚYYÜÝ]\ß×NÂØÝ[Y[Ù][[Y[RY
-	ØØ[[[Ù[XÙIÊK[\SX]Û\ÜÏHÙYÜY]Û\ÜÏHH]Û\ÜÏHÜXÚX[OÙ]]Û\ÜÏHÙ\ØÊØ[ÜXÚX[_	ø %	Ê_OÙ]Ù]]Û\ÜÏHH]Û\ÜÏHØØ][ÛÙ]]Û\ÜÏHÙ\ØÊØØ[Ý\[ÛØØ][ÛØ[Ý]WK[\ÛÛX[KÚ[	Ë	Ê_	ø %	Ê_OÙ]Ù]]Û\ÜÏHH]Û\ÜÏHZ[H]OÙ]]Û\ÜÏHØØ[Z[WÜ]WÛZ[ÉÉ	ÊØØ[Z[WÜ]WÛZ[ÊØ[Z[WÜ]WÛX^ÉÈ8 $È		ÊØØ[Z[WÜ]WÛX^ÉÊNÓÝÙ]	ßOÙ]Ù]]Û\ÜÏHH]Û\ÜÏH]Z[XHÛOÙ]]Û\ÜÏHØØ[]Z[X[]WÙÛOÙ]]JØ[]Z[X[]WÙÛJNø %	ßOÙ]Ù]]Û\ÜÏHH]Û\ÜÏH]Z[XHÏÙ]]Û\ÜÏHØØ[]Z[X[]WÝÏÙ]]JØ[]Z[X[]WÝÊNø %	ßOÙ]Ù]]Û\ÜÏHH]Û\ÜÏHH\X\ÏÙ]]Û\ÜÏHØØ[WØ\X\ÉØ[WØ\X\Ë[ÝØØ[WØ\X\ËÚ[	Ë	ÊNø %	ßOÙ]Ù]Ù]]Û\ÜÏHÙXË]]HX]Ú[ÈY\[Ù\ÈÜ[Ý[OHÛ]ÙZYÚØÛÛÜ\KYÍ
-NÈÙ]\ÙHÈ[\ÝHX]ÚXØÝ\XÞJOÜÜ[Ù]]Û\ÜÏHÈÝ[OHX\Ú[XÝÛNLÈ]Û\ÜÏHHX[ÛH\OÛX[Ù[XÝYHÜ\ÛK]\HÜ[Û[YOHÝ	Ê\YËÛWÝ\\ßYËÛWÝ\\ÏOOIØÝ	ÊOÉÜÙ[XÝY	ÎÉßO[HÈÝÙ]ÛÜ[ÛÜ[Û[YOHÔÛH	ÜYËÛWÝ\\ÏOOIÑÔÛIÏÉÜÙ[XÝY	ÎÉßOÔÛOÛÜ[ÛÜ[Û[YOHÔSÈ	ÜYËÛWÝ\\ÏOOIÑÔSÉßYËÛWÝ\\ÏOOIÑÔHSÉÏÉÜÙ[XÝY	ÎÉßOÔSÏÛÜ[ÛÜ[Û[YOH[\[[Û[Y[ÛÙÚ\Ý	ÜYËÛWÝ\\ÏOOIÒ[\[[Û[Y[ÛÙÚ\Ý	ßYËÛWÝ\\ÏOOIÒTÏÉÜÙ[XÝY	ÎÉßO[\[[Û[Y[ÛÙÚ\ÝÛÜ[ÛÜ[Û[YOHÙ[\[Y[ÛÙÚ\Ý	ÜYËÛWÝ\\ÏOOIÑÙ[\[Y[ÛÙÚ\Ý	ßYËÛWÝ\\ÏOOIÑÙ[Y[ÛÙÚ\Ý	ÏÉÜÙ[XÝY	ÎÉßOÙ[\[Y[ÛÙÚ\ÝÛÜ[ÛÜ[Û[YOHQSÈ	ÜYËÛWÝ\\ÏOOIÑQSÉÏÉÜÙ[XÝY	ÎÉßOQSÏÛÜ[ÛÜ[Û[YOHPÐÈ	ÜYËÛWÝ\\ÏOOIÕPÐÉÏÉÜÙ[XÝY	ÎÉßOPÐÏÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHX[ØÚÈ[ÝY\[ÙOÛX[Ù[XÝYHÜXØÚË\YÜ[Û[YOH[H	Ê\YËØÚ×ÜYYËØÚ×ÜYOOIØ[IÊOÉÜÙ[XÝY	ÎÉßOÈY\[ÙOÛÜ[ÛÜ[Û[YOHÚÜ	ÜYËØÚ×ÜYOOIÜÚÜ	ÏÉÜÙ[XÝY	ÎÉßOÚÜ
-x $ÌÙYZÜÊOÛÜ[ÛÜ[Û[YOHÛÈ	ÜYËØÚ×ÜYOOIÛÛÉÏÉÜÙ[XÝY	ÎÉßOÛÈ
-ÊÈÙYZÜÊOÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHX[\[È[[ÝHÒÏÏÛX[Ù[XÝYHÜ\\[Ü[Û[YOH	ÜYË\[ÛÚÏOO][Y[YYË\[ÛÚÏOOIÉÏÉÜÙ[XÝY	ÎÉßOÝÙ]ÛÜ[ÛÜ[Û[YOHYH	ÜYË\[ÛÚÏOO]Y_YË\[ÛÚÏOOIÝYIÏÉÜÙ[XÝY	ÎÉßOY\È8 %Ü[È\[ÛÜ[ÛÜ[Û[YOH[ÙH	ÜYË\[ÛÚÏOOY[Ù_YË\[ÛÚÏOOIÙ[ÙIÏÉÜÙ[XÝY	ÎÉßOÈ8 %Y]ËÜYÚ[Û[ÛOÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHX[QÈÚ[[ÏÏÛX[Ù[XÝYHÜYYÈÜ[Û[YOH	È\YËYÏÉÜÙ[XÝY	ÎÉßOÝÙ]ÛÜ[ÛÜ[Û[YOHYH	ÜYËYÏOOIÝYIßYËYÏOO]YOÉÜÙ[XÝY	ÎÉßOY\ÏÛÜ[ÛÜ[Û[YOH[ÙH	ÜYËYÏOOIÙ[ÙIßYËYÏOOY[ÙOÉÜÙ[XÝY	ÎÉßOÏÛÜ[ÛÜÙ[XÝÙ]]Û\ÜÏHHX[\ÝÛÛXÝ]OÛX[[]\OH]HYHÜ[\ÝXÛÛXÝ[YOHÜYË\ÝØÛÛXÝ	ÉßHÙ]Ù]]Û\ÜÏHÙXË]]HY\YÝ]\È
-XÚÈ[]\JOÙ]]Ý[OH\Ü^N^Ù^]Ü\Ü\ÙØ\ÛX\Ú[XÝÛNLÈYHÜ\Y\Ý]\È	Ø[Ý]\ËX\
-ÏOX[Ý[OH\Ü^N^Ø[YÛZ][\ÎÙ[\ÙØ\\ÙÛ\Ú^NLÜØÝ\ÛÜÚ[\È[]\OHÚXÚØÞ]K]\OHY]K\Ý]OHÜßH	ÜYÝ]\Ë[ÛY\ÊÊOÉØÚXÚÙY	ÎÉßO	ÜßBÛX[
-KÚ[	ÉÊ_BÙ]]Û\ÜÏHÙXË]]H]ÚYYÝ]\È
-Ú[YXÙHX]ÚØÛÜJOÙ]]Ý[OH\Ü^N^Ù^]Ü\Ü\ÙØ\ÛX\Ú[XÝÛNMÈ	Ø[Ý]\ËX\
-ÏOX[Ý[OH\Ü^N^Ø[YÛZ][\ÎÙ[\ÙØ\\ÙÛ\Ú^NLÜØÝ\ÛÜÚ[\È[]\OHÚXÚØÞ]K]\OH]ÚY]K\Ý]OHÜßH	Ø]ÚYÝ]\Ë[ÛY\ÊÊOÉØÚXÚÙY	ÎÉßO	ÜßBÛX[
-KÚ[	ÉÊ_BÙ]	ØÓÝ]ÛÛY\Ë[ÝØ]Û\ÜÏHÙXË]]HÝ]ÛÛYH\ÝÜH
-	ØÓÝ]ÛÛY\Ë[ÝHÙÙÙY
-OÙ]]Ý[OHXÚÙÜÝ[\KYÍL
-NØÜ\\Y]\ÎÜY[ÎLÙÛ\Ú^NLÈ	ØÓÝ]ÛÛY\ËX\
-ÏO]Ý[OHY[ÎØÜ\XÝÛN\ÛÛY\KYÌ
-NÈÛÝ]ÛÛYRXÛÛËÝ]ÛÛYJ_HÝÛÏÙ\ØÊËX×Ý]_	Õ[ÛÝÛXØ[ÞIÊ_OÜÝÛÏ8 %	Ù\ØÊËÝ]ÛÛYJ_IÛËX\ÛÛÉÈ
-	ÊÛËX\ÛÛ\XÙJ	×ÉË	È	ÊJÉÊIÎÉßHÜ[Ý[OHÛÛÜ\KYÍ
-NÈÙ]]JË]J_OÜÜ[Ù]
-KÚ[	ÉÊ_BÙ]ÉßHÂÚÝÓ[Ù[
-	ØØ[[[Ù[	ÊNÂB\Þ[È[Ý[ÛØ]PØ[YÊ
-^ÂYXÝ\[Ø[Y
-\]\ÂÛÛÝYÝ]\ÏP\^KÛJØÝ[Y[]Y\TÙ[XÝÜ[
-	ÖÙ]K]\OHYNÚXÚÙY	ÊJKX\
-ØOØ]\Ù]Ý]JNÂÛÛÝ]ÚYÝ]\ÏP\^KÛJØÝ[Y[]Y\TÙ[XÝÜ[
-	ÖÙ]K]\OH]ÚYNÚXÚÙY	ÊJKX\
-ØOØ]\Ù]Ý]JNÂÛÛÝYÏ^ÂÛWÝ\\ÎØÝ[Y[Ù][[Y[RY
-	ØÜ\ÛK]\IÊK[YKØÚ×ÜYØÝ[Y[Ù][[Y[RY
-	ØÜXØÚË\YÊK[YK\[ÛÚÎØÝ[Y[Ù][[Y[RY
-	ØÜ\\[	ÊK[YKYÎØÝ[Y[Ù][[Y[RY
-	ØÜYYÉÊK[YK\ÝØÛÛXÝØÝ[Y[Ù][[Y[RY
-	ØÜ[\ÝXÛÛXÝ	ÊK[YKY\YÜÝ]\ÎYÝ]\Ë]ÚYYÜÝ]\Î]ÚYÝ]\ÂNÂØ[YÖØÝ\[Ø[YO^ËØ[YÖØÝ\[Ø[YKYßNÂÛÛÝÙ\ÜOX]ØZ]Ø]TYÊÝ\[Ø[YYÊNÂY\Ü^ÛÝYJ	Ñ\ÜØ][ÈYÎ	ÊÙ\ÜY\ÜØYÙJNÜ]\ßBÛÜÙS[Ù[
-	ØØ[[[Ù[	ÊNÂÝYJ	ÔY\[Ù\ÈØ]YÜ	ÊØØ[Y]\Ë[
-ÏOËYOOXÝ\[Ø[Y
-OË[YJNÂBËÈ8¥ 8¥ 8¥ ÕUÓÓQHÑÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[ÛÜ[Ý]ÛÛYJØ[YXÒY
-^ÂÛÛÝØ[XØ[Y]\Ë[
-ÏOËYOOXØ[Y
-NÂÛÛÝXÏ]XØ[ÚY\Ë[
-OYOO]XÒY
-NÂÝ]ÛÛYPÛÛ^^ØØ[YXÒYNÂØÝ[Y[Ù][[Y[RY
-	ÛËXØ[[[YIÊK[YOXØ[ØØ[[YNÉÎÂØÝ[Y[Ù][[Y[RY
-	ÛË]XË]]IÊK[YO]XÏÝXË]NÉÎÂØÝ[Y[Ù][[Y[RY
-	ÛË[Ý]ÛÛYIÊK[YOIÉÎÂØÝ[Y[Ù][[Y[RY
-	ÛË\X\ÛÛÊK[YOIÉÎÂØÝ[Y[Ù][[Y[RY
-	ÛË[Ý\ÉÊK[YOIÉÎÂØÝ[Y[Ù][[Y[RY
-	ÛË\X\ÛÛ]Ü\	ÊKÝ[K\Ü^OIÙ^	ÎÂÚÝÓ[Ù[
-	ÛÝ]ÛÛYK[[Ù[	ÊNÂB[Ý[ÛÙÙÛSÝ]ÛÛYTX\ÛÛ
-^ÂÛÛÝYØÝ[Y[Ù][[Y[RY
-	ÛË[Ý]ÛÛYIÊK[YNÂØÝ[Y[Ù][[Y[RY
-	ÛË\X\ÛÛ]Ü\	ÊKÝ[K\Ü^OJOOIÙXÛ[Y	ÊOÉÙ^	ÎÛÛIÎÂB\Þ[È[Ý[ÛØ]SÝ]ÛÛYJ
-^ÂÛÛÝÝ]ÛÛYOYØÝ[Y[Ù][[Y[RY
-	ÛË[Ý]ÛÛYIÊK[YNÂY[Ý]ÛÛYJ^ÛÝYJ	ÔX\ÙHÙ[XÝ[Ý]ÛÛYIÊNÜ]\ßBÛÛÝØ[XØ[Y]\Ë[
-ÏOËYOO[Ý]ÛÛYPÛÛ^Ø[Y
-NÂÛÛÝXÏ]XØ[ÚY\Ë[
-OYOO[Ý]ÛÛYPÛÛ^XÒY
-NÂÛÛÝÏ^ÂYZY
-
-KØ[ÚYÝ]ÛÛYPÛÛ^Ø[YX×ÚYÝ]ÛÛYPÛÛ^XÒYØ[Û[YNØ[ØØ[[YNÉËX×Ý]NXÏÝXË]NÉËX×ÜÝ]NXÏÝXËÝ]NÉËÝ]ÛÛYKX\ÛÛØÝ[Y[Ù][[Y[RY
-	ÛË\X\ÛÛÊK[Y_	ÉËÝ\ÎØÝ[Y[Ù][[Y[RY
-	ÛË[Ý\ÉÊK[Y_	ÉË]N]È]J
-KÒTÓÔÝ[Ê
-KÛXÙJL
-BNÂÛÛÝÙ\ÜOX]ØZ]Ø]SÝ]ÛÛY\ÊÊNÂY\Ü^ÛÝYJ	Ñ\ÜØ][ÈÝ]ÛÛYN	ÊÙ\ÜY\ÜØYÙJNÜ]\ßBÝ]ÛÛY\Ë[ÚY
-ÊNÂÛÜÙS[Ù[
-	ÛÝ]ÛÛYK[[Ù[	ÊNÂÝYJ	ÓÝ]ÛÛYHÙÙÙY8 %Ø[Y]HØÛÜH\]Y	ÊNÂËÈK\[\X]Ú\Ý[ÈYÙIÜHÛ]Y]ÂYØÝ[Y[Ù][[Y[RY
-	ÝY]Ë[X]Ú	ÊKÛ\ÜÓ\ÝÛÛZ[Ê	ØXÝ]IÊJ^ÂÛÛÝÙ[XÝYOYØÝ[Y[]Y\TÙ[XÝÜ	ËXË[\ÝZ][KÙ[XÝY	ÊNÂYÙ[XÝYJ^ØÛÛÝXÒY\Ù[XÝYKY\XÙJ	ÝKIË	ÉÊNÜÙ[XÝXØ[ÞJXÒY
-NßBBB[Ý[Û[\Ý]ÛÛYSÙÊ
-^ÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	ÛÝ]ÛÛYK[\Ý	ÊNÂYÝ]ÛÛY\Ë[ÝOOL
-^Â[[\SIÏ]Û\ÜÏH[\H]Û\ÜÏHZH¼'äâÏÙ]ÈÝ]ÛÛY\ÈÙÙÙYY]Y\ÛÛXÝ[ÈHØ[Y]KÙÈHÝ]ÛÛYHÛHHX]Ú[Ú[KÜÙ]ÎÂ]\ÂB[[\S[Ý]ÛÛY\ËX\
-ÏO]Û\ÜÏHÝ]ÛÛYKZ][H]Ý[OHÛ\Ú^NNÈÛÝ]ÛÛYRXÛÛËÝ]ÛÛYJ_OÙ]]Ý[OH^NÈ]Ý[OHÛ\Ú^NLÜÙÛ]ÙZYÚÈÙ\ØÊËØ[Û[YJ_HÜ[Ý[OHÛÛÜ\KYÍ
-NÙÛ]ÙZYÚÈ¸¡¤ÜÜ[	Ù\ØÊËX×Ý]J_OÙ]]Ý[OHÛ\Ú^NLØÛÛÜ\KYÍL
-NÛX\Ú[]ÜÈÛÝ]ÛÛYSX[
-ËÝ]ÛÛYJ_IÛËX\ÛÛÉÈ0­È	ÊÛËX\ÛÛ\XÙJ×ËÙË	È	ÊNÉßIÛËÝ\ÏÉÈ0­È	ÊÛËÝ\ÎÉßHÜ[Ý[OHÛÛÜ\KYÌÌ
-NÈ°­È	Ù]]JË]J_OÜÜ[Ù]Ù]]ÛÛ\ÜÏH\ÙXÈ^ÈÛÛXÚÏH[]SÝ]ÛÛYJ	ÉÛËYIÊH[[ÝOØ]ÛÙ]
-KÚ[	ÉÊNÂB\Þ[È[Ý[Û[]SÝ]ÛÛYJY
-^ÂÛÛÝÙ\ÜOX]ØZ]ØÛJÓÕUÓÓQTÊK[]J
-K\J	ÚY	ËY
-NÂY\Ü^ÛÝYJ	Ñ\Ü[][ÈÝ]ÛÛYN	ÊÙ\ÜY\ÜØYÙJNÜ]\ßBÝ]ÛÛY\Ï[Ý]ÛÛY\Ë[\ÏOËYOOZY
-NÂ[\Ý]ÛÛYSÙÊ
-NÂÝYJ	ÓÝ]ÛÛYH[[ÝY	ÊNÂBËÈ8¥ 8¥ 8¥ QÑQUPÐSÖH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ \Þ[È[Ý[Û[]UXØ[ÞJY
-^ÂYXÛÛ\J	Ñ[]H\ÈXØ[ÞOÉÊJ\]\ÂÛÛÝÙ\ÜOX]ØZ]ØÛJÕPÊK[]J
-K\J	ÚY	ËY
-NÂY\Ü^ÛÝYJ	Ñ\Ü[][ÈXØ[ÞN	ÊÙ\ÜY\ÜØYÙJNÜ]\ßBXØ[ÚY\Ï]XØ[ÚY\Ë[\OYOOZY
-NÂ[\XØ[ÚY\ÕXJ
-NÂÝYJ	ÕXØ[ÞH[]Y	ÊNÂB[Ý[ÛÜ[YXØ[ÞJ
-^ÂY][ÕXÒY[[ÂØÝ[Y[Ù][[Y[RY
-	ÝXË[[Ù[]]IÊK^ÛÛ[IÐYXØ[ÞIÎÂÉÝ]]IË	ÝXÛY[	Ë	Ý[ØØ][ÛË	Ý\Ý]IË	Ý\ÛK]\IË	Ý\Ý\	Ë	ÝY[	Ë	ÝXØÚË]ÙYZÜÉË	Ý\]IË	ÝYIË	Ý\\[	Ë	Ý]][	Ë	ÝXXØÛÛIË	Ý]\Ù[ÞIË	Ý\Ý]\ÉË	Ý[Ý\É×BÜXXÚ
-YOØÛÛÝ[YØÝ[Y[Ù][[Y[RY
-Y
-NÚY[
-Y[[YOY[YÓ[YOOOIÔÑSPÕ	ÏÙ[Ü[ÛÖÌOË[Y_	ÉÎÉßJNÂØÝ[Y[Ù][[Y[RY
-	Ý]\Ù[ÞIÊK[YOIÛÜX[	ÎÂØÝ[Y[Ù][[Y[RY
-	Ý\Ý]\ÉÊK[YOIÓÜ[ÎÂÚÝÓ[Ù[
-	ÝXË[[Ù[	ÊNÂB[Ý[ÛÜ[Y]XØ[ÞJY
-^ÂÛÛÝ]XØ[ÚY\Ë[
-OYOOZY
-NÂY]\]\ÂY][ÕXÒYZYÂØÝ[Y[Ù][[Y[RY
-	ÝXË[[Ù[]]IÊK^ÛÛ[IÑY]XØ[ÞIÎÂÙ][
-	Ý]]IË]JNÜÙ][
-	ÝXÛY[	ËÛY[
-NÜÙ][
-	Ý[ØØ][ÛËØØ][ÛNÂÙ][
-	Ý\Ý]IËÝ]JNÜÙ][
-	Ý\ÛK]\IËÛWÝ\JNÜÙ][
-	Ý\Ý\	ËÝ\Ù]JNÂÙ][
-	ÝY[	Ë[Ù]JNÜÙ][
-	ÝXØÚË]ÙYZÜÉËØÚ×ÝÙYZÜÊNÜÙ][
-	Ý\]IË]JNÂÙ][
-	ÝYIËJNÜÙ][
-	Ý\\[	Ë\[
-NÜÙ][
-	Ý]][	Ë][
-NÂÙ][
-	ÝXXØÛÛIËXØÛÛJNÜÙ][
-	Ý]\Ù[ÞIË\Ù[Þ_	ÛÜX[	ÊNÜÙ][
-	Ý\Ý]\ÉËÝ]\ß	ÓÜ[ÊNÂÙ][
-	ÝX[[ÜÉË[[Ü×ÜÝ	ÉÊNÂÙ][
-	ÝX[ÌË\×Ø[ÌÉÝYIÎÙ[ÙIÊNÂÙ][
-	ÝX[\ÉË\×Ø[\ÏÉÝYIÎÙ[ÙIÊNÂÙ][
-	Ý\Ù\ÜÚ[ÛÉËÙ\ÜÚ[Ûß	ÉÊNÜÙ][
-	Ý[Z[]ÙYZÜÉËZ[ÝÙYZÜß	ÓÜ[ÊNÜÙ][
-	Ý[ÛXØ[	ËÛØØ[	ÕÉÊNÂÙ][
-	Ý[Ý\ÉËÝ\ÊNÂÚÝÓ[Ù[
-	ÝXË[[Ù[	ÊNÂBXÞ[È[Ý[ÛØ]UXØ[ÞJ
-^ÂÛÛÝ]OYØÝ[Y[Ù][[Y[RY
-	Ý]]IÊK[YK[J
-NÂY]]J^ÛÝYJ	ÔX\ÙH[\HØ]IÊNÜ]\ßBÛÛÝ^ÂYY][ÕXÒYZY
-
-K]KÛY[ØÝ[Y[Ù][[Y[RY
-	ÝXÛY[	ÊK[YK[J
-KØØ][ÛØÝ[Y[Ù][[Y[RY
-	Ý[ØØ][ÛÊK[YK[J
-KÝ]NØÝ[Y[Ù][[Y[RY
-	Ý\Ý]IÊK[YKÛWÝ\NØÝ[Y[Ù][[Y[RY
-	Ý\ÛK]\IÊK[YKÝ\Ù]NØÝ[Y[Ù][[Y[RY
-	Ý\Ý\	ÊK[YK[Ù]NØÝ[Y[Ù][[Y[RY
-	ÝY[	ÊK[YKØÚ×ÝÙYZÜÎØÝ[Y[Ù][[Y[RY
-	ÝXØÚË]ÙYZÜÉÊK[YK]NØÝ[Y[Ù][[Y[RY
-	Ý\]IÊK[YKNØÝ[Y[Ù][[Y[RY
-	ÝYIÊK[YK\[ØÝ[Y[Ù][[Y[RY
-	Ý\\[	ÊK[YK][ØÝ[Y[Ù][[Y[RY
-	Ý]][	ÊK[YKXØÛÛNØÝ[Y[Ù][[Y[RY
-	ÝXXØÛÛIÊK[YK\Ù[ÞNØÝ[Y[Ù][[Y[RY
-	Ý]\Ù[ÞIÊK[YKÝ]\ÎØÝ[Y[Ù][[Y[RY
-	Ý\Ý]\ÉÊK[YK[[Ü×ÜÝØÝ[Y[Ù][[Y[RY
-	ÝX[[ÜÉÊK[Y_	ÉË\×Ø[ÌØÝ[Y[Ù][[Y[RY
-	ÝX[ÌÊK[YOOOIÝYIË\×Ø[\ÎØÝ[Y[Ù][[Y[RY
-	ÝX[\ÉÊK[YOOOIÝYIËÙ\ÜÚ[ÛÎØÝ[Y[Ù][[Y[RY
-	Ý\Ù\ÜÚ[ÛÉÊK[YKZ[ÝÙYZÜÎØÝ[Y[Ù][[Y[RY
-	Ý[Z[]ÙYZÜÉÊK[YKÛØØ[ØÝ[Y[Ù][[Y[RY
-	Ý[ÛXØ[	ÊK[YKÝ\ÎØÝ[Y[Ù][[Y[RY
-	Ý[Ý\ÉÊK[YK[J
-KÜX]YØ]Y][ÕXÒYÊXØ[ÚY\Ë[
-OYOOYY][ÕXÒY
-OËÜX]YØ]]È]J
-KÒTÓÔÝ[Ê
-JN]È]J
-KÒTÓÔÝ[Ê
-BNÂÛÛÝÙ\ÜOX]ØZ]Ø]UXÜÊNÂY\Ü^ÛÝYJ	Ñ\ÜØ][ÈXØ[ÞN	ÊÙ\ÜY\ÜØYÙJNÜ]\ßBYY][ÕXÒY
-^ÝXØ[ÚY\Ï]XØ[ÚY\ËX\
-OYOOYY][ÕXÒYÝ
-NßB[Ù^ÝXØ[ÚY\Ë[ÚY
-NßBÛÜÙS[Ù[
-	ÝXË[[Ù[	ÊNÂÝYJY][ÕXÒYÉÕXØ[ÞH\]Y	ÎÕXØ[ÞHYY	ÊNÂËÈY\ÚÝ\[Y]ÂÛÛÝXÝ]OYØÝ[Y[]Y\TÙ[XÝÜ	ËY]ËXÝ]IÊNÂYXÝ]OËYOOIÝY]Ë]XØ[ÚY\ÉÊ\[\XØ[ÚY\ÕXJ
-NÂYXÝ]OËYOOIÝY]Ë[X]Ú	Ê\[\X]ÚY]Ê
-NÂYXÝ]OËYOOIÝY]ËY\Ú	Ê\[\\Ú
-
-NÂBËÈ8¥ 8¥ 8¥ STÈ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[ÛÚÝÓ[Ù[
-Y
-^ÙØÝ[Y[Ù][[Y[RY
-Y
-KÛ\ÜÓ\Ý[[ÝJ	ÚY[ÊNßB[Ý[ÛÛÜÙS[Ù[
-Y
-^ÙØÝ[Y[Ù][[Y[RY
-Y
-KÛ\ÜÓ\ÝY
-	ÚY[ÊNßB[Ý[ÛÙ][
-Y[
-^ØÛÛÝ[YØÝ[Y[Ù][[Y[RY
-Y
-NÚY[
-Y[[YO][	ÉÎßB[Ý[ÛÝYJ\ÙÊ^ØÛÛÝYØÝ[Y[Ù][[Y[RY
-	ÛÝYÊNÛ^ÛÛ[[\ÙÎÛÛ\ÜÓ\ÝY
-	ÜÚÝÉÊNÜÙ][Y[Ý]
+// ─── NAVIGATION ───────────────────────────────────────────────────────────
+function nav(el,view){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  const titles={dash:'Dashboard',match:'Match engine',vacancies:'Vacancies',candidates:'Candidates',outcomes:'Outcome log',import:'Import vacancies',broadcast:'Broadcast'};
+  document.getElementById('tb-title').textContent=titles[view]||view;
+  document.getElementById('tb-actions').innerHTML='';
+  if(view==='dash') renderDash();
+  if(view==='match') renderMatchView();
+  if(view==='vacancies') renderVacanciesTable();
+  if(view==='candidates') renderCandidatesTable();
+  if(view==='outcomes') renderOutcomeLog();
+  if(view==='broadcast') renderBroadcastView();
+}
 
 
-OOÛ\ÜÓ\Ý[[ÝJ	ÜÚÝÉÊKL
-NßB[Ý[Û[]X[Ê[YJ^ÚY[[YJ\]\ÏÉÎØÛÛÝ[[YKÜ]
-	È	ÊNÜ]\ÌOËÌ_	ÉÊJÊÌWOËÌ_	ÉÊKÕ\\Ø\ÙJ
-NßB[Ý[Û]ÛÛÜ[YJ^ØÛÛÝÛÛÜÏVÉÈÌMÙXË	ÈÍØÌØYY	Ë	ÈÌ
-NMIË	ÈÙMÍÌ
-Ë	ÈÙÌË	ÈÌLX×NØÛÛÝO[[YOÛ[YKÚ\ÛÙP]
-
-IXÛÛÜË[ÝÜ]\ÛÛÜÖÚWNßB[Ý[Û]]J
-^ÚYY
-\]\	ÉÎØÛÛÝ[]È]J
-ÉÕ	ÊNÜ]\ÓØØ[Q]TÝ[Ê	Ù[PUIËÙ^NÛ[Y\XÉË[ÛÜÚÜ	ËYX\Û[Y\XÉßJNßB[Ý[Û\Ù[ÞPYÙJJ^ÂYOOOIØÜ]XØ[	Ê\]\ÏÜ[Û\ÜÏH\Ù[ÞKZYÚ¼'æªÜ]XØ[ÜÜ[ÎÂYOOOIÚYÚ	Ê\]\ÏÜ[Û\ÜÏH\Ù[ÞKZYÚ¸¦¨H\Ù[ÜÜ[ÎÂ]\ÏÜ[Û\ÜÏH\Ù[ÞK[ÝÈÜX[ÜÜ[ÎÂB[Ý[ÛÝ]\ÐYÙJÊ^ÂYÏOOIÓÜ[Ê\]\ÏÜ[Û\ÜÏHYÜÜ[ÜÜ[ÎÂYÏOOIÑ[Y	Ê\]\ÏÜ[Û\ÜÏHXYH[YÜÜ[ÎÂ]\ÏÜ[Û\ÜÏHYÜ^HÊÙ\ØÊß	ø %	ÊJÉÏÜÜ[ÎÂB[Ý[ÛÝ]ÛÛYRXÛÛÊ^ÂYÏOOIØXØÙ\Y	Ê\]\ø§!IÎÂYÏOOIÙXÛ[Y	Ê\]\ø§c	ÎÂYÏOOIÙÚÜÝY	Ê\]\ü'änÉÎÂYÏOOIÜ[[ÉÊ\]\ø£ìÉÎÂ]\ü'äâÉÎÂB[Ý[ÛÝ]ÛÛYSX[
-Ê^ÂYÏOOIØXØÙ\Y	Ê\]\ÐXØÙ\Y	ÎÂYÏOOIÙXÛ[Y	Ê\]\ÑXÛ[Y	ÎÂYÏOOIÙÚÜÝY	Ê\]\ÑÚÜÝY	ÎÂYÏOOIÜ[[ÉÊ\]\ÔÙ[8 %[[È\IÎÂ]\ÎÂBËÈ8¥ 8¥ 8¥ STÔÈTÑH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ ][\ÜYXØ[ÚY\ÏV×NÂÛÛÝÕUWÔUTÏ^Â	ÔÓÕUUTÕSPIÎÔÐIË	ÕÑTÕTUTÕSPIÎÕÐIË	ÔUQQSÓS	ÎÔS	Ë	ÓUÈÓÕUÐSTÉÎÓÕÉË	ÕTÓPSPIÎÕTÉË	ÕPÕÔPIÎÕPÉË	ÓÔTTUÔIÎÓ	Ë	ÐUTÕSPSÐTUSTUÔIÎÐPÕ	Ë	ÐPÕ	ÎÐPÕ	ÂNÂËÈÝÛ8¡¤Ý]HÛÚÝ\
-ÛÜYÛÙ\Ý\ÝÜX]Ú[ÊBÛÛÝÕÓÔÕUO^ÂËÈÕÂ	ØÚÙ[[	ÎÓÕÉË	ÝÚ[Ø[XIÎÓÕÉË	ØÛÛØÛ[ÎÓÕÉË	Ø][X[È^IÎÓÕÉË	ØYØIÎÓÕÉË	Û\ÛÛXIÎÓÕÉË	ÙÛÝ[\ÎÓÕÉË	ÙXÉÎÓÕÉË	ÛÜ[ÙIÎÓÕÉË	ÝØYÙØHØYÙØIÎÓÕÉË	ÝØYÙØIÎÓÕÉË	Ø[\IÎÓÕÉË	Ý[]ÛÜ	ÎÓÕÉË	Ø\ZY[IÎÓÕÉË	Û\Û[ÜIÎÓÕÉË	ØÛÙÈ\Ý\ÎÓÕÉË	Û]ØØ\ÝIÎÓÕÉË	ÝÛÛÛÛÛÉÎÓÕÉË	Û[ÜYIÎÓÕÉË	ÛYÚ[ÈYÙIÎÓÕÉË	ØÝ\ÙIÎÓÕÉË	ØÛØ\ÎÓÕÉË	ÙÜY]	ÎÓÕÉË	ÝØ[Ù]	ÎÓÕÉË	Û\XIÎÓÕÉË	ÙÛ[[\ÉÎÓÕÉË	ÙÜYÛÎÓÕÉË	ÚÙ[\Ù^IÎÓÕÉË	ÜÜXXÜ]X\YIÎÓÕÉË	ÜØÛÛIÎÓÕÉË	ÜÚ[Û]ÛÎÓÕÉË	Û]\ÝÙ[ÛÚÉÎÓÕÉË	Û]YÙYIÎÓÕÉË	Ø]\Ý	ÎÓÕÉË	Þ[Ý[ÉÎÓÕÉË	ØÛÝÜIÎÓÕÉË	Ü\Ù\ÉÎÓÕÉË	ÙÜ\ÉÎÓÕÉË	ÝÙ\ÝÞX[ÛÉÎÓÕÉË	ØÛÛÛXIÎÓÕÉË	ÛY\[X[IÎÓÕÉË	ÙY[ÎÓÕÉË	ÛÝÜIÎÓÕÉË	Ý[Y[IÎÓÕÉË	ØÝÜ[	ÎÓÕÉË	Û]ÛÝÉÎÓÕÉË	Ú[\[	ÎÓÕÉË	ÙÝ[YZ	ÎÓÕÉË	Ý[\Y[	ÎÓÕÉË	ÙÜYÛÉÎÓÕÉË	Ý\YIÎÓÕÉË	ÝXÛØ\IÎÓÕÉË	Ú][ÙIÎÓÕÉË	ÝÙ[ÛÜ	ÎÓÕÉË	Û[Ø[ÎÓÕÉË	Ø]Ø\[IÎÓÕÉË	Û\[\IÎÓÕÉË	Ù[^IÎÓÕÉË	Ù[[\]Z[ÎÓÕÉË	ÝØÝ[]Ø[	ÎÓÕÉË	Ý[]]	ÎÓÕÉË	Ü]YX[^X[ÎÓÕÉË	ÞX\ÜÉÎÓÕÉË	ÚØ]ÛÛXIÎÓÕÉË	Ü[]	ÎÓÕÉË	ÛXZ][	ÎÓÕÉË	ØÙ\ÜÛØÚÉÎÓÕÉË	ØÛÜÝØIÎÓÕÉË	Ú^IÎÓÕÉË	Ø[[[	ÎÓÕÉË	ÛY[[YIÎÓÕÉËËÈPÂ	ØÛÜ[ÛÉÎÕPÉË	ØYÚ	ÎÕPÉË	ÝØ[Ø\]IÎÕPÉË	ÝÛÙÛØIÎÕPÉË	Ø[[IÎÕPÉË	ÜÚ\\ÛÎÕPÉË	ÙXÚXØIÎÕPÉË	ÜÝØ[[	ÎÕPÉË	ÛZ[\IÎÕPÉË	ÚÜÚ[IÎÕPÉË	Ø[\]	ÎÕPÉË	Ø\\]	ÎÕPÉË	Ú[Z[ÛÎÕPÉË	ÝØ\[XÛÛ	ÎÕPÉË	ØÛÛXÉÎÕPÉË	ÙÙY[ÛÉÎÕPÉË	ØZ\Ù[IÎÕPÉË	ÜØ[IÎÕPÉË	Û[ÜÙ[	ÎÕPÉË	Ý\[ÛÛÎÕPÉË	Û[ÙIÎÕPÉË	ÝÛÛYÙÚIÎÕPÉË	Û[ÛØ]IÎÕPÉË	ÛÛY[ÉÎÕPÉË	ÛX[ÙY[	ÎÕPÉË	Ø[^[IÎÕPÉË	ÜÙ^[[Ý\ÎÕPÉË	ÞX\]ÛÛØIÎÕPÉË	ØÛØ[IÎÕPÉË	ÚÞXX[IÎÕPÉË	ÛX\XÜÝYÚ	ÎÕPÉË	ÜÝ\]Y	ÎÕPÉË	ÛÝ^Y[ÎÕPÉË	ÜÜ[	ÎÕPÉË	ØØ[\\ÝÛÎÕPÉË	Û[	ÎÕPÉË	Ù[XÛÛIÎÕPÉË	ÙÛ[	ÎÕPÉË	ÜÝ]Ù[	ÎÕPÉË	Û]Ø[XY\ÎÕPÉËËÈS	ØÚ\][IÎÔS	Ë	ØÝ[[][IÎÔS	Ë	ÜÛXIÎÔS	Ë	ÜÝÙ[ÜÙIÎÔS	Ë	Ù\[[IÎÔS	Ë	ÜÝ\]	ÎÔS	Ë	Ú[[IÎÔS	Ë	ÛZ]Ú[	ÎÔS	Ë	ÛÛÜXXÚ	ÎÔS	Ë	Ø\Ø[[IÎÔS	Ë	ØXÚØ[	ÎÔS	Ë	Ù[Y\[	ÎÔS	Ë	Û[Ü[Z	ÎÔS	Ë	ØÝÙ[ÎÔS	Ë	ØÚ\\ÈÝÙ\ÉÎÔS	Ë	Û[Ý[\ØIÎÔS	Ë	ØÛÛÝ\IÎÔS	Ë	Ø\Ù]ÝÛÎÔS	Ë	ÛÜX[ÛÎÔS	Ë	ÚØ\[XIÎÔS	Ë	ØÛÛÚÝÝÛÎÔS	Ë	ÝÙZ\IÎÔS	Ë	ØØZ\ÉÎÔS	Ë	ÝÝÛÝ[IÎÔS	Ë	ÛXXÚØ^IÎÔS	Ë	ÜØÚÚ[\ÛÎÔS	Ë	ÙÛYÝÛIÎÔS	Ë	Ø[X\ÉÎÔS	Ë	ÙÚ[Ú[ÎÔS	Ë	Û][X\IÎÔS	Ë	ÙØ^[Z	ÎÔS	Ë	ØYÙÙ[[ÎÔS	Ë	Û[ÛÉÎÔS	Ë	Û]\ÛÛÎÔS	Ë	ÚÚ[Ø\ÞIÎÔS	Ë	ØÛÛZ	ÎÔS	Ë	ÝØ\ÚXÚÉÎÔS	Ë	ÜÝ[ÜIÎÔS	Ë	ÙÛÛÛ]Ú[IÎÔS	Ë	Ù[IÎÔS	Ë	ØÚ[Ú[IÎÔS	Ë	ÛZ[\ÉÎÔS	Ë	Ø[Ù[IÎÔS	Ë	Û[Ý\IÎÔS	Ë	Ú\^H^IÎÔS	Ë	ÙÞ[\YIÎÔS	Ë	ÝÛÝÛÛÛXIÎÔS	Ë	Ø\Ø[IÎÔS	Ë	Ø]\ÛÎÔS	Ë	ÛX\YXIÎÔS	Ë	Ú[\ÙZ[	ÎÔS	Ë	Ú[Ú[IÎÔS	Ë	Ø^\ÎÔS	Ë	ÜÜÙ\[IÎÔS	Ë	ÞY\ÛÛÎÔS	Ë	Ý\Ù^H\Û[	ÎÔS	ËËÈÐB	Ü\	ÎÕÐIË	Ø[\IÎÕÐIË	Ø\ÜÙ[ÛÎÕÐIË	ÛX\Ø\]]\ÎÕÐIË	ÛX[[]\	ÎÕÐIË	Ø[[IÎÕÐIË	Ù\Ü\[ÙIÎÕÐIË	ÚØ[ÛÛÜYIÎÕÐIË	ØÛÛÛØ\YIÎÕÐIË	Û[ÛÜIÎÕÐIË	Û]\ÛÎÕÐIË	ÛYYZØ]\IÎÕÐIË	ÙÙ\[ÛÎÕÐIË	ØØ\\ÛÎÕÐIË	Ù^[Ý]	ÎÕÐIË	ÚØ\]IÎÕÐIË	ÛÛÛÝÉÎÕÐIË	ÝÛHXÙIÎÕÐIË	Ü\X\ÛÉÎÕÐIË	Û]ÛX[ÎÕÐIË	ÜÜY[	ÎÕÐIË	ÚY[	ÎÕÐIË	ÜÛÝ]Y[	ÎÕÐIË	ØÛÛYIÎÕÐIË	Ù\IÎÕÐIË	Ù]ÞHÜÜÜÚ[ÉÎÕÐIË	Ú[ÈÜYZÉÎÕÐIË	ÚÝ[[\IÎÕÐIË	ÝÞ[[IÎÕÐIË	ÛY\Y[ÎÕÐIË	ÛÜ[IÎÕÐIË	Û[ÛÜIÎÕÐIË	Û\ÙÚ[ÎÕÐIË	ÚØ][[ÉÎÕÐIË	ØÛÛYIÎÕÐIË	Ù[X\ÉÎÕÐIË	ÛÜÙ[X[ÎÕÐIË	ÛX\H\ÎÕÐIË	Ù[\Y\ÎÕÐIËËÈÐB	Û\XÛÛÜIÎÔÐIË	Û[Ý[Ø[XY\ÎÔÐIË	ØÜ\ÝÛÎÔÐIË	ÜØIÎÔÐIË	ÝXÝÜ\ÜÎÔÐIË	ÙÛÛÛØIÎÔÐIË	ÜÝ][[ÎÔÐIË	Û\[ÛÝIÎÔÐIË	Ø\IÎÔÐIË	Ú[Y\ÝÝÛÎÔÐIË	ÜÜ\YIÎÔÐIË	ÜÜ]YÝ\ÝIÎÔÐIË	ÝÚX[IÎÔÐIË	ÜÜ[ÛÛÎÔÐIË	ØÙY[IÎÔÐIË	ÜÝXZÞH^IÎÔÐIË	ØÛÛØ\YIÎÔÐIË	ÛX\YIÎÔÐIË	ÛZYÚÜYZÉÎÔÐIË	ÜÞHÝÛÉÎÔÐIË	Ú]ÚÙ\ÎÔÐIË	Ü][ÜÎÔÐIË	ÛÜÜÛÉÎÔÐIË	Ü]\ÜÝYÚ	ÎÔÐIË	ÚØY[IÎÔÐIË	ÝØ[\ÛÉÎÔÐIË	Û[ÛÛIÎÔÐIË	ÛZ[]ÛÎÔÐIË	ØÜ\Ý[ÛÚÉÎÔÐIË	ÚØ\[IÎÔÐIË	Ý[[IÎÔÐIË	Ø[Ø\ÝÛÎÔÐIË	ÛZ[XÙ[	ÎÔÐIË	Û]\^HYÙIÎÔÐIË	ØY[ZYIÎÔÐIËËÈTÂ	ÚØ\	ÎÕTÉË	Û][Ù\ÝÛÎÕTÉË	Ù]ÛÜ	ÎÕTÉË	Ø\YIÎÕTÉË	Ý[\ÝÛIÎÕTÉË	ÝÞ[X\	ÎÕTÉË	ÜÛZ]ÛÎÕTÉË	Ü]YY[ÝÝÛÎÕTÉË	ÜÝZ[ÎÕTÉË	ÞYZ[ÎÕTÉË	ÜØÛÝÙ[IÎÕTÉË	ÜÝ[[ÉÎÕTÉË	ÜÝØ[ÙXIÎÕTÉË	ÛØ][ÉÎÕTÉË	ØØ[\[ÝÛÎÕTÉË	Ù[ÜZ[IÎÕTÉË	ÜÚYY[	ÎÕTÉË	ÛÛÙÜ	ÎÕTÉËÝX\IÜÈÕTÉË	ÜÝX\\ÉÎÕTÉË	ÙÙ[ÜÙHÝÛÎÕTÉË	ØXXÛÛÙY[	ÎÕTÉËËÈ	Ù\Ú[ÎÓ	Ë	Ø[XÙHÜ[ÜÉÎÓ	Ë	Ý[[ÜYZÉÎÓ	Ë	ÚØ]\[IÎÓ	Ë	Û[[^IÎÓ	Ë	Û[[IÎÓ	ËØ[]Ú[ÚÝHÓ	Ë	ÙØ[]Ú[ÝIÎÓ	Ë	ÞZ\Ø[IÎÓ	Ë	ÙÝ[X[Ø\IÎÓ	Ë	ÙØ\]Ú^XZÉÎÓ	Ë	ÛZ[[Ú[XIÎÓ	Ë	Ü[Z[Ú[[ÉÎÓ	Ë	ÛX[[ÜYIÎÓ	Ë	ÚX\IÎÓ	Ë	Ü[HÜYZÉÎÓ	Ë	Ø]Ú[ÜÎÓ	Ë	Ü[Y\ÝÛÎÓ	Ë	ØÜÛÛÛIÎÓ	Ë	ÛÝZÝ\ÎÓ	Ë	Ø\ÝÚXÚÉÎÓ	Ë	Ø\[ØIÎÓ	Ë	Ø[X[ÎÓ	Ë	ÛZ[X[IÎÓ	Ë	Þ]Y[[]IÎÓ	Ë	Ü\[XIÎÓ	Ë	Ú\X[Ø\ÉÎÓ	Ë	Þ][\IÎÓ	Ë	Ù[[Ý	ÎÓ	Ë	ÛX]\[ØIÎÓ	Ë	Ù[HØ]\ÉÎÓ	Ë	Ø[X[Ý[IÎÓ	ËËÈPÕ	ØØ[\IÎÐPÕ	ËNÂ[Ý[Û]XÝÝ]J^
-^ÂÛÛÝÝÙ\]^\XÙJÖø &8 &x &¸ &ø ,¸ -XKÙËÈKÓÝÙ\Ø\ÙJ
-NÂÛÛÝÛÜYSØXÝÙ^\ÊÕÓÔÕUJKÛÜ
+// ─── LOAD CANDIDATES FROM SUPABASE ────────────────────────────────────────
+async function loadCandidates(){
+  const{data,error}=await sb.from('crm_profiles')
+    .select('*')
+    .eq('type','locum')
+    .eq('status','Active')
+    .order('name');
+  if(error){console.error(error);candidates=[];return;}
+  candidates=data||[];
+}
 
-KOO[ÝXK[Ý
-NÂÜÛÛÝÝÛÙÛÜY
-^ÂÛÛÝY[ÝÙ\[^ÙÝÛNÂYYL
-^ÂÛÛÝZYÛÝÙ\ÚYLWNÈ	ÎØÛÛÝOZY
-ÝÝÛ[ÝÝÙ\[ÝÛÝÙ\ÚY
-ÝÝÛ[ÝNÈ	ÎÂYKÖØK^NWKË\Ý
-IKÖØK^NWKË\Ý
-JJ\]\ÕÓÔÕUVÝÝÛNÂBBÛÛÝO]^X]Ú
-×ÕßPßSÐ_Ð_TßPÕWÊNÂ]\OÛVÌWNÉÎÂB[Ý[Û^XÝ]J^
-^ÂÛÛÝVÂ×	Ê×J×ÊËx $×WÊ	Ê×J×ÊÎ\Ê^_Ù^_^WÊ]_
-KÚK×	Ê×J×Ê
-Ï×ÊÎ\Ê^_Ù^_^WÊ]_
-KÚK×	Ê×J×ÊËx $×WÊ	Ê×J×ÊÎ\ÊÝ\ÚÚÝ\KÚK×	Ê×J×ÊÎ\ÊÝ\ÚÚÝ\KÚKÖ×JÉWÊYÊ[[ÜÊÎ×^Ì
-JOËÚKÔÓÐWÊ]\ÏËÚKNÂÜÛÛÝÙ
-^ØÛÛÝO]^X]Ú
-NÚYJ\]\VÌK\XÙJ×ÊËÙË	È	ÊK[J
-NßB]\ÉÎÂB[Ý[Û^XÝ[Û\Ú[ÛÊ^
-^ÂÛÛÝÝ[V×NÂYØXØÛÛ[[Ù][ÛÙ[ÛÛZ[Y[WÊ\\ÚY[]ÊÝYYÝ\Ú[×ÊÝYYÚK\Ý
-^
-JYÝ[\Ú
-	ÐXØÛÛ[[Ù][ÛÊNÂYÙYÚZ\\_Z\Ê][]\ÊYÚßYÚ×ÊØ\YÚK\Ý
-^
-JYÝ[\Ú
-	ÑYÚÉÊNÂYÝZXÛ_\WÊØ\\WÊZXÛ_ÛÝ\Y[Ø\Ø\ÊÝYYØ\Ê]Z[X_ÛÛ\[WÊØ\Z\ÜØ\ÚK\Ý
-^
-JYÝ[\Ú
-	ÕZXÛIÊNÂYÝ[[ÝOOL	Ý][ÊÝYYÛÜÝßÛÝ\Y[ÛYYZY
-KÚK\Ý
-^
-JYÝ[\Ú
-	Õ][	ÊNÂ]\Ý[Ú[	È8 (	ÊNÂB[Ý[Û^XÝ]\Ê^
-^ÂÛÛÝÝ[V×NØÛÛÝÙY[[]ÈÙ]
+// ─── SAVE/LOAD HELPERS (Supabase) ─────────────────────────────────────────
+async function saveVacs(v){await sb.from(TBL_VAC).upsert(v);}
+async function savePrefs(cid,prefs){return await sb.from(TBL_PREFS).upsert({cand_id:cid,...prefs});}
+async function saveOutcomes(o){await sb.from(TBL_OUTCOMES).insert(o);}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-NÂÛÛÝ[ÛIÊÎ[ÎX\JOßXÎX\JOßX\ÎÚ
-Oß\Î[
-OßX^_[ÎJOß[
-ÎJOß]YÊÎ\Ý
-OßÙ\
-Î[X\OßØÝ
-ÎØ\OßÝÎ[X\OßXÊÎ[X\OÊIÎÂÛÛÝ^OI×ÌKJÎÝ
-OÉÎÂÛÛÝ]\ÏVÂ]ÈYÑ^
-	Ù^_WÊËx $×WÊÙ^_WÊÉÛ[ÛJÎÊÍJOØ	ÙÚIÊK]ÈYÑ^
-	Ù^_WÊÉÛ[ÛWÊËx $×WÊÙ^_WÊÉÛ[ÛJÎÊÍJOØ	ÙÚIÊK]ÈYÑ^
-	Ù^_WÊÉÛ[ÛWÊËx $×WÊÙ^_WÊÉÛ[ÛWÊ×ÍX	ÙÚIÊK]ÈYÑ^
-
-Î[Û^_Y\Ù^_ÙY\Ù^_\Ù^_Y^JWÊÉÙ^_WÊÉÛ[ÛWÊËx $×WÊÎ[Û^_Y\Ù^_ÙY\Ù^_\Ù^_Y^JWÊÉÙ^_WÊÉÛ[ÛJÎÊ×ÍJOØ	ÙÚIÊK×ÌKW×ÌKJÎ×Ì
-JO×ÊËx $×WÊÌKW×ÌKJÎ×Ì
-JOËÙË]ÈYÑ^
-[ÊÉÛ[ÛX	ÙÚIÊKNÂÜÛÛÝÙ]\Ê^ÂÛÛÝO[]ÈYÑ^
-ÛÝ\ÙKYÜÊNÛ]NÂÚ[J
-O\K^XÊ^
-JHOO[[
-^ÂÛÛÝ[VÌK[J
-NÚY[ÝÉ\ÙY[\Ê
-J^ÜÙY[Y
-
-NÙÝ[\Ú
-
-NßBBBYÝ[[ÝOOL	×TÐTÚK\Ý
-^
-JYÝ[\Ú
-	ÐTÐT8 %Ý\[[YYX][IÊNÂ]\Ý[Ú[	È8 (	ÊNÂB[Ý[Û]XÝÛU\QÛU^
-^
-^ÂÛÛÝ]^ÓÝÙ\Ø\ÙJ
-NÂYÝ[×ÊYÚßÛØ[Y\Ý\ßÜÙYÜÊYÜY[X[[ß[×ÊÙ\\ßXÙ[_XÜ_Ù[[ÜÊYYÊØÝ[_[]Y[Ý\Ý\YÚÚK\Ý
-
-J\]\ÑÔSÉÎÂYÛ×Ê[ß×ÊÛØ[×ÊY\ZÝ\ßÛ[X×ÊÛ_[Û_[Û^WÊ×ÊY^_[Ë[Ù[\[ÊXÝXÙWÊÛKÚK\Ý
-
-J\]\ÑÔÛIÎÂYÚ[\[[Û[ÊY[ÛÚK\Ý
-
-J\]\Ò[\[[Û[Y[ÛÙÚ\Ý	ÎÂYÜY[ÛÙËÚK\Ý
-
-J\]\ÑÙ[\[Y[ÛÙÚ\Ý	ÎÂ]\ÑÔÛIÎÂB[Ý[ÛØ\\Ý
-Ê^Ü]\ÏÜËÚ\]
-
-KÕ\\Ø\ÙJ
-JÜËÛXÙJJNÉÎßBÛÛÝÒÒTÔK×HHÜ_X\ÙHÚ[YØ\ßYØ\ßÛNÎÝXXÝÙ[Y[_[ÝHØ[X\\Ú]Ý\YY\[Ü_[[Ø[XZ[ÝÝ×0ª_[ÝXØÜX_Y\_X\	X\ÛÛÙ[Ü[ßÛÛÙY\ÛÛ\H[Û^_[XYÙJKÚNÂÛÛÝUWÔK×ÌKV××WWÌKKÎÂ[Ý[Û\ÙR[\Ü
+// ─── MATCHING ENGINE ──────────────────────────────────────────────────────
+function scoreCandidate(cand,vac){
+  const prefs=candPrefs[cand.id]||{};
+  let score=0;
+  let reasons=[];
+  let warnings=[];
+  let blocks=[];
 
-^ÂÛÛÝ]ÏYØÝ[Y[Ù][[Y[RY
-	Ú[\Ü\\ÝIÊK[YK[J
-NÂY\]Ê^ÛÝYJ	Ô\ÝHÛÛYH[XZ[^\Ý	ÊNÜ]\ßB[\ÜYXØ[ÚY\ÏV×NÂÛÛÝ[\Ï\]ËÜ]
-	×ÊKX\
-O[J
-JK[\O[Ý
-NÂËÈÜX]NÝXÝ\Y8 %ÛHY]\È^XÚ]Ý]HÙXÝ[ÛXY\È
-KËÓÕUUTÕSPHBÛÛÝ\ÔÝ]R[[\ËÛÛYJOÕUWÔUTÖÛÕ\\Ø\ÙJ
-WJNÂY\ÔÝ]R^Ü\ÙTÝXÝ\YÜX]
-[\ÊNØ\VÛT]\Ê]ÊNÚ[\ÜYXØ[ÚY\ÏZ[\ÜYXØ[ÚY\Ë[\O\Õ[YØØ][ÛØØ][Û]JJNÜ[\[\Ü\Ý[Ê
-NÜ]\ßBËÈÜX]][K[ØØ][Û\ÝÈ\YÜ\ÈÚ[ÛHØØ][ÛÛX\^XÝ
-]Ë[\ÊNÂ\VÛT]\Ê]ÊNÂËÈ[[ÝH[ÙK\ÜÚ]]HXØ[ÚY\È]\HÛX\H[XZ[XY\ËÙ\ØÜ\ÜÂ[\ÜYXØ[ÚY\ÏZ[\ÜYXØ[ÚY\Ë[\O\Õ[YØØ][ÛØØ][Û]JJNÂ[\[\Ü\Ý[Ê
-NÂB[Ý[Û\ÙTÝXÝ\YÜX]
-[\Ê^Â]Ý\[Ý]OIÉÎÛ]OLÂÚ[JO[\Ë[Ý
-^ÂÛÛÝ[O[[\ÖÚWNÂÛÛÝÝ]RÙ^OSØXÝÙ^\ÊÕUWÔUTÊK[
-ÏO[KÕ\\Ø\ÙJ
-OOOZÊNÂYÝ]RÙ^J^ØÝ\[Ý]OTÕUWÔUTÖÜÝ]RÙ^WNÚJÊÎØÛÛ[YNßBÛÛÝ]SX]Ú[[KX]Ú
-×ÏÊWÊø $×WWÊÏÊJÎÞÌË_
-J	×ø $×WJËOÉÊNÂY]SX]Ú	[K[ÝI[[KÝ\ÕÚ]
-	É	ÊIQUWÔ\Ý
-[KÛXÙJ
-JJJ^ÂÛÛÝØØ][Û]]SX]ÚÌWK[J
-NØÛÛÝÛT]Ï]]SX]ÚÌK[J
-NÂ]]O]]SX]ÚÌ×OÝ]SX]ÚÌ×K[J
-NÉÎÂY\]IJÌO[\Ë[Ý	[\ÖÚJÌWKX]Ú
-×	×_ÓÐ_ÛH	ÊJ^Ü]O[[\ÖÚJÌWNÚJÊÎßBÛÛÝÛU\OY]XÝÛU\QÛU^
-ÛT]ÊÉÈ	ÊÛ[JNÂ]]\ÏIÉË[Û\Ú[ÛÏIÉËÝ\ÏIÉËÚYÝ\ÏIÉËÝZ]XQÜIÉÎÂJÊÎÂÚ[JO[\Ë[Ý
-^ÂÛÛÝ[[\ÖÚWNÂYÕUWÔUTÖÙÕ\\Ø\ÙJ
-WJXXZÎÂY×ÐKVK^KÌË
-LWÊø $×WWÊÔQSßØÝ[_Ù[[ÜÓSßY[ÛÙÊKÚK\Ý
-
-IQUWÔ\Ý
-ÛXÙJ
-JJJXXZÎÂÛÛÝÝÏYÓÝÙ\Ø\ÙJ
-NÂYÉÙ]\ÉË	ÚÙ^H\ÛÛZ[ÈYÚYÉË	ÙÜÙY]\ÉË	ÙÜÈ]\ÉË	ÙÜH]\ÉË	Ù^H]\ÉË	ØY\ÛÛ]\É×K[ÛY\ÊÝÊJ^ÚJÊÎÚYO[\Ë[Ý
-Y]\Ï[[\ÖÚWNßB[ÙHYÝÏOOIÚ[Û\Ú[ÛÉÊ^ÚJÊÎÚYO[\Ë[Ý
-Z[Û\Ú[ÛÏ[[\ÖÚWNßB[ÙHYÝÏOOIÛÝ\ÉÊ^ÚJÊÎÚYO[\Ë[Ý
-[Ý\Ï[[\ÖÚWNßB[ÙHYÝÏOOIÜÚYÝ\ÉßÝÏOOIÜÚY\\ÉÊ^ÚJÊÎÚYO[\Ë[Ý
-\ÚYÝ\Ï[[\ÖÚWNßB[ÙHYÝÏOOIÜÝZ]XHÜÊ^ÚJÊÎÚYO[\Ë[Ý
-\ÝZ]XQÜ[[\ÖÚWNßBJÊÎÂB[\ÜYXØ[ÚY\Ë\Ú
-ÂYZY
+  // 1. ROLE TYPE (15pts)
+  const rt=prefs.role_types||'both';
+  if(vac.role_type==='Either'||rt==='both'){
+    score+=15;reasons.push('Role type: any fit');
+  } else if(vac.role_type===rt||(rt==='GP Only'&&vac.role_type==='GP Only')||(rt==='GPM VMO'&&vac.role_type==='GPM VMO')){
+    score+=15;reasons.push('✓ Role type match ('+vac.role_type+')');
+  } else {
+    blocks.push('✗ Role type mismatch (doctor prefers '+rt+')');
+  }
 
-K]NØØ][ÛÉÈ8 $È	ÊÜÛT]ËÛY[ÉËØØ][ÛÝ]NÝ\[Ý]KÛWÝ\NÛU\K]N\ÙT]J]JK]WÜ]Î]K]\×Ü]Î]\Ë[Û\Ú[Û×Ü]Î[Û\Ú[ÛËÝ\ÎÝ\ÊÊÚYÝ\ÏÉÈÚY	ÊÜÚYÝ\ÎÉÊJÊÝZ]XQÜÉÈÝZ]XHÜ	ÊÜÝZ]XQÜÉÊKÝ]\ÎÓÜ[Ë\Ù[ÞNÛÜX[	ËÜX]YØ]]È]J
-KÒTÓÔÝ[Ê
-BJNÂÛÛ[YNÂBJÊÎÂBB[Ý[ÛÛX\^XÝ
-]Ë[\Ê^Â]Ï\]Ë\XÙJÖÉÉø &¸ &ø ,¸ -XKÙËÈNÂ[\Ï\]ËÜ]
-	×ÊKX\
-O[J
-JK[\O[Ý
-NÂÛÛÝÝÙ\\]ËÓÝÙ\Ø\ÙJ
-NÂÛÛÝÛÜYSØXÝÙ^\ÊÕÓÔÕUJKÛÜ
+  // 2. AVAILABILITY (25pts)
+  const avFrom=cand.availability_from;
+  const avTo=cand.availability_to;
+  if(vac.start_date&&avFrom&&avTo){
+    const vs=new Date(vac.start_date),ve=new Date(vac.end_date||vac.start_date);
+    const as=new Date(avFrom),ae=new Date(avTo);
+    if(as<=vs&&ae>=ve){score+=25;reasons.push('✓ Available '+fmtDate(vac.start_date)+(vac.end_date?' – '+fmtDate(vac.end_date):''));}
+    else if(as<=ve&&ae>=vs){score+=12;warnings.push('⚠ Partial availability overlap');}
+    else{blocks.push('✗ Not available these dates');}
+  } else if(avFrom){
+    score+=12;warnings.push('⚠ Availability listed but no end date');
+  } else {
+    score+=8;warnings.push('⚠ Availability not confirmed');
+  }
 
-KOO[ÝXK[Ý
-NÂÛÛÝ[ÚÜÏV×NÂÜÛÛÝÝÛÙÛÜY
-^ÂÛÛÝY[ÝÙ\[^ÙÝÛNÂYYL
-^ÂÛÛÝZYÛÝÙ\ÚYLWNÈ	ÎØÛÛÝOZY
-ÝÝÛ[ÝÝÙ\[ÝÛÝÙ\ÚY
-ÝÝÛ[ÝNÈ	ÎÂYKÖØK^NWKË\Ý
-IKÖØK^NWKË\Ý
-JJ^ÂYX[ÚÜËÛÛYJ[OX]XÊ[YZY
-OÊJB[ÚÜË\Ú
-ÝÝÛYÝ]NÕÓÔÕUVÝÝÛK\Ü^S[YNØ\\Ý
-ÝÛ_JNÂBBBÛÛÝ[P[ÚÜÏV×NÂ[\ËÜXXÚ
+  // 3. LOCATION / STATE (20pts)
+  const prefStates=prefs.preferred_states||[];
+  const avoidStates=prefs.avoided_states||[];
+  if(avoidStates.includes(vac.state)){
+    blocks.push('✗ Avoids '+vac.state);
+  } else if(prefStates.length===0){
+    score+=12;warnings.push('⚠ No location preference set');
+  } else if(prefStates.includes(vac.state)){
+    score+=20;reasons.push('✓ Prefers '+vac.state);
+  } else {
+    score+=5;warnings.push('⚠ '+vac.state+' not in preferred states');
+  }
 
-[KJOOÂY[K[ÝLÉ[K[ÝM	TÒÒTÔ\Ý
-[JIQUWÔ\Ý
-[KÛXÙJ
-JI[[KÝ\ÕÚ]
-	É	ÊI[[KX]Ú
-×ÊI[[K[ÛY\Ê	Ð	ÊI[[K[ÛY\Ê	Ú	ÊJ^ÂÛÛÝ^[\Ï[[\ËÛXÙJJÌKJÍJKÚ[	È	ÊNÂY^XÝ]\Ê^[\ÊK[ÝÐTÐTÚK\Ý
-^[\ÊJ^ÂÛÛÝÝY]XÝÝ]J[J_]XÝÝ]J]ÊNÂ[P[ÚÜË\Ú
-ÝÝÛ[KY]Ë[^Ù[JKÝ]NÝ\Ü^S[YN[_JNÂBBJNÂ][[ÚÜÏVË[ÚÜ×NÂ[P[ÚÜËÜXXÚ
-OOÂYX[[ÚÜËÛÛYJOOK\Ü^S[YKÓÝÙ\Ø\ÙJ
-K[ÛY\ÊKÝÛÓÝÙ\Ø\ÙJ
-J_KÝÛÓÝÙ\Ø\ÙJ
-K[ÛY\ÊK\Ü^S[YKÓÝÙ\Ø\ÙJ
-JJJB[[ÚÜË\Ú
-JNÂJNÂ[[ÚÜËÛÜ
+  // 4. RATE (20pts)
+  const rateMin=cand.daily_rate_min;
+  const budget=vac.rate;
+  if(rateMin&&budget){
+    if(rateMin<=budget){score+=20;reasons.push('✓ Rate ok ($'+rateMin+'/day min, budget $'+budget+')');}
+    else if(rateMin<=budget*1.1){score+=10;warnings.push('⚠ Rate $'+rateMin+' slightly over budget $'+budget);}
+    else{blocks.push('✗ Rate $'+rateMin+' over budget $'+budget);}
+  } else if(rateMin){
+    score+=10;warnings.push('⚠ No budget set for vacancy');
+  } else {
+    score+=10;warnings.push('⚠ Candidate rate not on file');
+  }
 
-KOOKYXY
-NÂÛÛÝY\YV×NÂ[[ÚÜËÜXXÚ
-OOÂYYY\YÛÛYJOX]XÊYXKY
-O
-L
-JYY\Y\Ú
-JNÂJNÂYY\Y[ÝOOL
-^ÂÛÛÝXÏY^XÝØÚÑY[Ê]Ë]ÊNÂYXË]\×Ü]ßXË]WÜ]Ê^Ú[\ÜYXØ[ÚY\Ë\Ú
-ÚYZY
+  // 5. DPA (10pts)
+  if(vac.dpa==='true'||vac.dpa===true){
+    const dpaAreas=cand.dpa_areas||[];
+    if(dpaAreas.length>0||cand.dpa_status){score+=10;reasons.push('✓ DPA eligible');}
+    else{blocks.push('✗ DPA required but candidate not DPA eligible');}
+  } else {
+    score+=5;// no penalty for non-DPA jobs
+  }
 
-K]NÕ[ÛÝÛØØ][ÛËÛY[ÉËØØ][ÛÉËÝ]NÉËÛWÝ\N]XÝÛU\QÛU^
-]ÊKXËÝ]\ÎÓÜ[Ë\Ù[ÞNÛÜX[	ËÜX]YØ]]È]J
-KÒTÓÔÝ[Ê
-_JNßB]\ÂBYY\Y[ÝOOL_\ÓXZ[TÚ[ÛUXØ[ÞJ]ÊJ^ÂÛÛÝOYY\YÌNÂÛÛÝXÏY^XÝØÚÑY[Ê]Ë]ÊNÂXËØØ][Û]XËØØ][ÛK\Ü^S[YNÂXËÝ]O]XËÝ]_KÝ]_]XÝÝ]J]ÊNÂXË]O]XË]_XËØØ][ÛÂ[\ÜYXØ[ÚY\Ë\Ú
-ÚYZY
+  // 6. BLOCK LENGTH (10pts)
+  const blockPref=prefs.block_pref||'any';
+  const blockWks=parseInt(vac.block_weeks)||0;
+  if(blockPref==='any'||!blockWks){
+    score+=10;
+  } else if(blockPref==='short'&&blockWks<=2){
+    score+=10;reasons.push('✓ Short block preferred ('+blockWks+' wk)');
+  } else if(blockPref==='long'&&blockWks>=3){
+    score+=10;reasons.push('✓ Long block preferred ('+blockWks+' wk)');
+  } else if(blockPref==='short'&&blockWks>2){
+    warnings.push('⚠ Prefers short blocks, this is '+blockWks+' wks');
+    score+=3;
+  } else if(blockPref==='long'&&blockWks<3){
+    warnings.push('⚠ Prefers longer blocks, this is only '+blockWks+' wks');
+    score+=3;
+  }
 
-KÛY[ÉËÝ]\ÎÓÜ[Ë\Ù[ÞNÛÜX[	ËÜX]YØ]]È]J
-KÒTÓÔÝ[Ê
-KXßJNÂ]\ÂBY\YÜXXÚ
+  // 7. RURAL PREFERENCE (bonus/penalty, no pts cap)
+  const ruralOk=prefs.rural_ok;
+  if((vac.rural==='true'||vac.rural===true)){
+    if(ruralOk===true||ruralOk==='true'){score+=5;reasons.push('✓ Open to rural/remote');}
+    else if(ruralOk===false||ruralOk==='false'){blocks.push('✗ Not interested in rural/remote');}
+    else{warnings.push('⚠ Rural role — preference not set');}
+  }
 
-[ÚÜJOOÂÛÛÝØÚÔÝ\SX]X^
-[ÚÜYL
-NÂÛÛÝØÚÑ[ZJÌOY\Y[ÝÙY\YÚJÌWKY]Ë[ÝÂÛÛÝØÚÏ\]ËÛXÙJØÚÔÝ\ØÚÑ[
-NÂÛÛÝXÏY^XÝØÚÑY[ÊØÚË]ÊNÂXËØØ][Û]XËØØ][Û[ÚÜ\Ü^S[YNÂXËÝ]O]XËÝ]_[ÚÜÝ]NÂXË]O]XËØØ][ÛÂXËÛWÝ\O]XËÛWÝ\_]XÝÛU\QÛU^
-]ÊNÂYXË]\×Ü]ßXË]WÜ]ßXËØØ][ÛB[\ÜYXØ[ÚY\Ë\Ú
-ÚYZY
+  // 8. LIKELIHOOD MODIFIER — from outcome history
+  const candOutcomes=outcomes.filter(o=>o.cand_id===cand.id);
+  const accepted=candOutcomes.filter(o=>o.outcome==='accepted').length;
+  const declined=candOutcomes.filter(o=>o.outcome==='declined').length;
+  const ghosted=candOutcomes.filter(o=>o.outcome==='ghosted').length;
+  // Check for similar state outcomes
+  const stateAccepted=outcomes.filter(o=>o.cand_id===cand.id&&o.outcome==='accepted'&&o.vac_state===vac.state).length;
+  const stateDeclined=outcomes.filter(o=>o.cand_id===cand.id&&o.outcome==='declined'&&o.vac_state===vac.state&&o.reason==='location').length;
+  if(stateAccepted>0){score+=8;reasons.push('✓ Placed in '+vac.state+' before');}
+  if(stateDeclined>0){score-=10;warnings.push('⚠ Previously declined '+vac.state+' location');}
+  if(ghosted>=2){score-=15;warnings.push('⚠ Ghosted '+ghosted+'x — reliability risk');}
+  else if(ghosted===1){score-=5;warnings.push('⚠ Ghosted once previously');}
+  if(accepted>=3){score+=5;reasons.push('✓ Strong acceptance history ('+accepted+' placements)');}
 
-KÛY[ÉËÝ]\ÎÓÜ[Ë\Ù[ÞNÛÜX[	ËÜX]YØ]]È]J
-KÒTÓÔÝ[Ê
-KXßJNÂJNÂB[Ý[Û\VÛT]\Ê^
-^ÂÛÛÝÜO]^\XÙJÖÉÉø &¸ &ø ,¸ -XKÙËÈNÂÛÛÝÛSX\^ßNÂÛÛÝÛTKÖÛWÊ
-×ÊÊ×^ÍKJW	Ê×JÊKÙÚNÂ]NÂÚ[J
-O^ÛT^XÊÜJJHOO[[
-^ÂÛÛÝ]O[VÌK\XÙJËÙË	ÉÊNÂÛÛÝ]T]ÏIÉ	ÊÓ[X\]JKÓØØ[TÝ[Ê
-JÉËÙ^IÎÂÛÛÝØÜÏ[VÌWKÜ]
-Ë[ÚJKX\
-O[J
-KÓÝÙ\Ø\ÙJ
-JK[\O[ÝNÂØÜËÜXXÚ
-ØÏOÛSX\ÛØ×O\]T]ÊNÂBYØXÝÙ^\ÊÛSX\
-K[ÝOOL
-\]\Â[\ÜYXØ[ÚY\ËÜXXÚ
-OÂY]WÜ]Ê\]\ÂÛÛÝØÏ]ØØ][ÛÓÝÙ\Ø\ÙJ
-NÂÛÛÝX]ÚSØXÝÙ^\ÊÛSX\
-K[
-OØË[ÛY\Ê_[ÛY\ÊØÊJNÂYX]Ú
-^Ý]WÜ]Ï^ÛSX\ÛX]ÚNÝ]O\\ÙT]JÛSX\ÛX]ÚJNßBJNÂB[Ý[Û\Õ[YØØ][Û[YJ^ÂY[[Y_[YK[Ý
-\]\[ÙNÂY×XØ[ÚY\×XØ[ÞWÜÜ[]Y\×\X[[ØÝ[WQ×]Z[XW\]Z\YÙYZÚ[×ÙWÊØ\WX\ÙWÚ[ÊÜYØ\×ÚK\Ý
-[YJJ\]\[ÙNÂYÐÎKË\Ý
-[YJJ\]\[ÙNÂ]\YNÂB[Ý[Û\ÓXZ[TÚ[ÛUXØ[ÞJ^
-^ÂÛÛÝ]SX]Ú\ÏJ^X]Ú
-×	Ê×J×ÊÎ\Ê^_Ù^_^WÊ]JKÙÚJ_×JK[ÝÂ]\]SX]Ú\ÏLNÂB[Ý[Û[^\Ý[ÕXØ[ÞJØØ][ÛÝ]J^ÂY[ØØ][Û\]\[ÂÛÛÝØÏ[ØØ][ÛÓÝÙ\Ø\ÙJ
-K[J
-NÂ]\XØ[ÚY\Ë[
-OÂÛÛÝJØØ][Û]_	ÉÊKÓÝÙ\Ø\ÙJ
-K[J
-NÂÛÛÝØ[YTÝ]OH\Ý]_]Ý]_Ý]OOO\Ý]NÂ]\Ø[YTÝ]IOO[ØßÝ\ÕÚ]
-ØÊ_ØËÝ\ÕÚ]
-
-JNÂJ_[ÂB[Ý[Û[[ÝR[\ÜY
-Y
-^Ú[\ÜYXØ[ÚY\ËÜXÙJYJNÜ[\[\Ü\Ý[Ê
-NßB[Ý[Û[\[\Ü\Ý[Ê
-^ÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	Ú[\Ü\\Ý[ÉÊNÂÛÛÝ\YØÝ[Y[Ù][[Y[RY
-	Ú[\Ü\Ø]KX\ÊNÂÛÛÝÛYØÝ[Y[Ù][[Y[RY
-	Ú[\ÜXÛÝ[	ÊNÂY[\ÜYXØ[ÚY\Ë[ÝOOL
-^Â[[\SIÏ]Û\ÜÏH[\HÈXØ[ÚY\È]XÝYÚXÚÈHÜX][HYØZ[ÜÙ]ÎÂ\Ý[K\Ü^OIÛÛIÎØÛ^ÛÛ[IÉÎÜ]\ÂB[\ÜYXØ[ÚY\ËÜXXÚ
-OØÙ^\Ý[ÏY[^\Ý[ÕXØ[ÞJØØ][Û]KÝ]JNßJNÂÛÛÝ\]\ÏZ[\ÜYXØ[ÚY\Ë[\OÙ^\Ý[ÊK[ÝÂÛÛÝ]ÜÏZ[\ÜYXØ[ÚY\Ë[Ý]\]\ÎÂÛ^ÛÛ[Z[\ÜYXØ[ÚY\Ë[Ý
-ÉÈÝ[	ÎÂ\Ý[K\Ü^OIØØÚÉÎÂØÝ[Y[Ù][[Y[RY
-	Ú[\Ü\Ø]K[\ÙÉÊK^ÛÛ[J]ÜÏÛ]ÜÊÉÈ]ÉÎÉÊJÊ]ÜÉ\]\ÏÉÈ
-È	ÎÉÊJÊ\]\ÏÝ\]\ÊÉÈ\]\ÉÎÉÊJÈ	ÈXYHÈØ]IÎÂ[[\SZ[\ÜYXØ[ÚY\ËX\
+  // Declined for rate on similar jobs
+  const rateDeclined=outcomes.filter(o=>o.cand_id===cand.id&&o.outcome==='declined'&&o.reason==='rate_low').length;
+  if(rateDeclined>=2){warnings.push('⚠ Declined '+rateDeclined+'x for low rate — negotiate carefully');}
 
-Y
-OO]Ý[OHÜ\\ÛÛY\KYÌ
-NØÜ\\Y]\ÎÛÝ\ÝÎY[ÛX\Ú[XÝÛNLÈ]Ý[OHXÚÙÜÝ[\KYÍL
-NÜY[ÎLÙ\Ü^N^Ø[YÛZ][\ÎÙ[\ÙØ\ØÜ\XÝÛN\ÛÛY\KYÌ
-NÈÜ[Ý[OHÛ\Ú^NLÜÙÛ]ÙZYÚÙ^NÈÙ\ØÊ]J_OÜÜ[[][YOHÙ\ØÊ]WÜ]ß	ÉÊ_HÛÚ[ÙOH[\ÜYXØ[ÚY\ÖÉÚYWK]WÜ]Ï]\Ë[YNÚ[\ÜYXØ[ÚY\ÖÉÚYWK]O\\ÙT]J\Ë[YJNÈXÙZÛ\H]HKË	KÙ^HÝ[OHÛ\Ú^NL\ÜY[Î
-ØÜ\\ÛÛY\KYÌÌ
-NØÜ\\Y]\ÎÝÚYLÌØÛÛÜ\KYÜNÙÛ]ÙZYÚÈÜ[Û\ÜÏHIÝÛWÝ\OOOIÑÔÛIÏÉÙÜÎÛWÝ\OOOIÒ[\[[Û[Y[ÛÙÚ\Ý	ßÛWÝ\OOOIÑÙ[\[Y[ÛÙÚ\Ý	ÏÉØYIÎÜ\ßHÙ\ØÊÛWÝ\J_OÜÜ[	ÝÙ^\Ý[ÏÉÏÜ[Û\ÜÏHÝ[OHXÚÙÜÝ[ÙÙYØÛÛÜØÌLÎØÜ\\ÛÛYÙY
-ØXNÈTUOÜÜ[ÎÏÜ[Û\ÜÏHXYHUÏÜÜ[ßB]ÛÛ\ÜÏH\ÙXÈ^ÈÛÛXÚÏH[[ÝR[\ÜY
-	ÚYJH¸§%OØ]ÛÙ]]Ý[OHY[ÎLÙÛ\Ú^NLÈ]Ý[OH\Ü^NÜYÙÜY][\]KXÛÛ[[ÎYYÙØ\È]Ü[Ý[OHÛÛÜ\KYÍL
-NÈÝ]NÜÜ[ÝÛÏÙ\ØÊÝ]_	ø %	Ê_OÜÝÛÏÙ]]Ü[Ý[OHÛÛÜ\KYÍL
-NÈÛNÜÜ[Ù[XÝÛÚ[ÙOH[\ÜYXØ[ÚY\ÖÉÚYWKÛWÝ\O]\Ë[YHÝ[OHÛ\Ú^NL\ÜY[Î\
-ØÜ\\ÛÛY\KYÌÌ
-NØÜ\\Y]\ÎÈ	ÖÉÑÔÛIË	ÑÔSÉË	ÑQSÉË	ÕPÐÉË	Ò[\[[Û[Y[ÛÙÚ\Ý	Ë	ÑÙ[\[Y[ÛÙÚ\Ý	×KX\
-OÜ[Û	ÜOO]ÛWÝ\OÉÜÙ[XÝY	ÎÉßOÜOÛÜ[Û
-KÚ[	ÉÊ_BÜÙ[XÝÙ]Ù]	Ý]\×Ü]ÏØ]Ý[OHX\Ú[]ÜÈÜ[Ý[OHÛÛÜ\KYÍL
-NÈ]\ÎÜÜ[Ù\ØÊ]\×Ü]Ê_OÙ]ÉßB	Ý[Û\Ú[Û×Ü]ÏØ]Ý[OHX\Ú[]ÜÈÜ[Ý[OHÛÛÜ\KYÍL
-NÈ[Û\Ú[ÛÎÜÜ[Ù\ØÊ[Û\Ú[Û×Ü]Ê_OÙ]ÉßBÙ]Ù]
-KÚ[	ÉÊNÂB\Þ[È[Ý[ÛØ]P[[\ÜY
+  // Cap score
+  score=Math.max(0,Math.min(100,score));
 
-^ÂYZ[\ÜYXØ[ÚY\Ë[Ý
-\]\Â]YYL\]YLÂÜÛÛÝÙ[\ÜYXØ[ÚY\Ê^ÂÛÛÝ[^ËNÙ[]H[Ù^\Ý[ÎÂÛÛÝÙ\ÜOX]ØZ]ØÛJÕPÊK\Ù\
-[
-NÂY\Ü^ÛÝYJ	Ñ\ÜØ][Î	ÊÙ\ÜY\ÜØYÙJNØÛÛÛÛK\Ü\ÜNÜ]\ßBÛÛÝ^\Ý[ÏY[^\Ý[ÕXØ[ÞJØØ][Û]KÝ]JNÂY^\Ý[Ê^ÓØXÝ\ÜÚYÛ^\Ý[ËË[Y^\Ý[ËYÜX]YØ]^\Ý[ËÜX]YØ]JNÝ\]Y
-ÊÎßB[Ù^ÝXØ[ÚY\Ë[ÚY
-[
-NØYY
-ÊÎßBBÛX\[\Ü
+  // Tier
+  let tier='cold';
+  if(score>=68)tier='hot';
+  else if(score>=42)tier='warm';
 
-NÂÝYJ
-YYØYY
-ÉÈYY	ÎÉÊJÊYY	\]YÉÈ0­È	ÎÉÊJÊ\]YÝ\]Y
-ÉÈ\]Y	ÎÉÊJNÂ[\\Ú
+  return{score,tier,reasons,warnings,blocks,candOutcomes};
+}
 
-NÂB[Ý[ÛÛX\[\Ü
+function getTier(score){
+  if(score>=68)return'hot';
+  if(score>=42)return'warm';
+  return'cold';
+}
 
-^Â[\ÜYXØ[ÚY\ÏV×NÂØÝ[Y[Ù][[Y[RY
-	Ú[\Ü\\ÝIÊK[YOIÉÎÂØÝ[Y[Ù][[Y[RY
-	Ú[\Ü\\Ý[ÉÊK[\SIÏ]Û\ÜÏH[\H\ÝH[[XZ[[ÛXÚÏ^XÝXØ[ÚY\ÈÈYÚ[ÜÙ]ÎÂØÝ[Y[Ù][[Y[RY
-	Ú[\Ü\Ø]KX\ÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
-	Ú[\ÜXÛÝ[	ÊK^ÛÛ[IÉÎÂBËÈ8¥ 8¥ 8¥ ÐQÐTÕ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[Û[\ØYØ\ÝY]Ê
-^Â[\ØYØ\ÝXÚÙ\
-NÂ[\ØYØ\Ý]Y]Ê
-NÂB[Ý[Û[\ØYØ\ÝXÚÙ\
-^ÂÛÛÝ[YØÝ[Y[Ù][[Y[RY
-	ØË]XË\XÚÙ\ÊNÚYY[
-\]\ÂÛÛÝÜ[]XØ[ÚY\Ë[\O]Ý]\ßÝ]\ÏOOIÓÜ[ÊNÂY[Ü[[Ý
-^Ù[[\SIÏ]Ý[OHY[ÎLÙÛ\Ú^NLØÛÛÜ\KYÍL
-NÈÈÜ[XØ[ÚY\ËÙ]ÎÜ]\ßB[[\S[Ü[X\
-OX[Ý[OH\Ü^N^Ø[YÛZ][\Î^\Ý\ÙØ\ÜY[ÎØÜ\XÝÛN\ÛÛY\KYÌL
-NØÝ\ÛÜÚ[\È[]\OHÚXÚØÞÛ\ÜÏHË]XËXØ]KZYHÝYHÝ[OHX\Ú[]ÜÈÛÚ[ÙOH[\ØYØ\Ý]Y]Ê
-H]]Ý[OHÛ\Ú^NLÙÛ]ÙZYÚÈÙ\ØÊ]J_OÙ]]Ý[OHÛ\Ú^NL\ØÛÛÜ\KYÍL
-NÈÙ\ØÊÝ]_	ÉÊ_IÝ]WÜ]ÏÉÈ0­È	ÊÙ\ØÊ]WÜ]ÊNÉßOÙ]Ù]ÛX[
-KÚ[	ÉÊNÂB[Ý[Û[\ØYØ\Ý]Y]Ê
-^ÂÛÛÝ]YY[ÙOYÙ]ØYØ\Ý]YY[ÙJ
-NÂÛÛÝXÜÏYÙ]Ù[XÝYØYØ\ÝXÜÊ
-NÂÛÛÝ]Y]ÏYØÝ[Y[Ù][[Y[RY
-	ØË\]Y]ÉÊNÂÛÛÝÝXXÝYØÝ[Y[Ù][[Y[RY
-	ØË\ÝXXÝ	ÊNÂY\]Y]Ê\]\ÂÛÛÝÝ]\Õ[\OVË]ÈÙ]
-XÜËX\
-OÝ]JK[\ÛÛX[JWNÂÛÛÝÝXXÝ^\Ý]\Õ[\K[ÝØ	Ø]YY[Ù_HØÝ[HÜÜ[]Y\È8 %	ÜÝ]\Õ[\KÚ[	Ë	Ê_X	Ø]YY[Ù_HØÝ[HÜÜ[]Y\ØÂYÝXXÝ
-\ÝXXÝ[YO\ÝXXÝ^Â]Y]Ë[\S]XÜË[ÝØZ[ØYØ\ÝS
-]YY[ÙKXÜÊNÏ]Û\ÜÏH[\HÙ[XÝXØ[ÚY\ÈÛHYÈ]Y]ËÜÙ]ÎÂB[Ý[ÛÙ]ØYØ\Ý]YY[ÙJ
-^ÂÛÛÝOYØÝ[Y[]Y\TÙ[XÝÜ	Ú[]Û[YOHËX]YY[ÙHNÚXÚÙY	ÊNÂ]\Ü[YNÑÔSÉÎÂB[Ý[ÛÙ]Ù[XÝYØYØ\ÝXÜÊ
-^ÂÛÛÝÚXÚÙYP\^KÛJØÝ[Y[]Y\TÙ[XÝÜ[
-	ËË]XËXØÚXÚÙY	ÊJKX\
-ØOØ]\Ù]Y
-NÂ]\XØ[ÚY\Ë[\OÚXÚÙY[ÛY\ÊY
-JNÂB[Ý[ÛZ[ØYØ\ÝS
-]YY[ÙKXÜÊ^ÂÛÛÝÝ]SÜ\VÉÔÐIË	ÕÐIË	ÔS	Ë	ÓÕÉË	ÕPÉË	ÕTÉË	Ó	Ë	ÐPÕ	Ë	Ó×NÂÛÛÝTÝ]O^ßNÂXÜËÜXXÚ
-OØÛÛÝÏ]Ý]_	ÓÝ\ÎÚYXTÝ]VÜ×JXTÝ]VÜ×OV×NØTÝ]VÜ×K\Ú
-NßJNÂÛÛÝÝ]Q[[YO^ÉÓÕÉÎÓUÈÓÕUÐSTÉË	ÕPÉÎÕPÕÔPIË	ÔS	ÎÔUQQSÓS	Ë	ÕÐIÎÕÑTÕTUTÕSPIË	ÔÐIÎÔÓÕUUTÕSPIË	ÕTÉÎÕTÓPSPIË	Ó	ÎÓÔTTUÔIË	ÐPÕ	ÎÐUTÕSPSÐTUSTUÔIË	ÓÎÓUÈPSS	Ë	ÓÝ\ÎÓÕTßNÂÛÛÝÝ]\ÏVË]ÈÙ]
-ËÝ]SÜ\ØXÝÙ^\ÊTÝ]JWJWK[\ÏOTÝ]VÜ×JNÂÛÛÝÝ]S\Ý\Ý]\ËÚ[	Ë	ÊNÂÛÛÝ]YY[ÙR[Ï^Â	ÑÔSÉÎH]HÛÛYHÜX]ÔÑQ[SÈØÝ[HÜÜ[]Y\È]Z[XHXÜÜÜÈ	ÜÝ]S\ÝKX\ÙHÙYHHÝ\[XØ[ÚY\È[ÝË	ÑÔÛIÎH]HÛÛYHÜX]ÔØÝ[HÜÜ[]Y\È]Z[XHXÜÜÜÈ	ÜÝ]S\ÝKX\ÙHÙYHHÝ\[XØ[ÚY\È[ÝË	ÕPÐÉÎH]HÛÛYHÜX]\Ù[Ø\HÛ[XÈ
-PÐÊHØÝ[HÜÜ[]Y\È]Z[XHXÜÜÜÈ	ÜÝ]S\ÝKX\ÙHÙYHHÝ\[XØ[ÚY\È[ÝË	Ò[\[[Û[Y[ÛÙÚ\Ý	ÎÒH]HÛÛYHÜX][\[[Û[Y[ÛÙÞHØÝ[HÜÜ[]Y\È]Z[XKX\ÙHÙYHHÝ\[XØ[ÚY\È[ÝËË	ÑÙ[\[Y[ÛÙÚ\Ý	ÎÒH]HÛÛYHÜX]Y[ÛÙÞHØÝ[HÜÜ[]Y\È]Z[XKX\ÙHÙYHHÝ\[XØ[ÚY\È[ÝËÂNÂ][XÝ[OHÛY[Z[N\X[[]XØKØ[Ë\Ù\YÙÛ\Ú^NMÛX\Ú[MÈH	\Ý[YIÜÝ[OHÛY[Z[N\X[[]XØKØ[Ë\Ù\YÙÛ\Ú^NMÛX\Ú[ÈØ]YY[ÙR[ÖØ]YY[ÙW_	ÒH]HÛÛYHÜX]ØÝ[HÜÜ[]Y\È]Z[XKX\ÙHÙYHHÝ\[XØ[ÚY\È[ÝËßOÜÂÝ]\ËÜXXÚ
-Ý]OOÂÛÛÝÝXÜÏXTÝ]VÜÝ]WNÂ[
-ÏXÝ[OHÛY[Z[N\X[[]XØKØ[Ë\Ù\YÙÛ]ÙZYÚÛÙÛ\Ú^NLÜÛX\Ú[LÛ]\\ÜXÚ[Î[NÈÜÝ]Q[[YVÜÝ]W_Ý]_OÜÂÝXÜËÜXXÚ
-OÂÛÛÝ]Q\Ü^O]]WÜ]ß
-]I]HOOIÌ	ÏÉÉ	ÊÓ[X\]JKÓØØ[TÝ[Ê
-JÉËÙ^IÎÉÊNÂÛÛÝ]\Ñ\Ü^O]]\×Ü]ß	ÉÎÂÛÛÝ[Û\Ü^O][Û\Ú[Û×Ü]ß	ÉÎÂÛÛÝ[[ÜÔÝ][[Ü×ÜÝØÜ	Ý[[Ü×ÜÝIHÙ[[ÜØÉÎÂÛÛÝ[]O\]Q\Ü^OÊ]Q\Ü^JØ[[ÜÔÝNÉÎÂ[
-ÏX]Ý[OHÛY[Z[N\X[[]XØKØ[Ë\Ù\YØÜ\\ÛÛYÙY
-YØÜ\\Y]\ÎÛÝ\ÝÎY[ÛX\Ú[XÝÛNLÈ]Ý[OHXÚÙÜÝ[ÙYYNÜY[ÎLMÙ\Ü^N^Ú\ÝYKXÛÛ[ÜXÙKX]ÙY[Ø[YÛZ][\ÎÙ[\ÈÜ[Ý[OHÛ]ÙZYÚÛÙÛ\Ú^NMØÛÛÜÌLLNÎÈÙ\ØÊ]J_OÜÜ[Ù[]OØÜ[Ý[OHÛÛÜÌMÙÌÙÛ]ÙZYÚÛÙÛ\Ú^NLÜÈÙ\ØÊ[]J_OÜÜ[ÉßOÙ]]Ý[OHY[ÎLMLMØXÚÙÜÝ[ÙÈÂY]\Ñ\Ü^JZ[
-ÏXÝ[OHÛÛÜÎXØLØYÙÛ\Ú^NL\ÛX\Ú[È]\ÏÜÝ[OHÛ]ÙZYÚÛÙÛ\Ú^NLÜÛX\Ú[LØÛÛÜÌLLNÎÈÙ\ØÊ]\Ñ\Ü^J_OÜÂY[Û\Ü^JZ[
-ÏXÝ[OHÛÛÜÎXØLØYÙÛ\Ú^NL\ÛX\Ú[È[Û\Ú[ÛÏÜÝ[OHÛ\Ú^NLÜÛX\Ú[ØÛÛÜÌLLNÎÈÙ\ØÊ[Û\Ü^J_OÜÂ[
-ÏXÙ]Ù]ÂJNÂJNÂY]XÜË[Ý
-Z[
-ÏXÝ[OHÛÛÜÎXØLØYÙÛ\Ý[N][XÎÙÛY[Z[N\X[[]XØKØ[Ë\Ù\YÈÈXØ[ÚY\ÈÙ[XÝYÜÂ[
-ÏXÝ[OHÛY[Z[N\X[[]XØKØ[Ë\Ù\YÙÛ\Ú^NMÛX\Ú[
-ÈY[HÙ\ÙH[\\Ý[ÝKX\ÙH\HÈ\È[XZ[ÜÚ]HYHHØ[ÛÝÛÏ
-L
-M
-ÈLOÜÝÛÏ[IÛÙ][ÝHXÜÜÜÈ[H]Z[ËÜÝ[OHÛY[Z[N\X[[]XØKØ[Ë\Ù\YÙÛ\Ú^NLÜØÛÛÜÌMLÍNÛX\Ú[È[ÝHØ[X\	KÜY\[ÈHÛÛXYÝYHH\Ú]Ý\HYHÎËÝÝÝËYY\[ÜKÛÛK]KÜ]Ø\ÈÝ[OHÛÛÜÌMLÍNÈ]Ø\ÈYÙOØOÜ[ÜH]Z[ËÜÝ[OHÛY[Z[N\X[[]XØKØ[Ë\Ù\YÙÛ\Ú^NLÜÛX\Ú[ÈÚ[YØ\ËÝÛÏÚ\ÈÛÛZÚ\ÏÜÝÛÏ\XÝÜYYT[ÜO
-ÍHH
-Ì	Üß	ÜÈN
-ÍH
-L
-M
-ÈLOHYHXZ[ÎÚ\ËYY\[ÜKÛÛK]HÝ[OHÛÛÜÌMÙÌÈÚ\ËYY\[ÜKÛÛK]OØO	Üß	ÜÈHYHÎËÝÝÝËYY\[ÜKÛÛK]HÝ[OHÛÛÜÌMÙÌÈÝÝËYY\[ÜKÛÛK]OØOÜÂ]\[ÂB[Ý[ÛZ[ØYØ\ÝZ[]YY[ÙKXÜÊ^ÂÛÛÝÝ]SÜ\VÉÔS	Ë	ÓÕÉË	ÕPÉË	ÔÐIË	ÕÐIË	ÕTÉË	Ó	Ë	ÐPÕ	Ë	Ó×NÂÛÛÝTÝ]O^ßNÂXÜËÜXXÚ
-OØÛÛÝÏ]Ý]_	ÓÝ\ÎÚYXTÝ]VÜ×JXTÝ]VÜ×OV×NØTÝ]VÜ×K\Ú
-NßJNÂÛÛÝÝ]\ÏVË]ÈÙ]
-ËÝ]SÜ\ØXÝÙ^\ÊTÝ]JWJWK[\ÏOTÝ]VÜ×JNÂ]XHÑ\Ý[YWKÜH[ÝIÜHÙ[HH]HÛÛYHØÝ[HÜÜ[]Y\È]X^HÝZ][ÝKÂÝ]\ËÜXXÚ
-Ý]OOÂ
-ÏX	Éø¥ 	Ë\X]
+function tierLabel(tier){
+  if(tier==='hot')return'🔥 Hot';
+  if(tier==='warm')return'🟡 Warm';
+  return'❄️ Cold';
+}
 
-
-_WÜÝ]_WÉø¥ 	Ë\X]
+// ─── DASHBOARD ────────────────────────────────────────────────────────────
+function renderDash(){
+  const openVacs=vacancies.filter(v=>v.status==='Open');
+  document.getElementById('s-vac').textContent=openVacs.length;
+  document.getElementById('s-cands').textContent=candidates.length;
+  document.getElementById('s-outcomes').textContent=outcomes.length;
 
-
-_WÂTÝ]VÜÝ]WKÜXXÚ
-OÂÛÛÝ]Q\Ü^O]]WÜ]ß
-]OÉÉ	ÊÓ[X\]JKÓØØ[TÝ[Ê
-JÉËÙ^IÎÉÊNÂ
-ÏX	Ý]_IÜ]Q\Ü^OÉÈ	ÊÜ]Q\Ü^NÉßWÂY]\×Ü]Ê]
-ÏX]\Î	Ý]\×Ü]ßWÂY[Û\Ú[Û×Ü]Ê]
-ÏX[Û\Ú[ÛÎ	Ý[Û\Ú[Û×Ü]ßWÂ
-ÏI×ÎÂJNÂJNÂ
-ÏXY[HÙ\ÙH[\\Ý[ÝKX\ÙH\HÜÚ]HYHHØ[Û
-L
-M
-ÈLKÚ[YØ\ËÚ\ÈÛÛZÚ\È\XÝÜYYT[ÜW
-ÍHH
-ÌN
-ÍH
-L
-M
-ÈLWÚ\ËYY\[ÜKÛÛK]HÝÝËYY\[ÜKÛÛK]XÂ]\ÂB[Ý[ÛÛÜPØYØ\ÝS
+  // Count hot matches across all open vacancies
+  let hotCount=0;
+  let hotItems=[];
+  openVacs.forEach(v=>{
+    candidates.forEach(c=>{
+      const r=scoreCandidate(c,v);
+      if(r.tier==='hot'){
+        hotCount++;
+        hotItems.push({cand:c,vac:v,score:r.score,reasons:r.reasons});
+      }
+    });
+  });
+  document.getElementById('s-hot').textContent=hotCount;
+  hotItems.sort((a,b)=>b.score-a.score);
 
-^Â[\ØYØ\Ý]Y]Ê
-NÂÛÛÝYØÝ[Y[Ù][[Y[RY
-	ØË\]Y]ÉÊNÚY\\]\Â]YØ]ÜÛ\Ø\Ü]U^
-[\S
-K[
+  const hotList=document.getElementById('dash-hot-list');
+  if(hotItems.length===0){
+    hotList.innerHTML='<div class="empty"><p>No hot matches yet.<br>Add vacancies and confirm candidate availability.</p></div>';
+  } else {
+    hotList.innerHTML=hotItems.slice(0,5).map(h=>`
+      <div style="padding:10px 14px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px;">
+        <div class="av" style="background:#2563eb;width:32px;height:32px;font-size:12px;">${initials(h.cand.name)}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${esc(h.cand.name)}</div>
+          <div style="font-size:11px;color:var(--g500);">${esc(h.vac.title)} · Score ${h.score}</div>
+        </div>
+        <span class="b b-grn">🔥 Hot</span>
+      </div>`).join('');
+  }
 
-OOÝYJ	ÐØYØ\ÝSÛÜYY	ÊJKØ]Ú
+  const vacList=document.getElementById('dash-vac-list');
+  if(openVacs.length===0){
+    vacList.innerHTML='<div class="empty"><p>No open vacancies.<br>Add one to get started.</p></div>';
+  } else {
+    vacList.innerHTML=openVacs.slice(0,5).map(v=>`
+      <div style="padding:10px 14px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="openMatchForVac('${v.id}')">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${esc(v.title)}</div>
+          <div style="font-size:11px;color:var(--g500);">${esc(v.state)} · ${esc(v.role_type)} · ${v.rate?'$'+v.rate+'/day':''}</div>
+        </div>
+        ${urgencyBadge(v.urgency)}
+      </div>`).join('');
+  }
+}
 
+function openMatchForVac(vacId){
+  nav(document.querySelector('[data-view=match]'),'match');
+  setTimeout(()=>selectVacancy(vacId),50);
+}
 
-OOÝYJ	ÐÛÝ[ÝÛÜIÊJNÂB[Ý[ÛÛÜPØYØ\ÝZ[
-^ÂÛÛÝ]YY[ÙOYÙ]ØYØ\Ý]YY[ÙJ
-NÂÛÛÝXÜÏYÙ]Ù[XÝYØYØ\ÝXÜÊ
-NÂ]YØ]ÜÛ\Ø\Ü]U^
-Z[ØYØ\ÝZ[]YY[ÙKXÜÊJK[
+// ─── MATCH VIEW ───────────────────────────────────────────────────────────
+function renderMatchView(){
+  const el=document.getElementById('match-vac-list');
+  if(vacancies.length===0){
+    el.innerHTML='<div class="empty"><p>No vacancies yet.</p></div>';
+    return;
+  }
+  el.innerHTML=vacancies.filter(v=>v.status==='Open').map(v=>`
+    <div class="vac-list-item" id="vli-${v.id}" onclick="selectVacancy('${v.id}')">
+      <div class="vtitle">${esc(v.title)}</div>
+      <div class="vmeta">${esc(v.state||'')} · ${esc(v.role_type||'')} ${v.rate?'· $'+v.rate+'/day':''}</div>
+      ${urgencyBadge(v.urgency)}
+    </div>`).join('');
+}
 
-OOÝYJ	ÐØYØ\ÝZ[^ÛÜYY	ÊJKØ]Ú
+function selectVacancy(vacId){
+  document.querySelectorAll('.vac-list-item').forEach(el=>el.classList.remove('selected'));
+  const el=document.getElementById('vli-'+vacId);
+  if(el)el.classList.add('selected');
+  const vac=vacancies.find(v=>v.id===vacId);
+  if(!vac)return;
+  renderVacDetail(vac);
+  renderMatchResults(vac);
+}
 
+function renderVacDetail(vac){
+  const el=document.getElementById('match-vac-detail');
+  el.style.display='block';
+  el.innerHTML=`
+    <div class="vac-detail">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:600;">${esc(vac.title)}</span>
+        <div class="sp" style="flex:1;"></div>
+        ${urgencyBadge(vac.urgency)}
+        <button class="btn btn-sec btn-xs" onclick="openEditVacancy('${vac.id}')">Edit</button>
+      </div>
+      <div class="vd-grid">
+        <div class="vd-item"><div class="vd-lbl">Location</div><div class="vd-val">${esc(vac.location||'')} ${esc(vac.state||'')}</div></div>
+        <div class="vd-item"><div class="vd-lbl">Role type</div><div class="vd-val">${esc(vac.role_type||'—')}</div></div>
+        <div class="vd-item"><div class="vd-lbl">Dates</div><div class="vd-val">${vac.start_date?fmtDate(vac.start_date):'TBC'}${vac.end_date?' – '+fmtDate(vac.end_date):''}</div></div>
+        <div class="vd-item"><div class="vd-lbl">Block</div><div class="vd-val">${vac.block_weeks?vac.block_weeks+' week'+(vac.block_weeks>1?'s':''):'—'}</div></div>
+        <div class="vd-item"><div class="vd-lbl">Rate</div><div class="vd-val">${vac.rate?'$'+vac.rate+'/day':'—'}</div></div>
+        <div class="vd-item"><div class="vd-lbl">DPA</div><div class="vd-val" style="color:${vac.dpa==='true'?'var(--grn)':'var(--g500)'}">${vac.dpa==='true'?'Required':'No'}</div></div>
+      </div>
+      ${vac.travel==='true'||vac.accom==='true'?`<div style="font-size:11px;color:var(--grn);margin-top:6px;">${vac.travel==='true'?'✓ Travel provided ':''} ${vac.accom==='true'?'✓ Accommodation provided':''}</div>`:''}
+      ${vac.notes?`<div style="font-size:11px;color:var(--g500);margin-top:6px;border-top:1px solid var(--g100);padding-top:6px;">${esc(vac.notes)}</div>`:''}
+    </div>`;
+}
 
-OOÝYJ	ÐÛÝ[ÝÛÜIÊJNÂB[Ý[ÛYØYØ\Ý\ÙÊXË[YJ^ÂÛÛÝ]TÝ]XËÝ\Ù]OÊ]]JXËÝ\Ù]JJÊXË[Ù]OÉÈ8 $È	ÊÙ]]JXË[Ù]JNÉÊJNÙ]\ÈÉÎÂ]\H	Û[Y_	ÖÓ[YWIßKÜH[ÝIÜHÙ[HH]HHÜX]ØÝ[HÜÜ[]HIÙÝHÈ[H[ÝK¼'äãHØØ][Û	ÝXËØØ][Û	ÉßH	ÝXËÝ]_	ÉßW¼'äáH]\Î	Ù]TÝW¼'ä¬]N	ÝXË]OÉÉ	ÊÝXË]JÉËÙ^IÎÕÉßW¼'ãéHÛN	ÝXËÛWÝ\_	ÑÔØÝ[IßIÝXËOOOIÝYIÏÉÈ
-HØØ][ÛIÎÉßIÝXË][OOIÝYIÏÉ×¸§";î#È][ÝYY	ÎÉßIÝXËXØÛÛOOOIÝYIÏÉ×¼'ãèXØÛÛ[[Ù][ÛÝYY	ÎÉßWÝXËÝ\ÏÉÐY][Û[]Z[Î	ÊÝXËÝ\ÊÉ×ÎÉßUÛÝ[\ÈÛÜÈÜ[ÝOÈ\HÈÚ]ÝYÚ[H]Z[ËØ\HYØ\ËÚ\ÈÛÛZÚ\ÈYYT[ÜXÂB[Ý[ÛÛÜS\ÙÊ
-^ÂÛÛÝOYØÝ[Y[Ù][[Y[RY
-	Û\ÙËXÙIÊNÚY]J\]\Â]YØ]ÜÛ\Ø\Ü]U^
-K[YJK[
+function renderMatchResults(vac){
+  const el=document.getElementById('match-results');
+  if(candidates.length===0){
+    el.innerHTML='<div class="empty" style="background:#fff;border:1px solid var(--g200);border-radius:10px;"><div class="ei">👨‍⚕️</div><p>No locum GP candidates found in CRM.<br>Add candidates in the CRM first.</p></div>';
+    return;
+  }
 
-OOÝYJ	ÓY\ÜØYÙHÛÜYYÈÛ\Ø\	ÊJNÂB[Ý[ÛÙ]Y\ØÛÜJ^ÂYØÛÜOM
-\]\ÚÝ	ÎÂYØÛÜOM\]\ÝØ\IÎÂ]\ØÛÛ	ÎÂB[Ý[ÛÜ[YØ[Y]JY
-^ÂËÈØ[Y]\È\HX[YÙY[HÔH8 %\ÈÜ[ÈHXY[ÛHYÈY]ÂYY
-[Ü[Ø[Ù[JY
-NÂB[Ý[ÛÛÜÙPYØ[
+  // Score all candidates
+  const scored=candidates.map(c=>({cand:c,...scoreCandidate(c,vac)}));
+  scored.sort((a,b)=>b.score-a.score);
 
-^ÂÛÛÝOYØÝ[Y[Ù][[Y[RY
-	ØYØ[[[Ù[	ÊNÚYJ[KÝ[K\Ü^OIÛÛIÎÂBËÈ8¥ 8¥ 8¥ ÓÕÕT8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ []
+  const hot=scored.filter(s=>s.tier==='hot');
+  const warm=scored.filter(s=>s.tier==='warm');
+  const cold=scored.filter(s=>s.tier==='cold');
 
-NÂÜØÜ\ØÙOÚ[
+  let html=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="font-size:14px;font-weight:600;">${esc(vac.title)}</span>
+      <span style="font-size:12px;color:var(--g500);">${scored.length} candidates scored</span>
+      <div style="flex:1;"></div>`;
+
+  const hotWarmCands=scored.filter(s=>s.tier!=='cold');
+  if(hotWarmCands.length>0){
+    html+=`<button class="btn btn-sec btn-sm" onclick="openBroadcast(${JSON.stringify(vac.id)},${JSON.stringify(hotWarmCands.map(s=>s.cand.id))})">📣 Broadcast Hot+Warm (${hotWarmCands.length})</button>`;
+  }
+  html+='</div>';
+
+  if(hot.length>0){
+    html+=`<div class="tier-section tier-hot">
+      <div class="tier-header">🔥 Hot — strong fit, likely to accept (${hot.length})</div>
+      ${hot.map(s=>matchCard(s,vac)).join('')}
+    </div>`;
+  }
+  if(warm.length>0){
+    html+=`<div class="tier-section tier-warm">
+      <div class="tier-header">🟡 Warm — good fit, one or two friction points (${warm.length})</div>
+      ${warm.map(s=>matchCard(s,vac)).join('')}
+    </div>`;
+  }
+  if(cold.length>0){
+    html+=`<div class="tier-section tier-cold">
+      <div class="tier-header" style="cursor:pointer;" onclick="toggleCold(this)">❄️ Cold — significant issues, last resort (${cold.length}) <span style="margin-left:auto;font-size:11px;">▼ Show</span></div>
+      <div class="cold-content" style="display:none;">${cold.map(s=>matchCard(s,vac)).join('')}</div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+function toggleCold(headerEl){
+  const content=headerEl.nextElementSibling;
+  const isHidden=content.style.display==='none';
+  content.style.display=isHidden?'block':'none';
+  headerEl.querySelector('span').textContent=isHidden?'▲ Hide':'▼ Show';
+}
+
+function matchCard(s,vac){
+  const c=s.cand;
+  const prefs=candPrefs[c.id]||{};
+  const roleColor={'GP Only':'grn','GP VMO':'pur','ED VMO':'pur','UCC':'amb','Interventional Radiologist':'blue','General Radiologist':'blue'}[prefs.role_types]||'gray';
+  const roleTag=prefs.role_types&&prefs.role_types!=='both'?`<span class="b b-${roleColor}">${esc(prefs.role_types)}</span>`:'<span class="b b-gray">Type not set</span>';
+  const allSignals=[
+    ...s.reasons.map(r=>`<span class="sig sig-ok">${esc(r)}</span>`),
+    ...s.warnings.map(w=>`<span class="sig sig-warn">${esc(w)}</span>`),
+    ...s.blocks.map(b=>`<span class="sig sig-bad">${esc(b)}</span>`)
+  ];
+  const lastContact=prefs.last_contact?'Last contact: '+fmtDate(prefs.last_contact):'';
+  return `
+    <div class="match-card">
+      <div class="av" style="background:${avColor(c.name)};">${initials(c.name)}</div>
+      <div class="match-info">
+        <div class="match-name">
+          ${esc(c.name)} ${roleTag}
+          ${c.dpa_areas&&c.dpa_areas.length?'<span class="b b-blue">DPA</span>':''}
+          <span style="margin-left:auto;font-size:12px;font-weight:700;color:${s.tier==='hot'?'var(--grn)':s.tier==='warm'?'var(--amb)':'var(--red)'}">Score: ${s.score}</span>
+        </div>
+        <div class="match-signals">${allSignals.join('')}</div>
+        <div class="match-actions">
+          <button class="btn btn-sec btn-xs" onclick="openDraftMsg('${c.id}','${vac.id}')">✉ Draft message</button>
+          <button class="btn btn-xs" style="background:var(--grn-l);color:var(--grn);border:1px solid #bbf7d0;" onclick="openOutcome('${c.id}','${vac.id}')">Log outcome</button>
+          <button class="btn btn-sec btn-xs" onclick="openCandProfile('${c.id}')">Profile</button>
+          ${lastContact?`<span class="match-meta">${lastContact}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── BROADCAST ────────────────────────────────────────────────────────────
+function openBroadcast(vacId,candIds){
+  const vac=vacancies.find(v=>v.id===vacId);
+  if(!vac)return;
+  const names=candIds.map(id=>{const c=candidates.find(x=>x.id===id);return c?c.name:''}).filter(Boolean);
+  const msg=draftBroadcastMsg(vac,names);
+  document.getElementById('msg-modal-title').textContent='Broadcast message — '+vac.title;
+  document.getElementById('msg-body').value=msg;
+  showModal('msg-modal');
+}
+
+function draftBroadcastMsg(vac,names){
+  const dateStr=vac.start_date?(fmtDate(vac.start_date)+(vac.end_date?' – '+fmtDate(vac.end_date):'')):'dates TBC';
+  return `Hi [Name],
+
+Hope you're well! I have a great locum opportunity I'd love to run by you.
+
+📍 Location: ${vac.location||''} ${vac.state||''}
+📅 Dates: ${dateStr}
+⏱ Block: ${vac.block_weeks?vac.block_weeks+' week'+(vac.block_weeks>1?'s':''):'TBC'}
+💰 Rate: ${vac.rate?'$'+vac.rate+'/day':'TBC'}
+🏥 Role: ${vac.role_type||'GP locum'}${vac.dpa==='true'?' (DPA location)':''}${vac.travel==='true'?'\n✈️ Travel provided':''}${vac.accom==='true'?'\n🏠 Accommodation provided':''}
+
+${vac.notes?'Additional details: '+vac.notes+'\n\n':''}Would this work for you? Happy to chat through any details.
+
+Warm regards,
+[Your name]
+MediPeople`;
+}
+
+// ─── DRAFT MESSAGE ────────────────────────────────────────────────────────
+function openDraftMsg(candId,vacId){
+  const cand=candidates.find(c=>c.id===candId);
+  const vac=vacancies.find(v=>v.id===vacId);
+  if(!cand||!vac)return;
+  const prefs=candPrefs[candId]||{};
+  const result=scoreCandidate(cand,vac);
+  const dateStr=vac.start_date?(fmtDate(vac.start_date)+(vac.end_date?' – '+fmtDate(vac.end_date):'')):'dates TBC';
+  const firstName=cand.name.split(' ')[0];
+
+  // Tailor message based on tier and known signals
+  let hook='';
+  if(result.tier==='hot'){
+    const stateMatch=(prefs.preferred_states||[]).includes(vac.state);
+    if(stateMatch)hook=`This one looks like a great fit for you — it's in ${vac.state} which I know you prefer.`;
+    else if(result.reasons.some(r=>r.includes('Placed')))hook=`I know you've done well in ${vac.state} before, so I wanted to reach out about this one first.`;
+    else hook=`Based on your availability and preferences, this looks like a strong fit.`;
+  } else if(result.tier==='warm'){
+    const warn=result.warnings[0]||'';
+    if(warn.includes('Rate'))hook=`The rate is slightly above budget but I'd love to discuss — there may be some flexibility.`;
+    else if(warn.includes('block'))hook=`I know the block length isn't your usual preference, but I'd love to chat about whether this could work.`;
+    else hook=`This one has a couple of moving parts but I think it could work well for you.`;
+  } else {
+    hook=`I have a locum opportunity coming up and wanted to see if your situation has changed.`;
+  }
+
+  const msg=`Hi ${firstName},
+
+${hook}
+
+📍 ${vac.location||''} ${vac.state||''}
+📅 ${dateStr}
+⏱ ${vac.block_weeks?vac.block_weeks+' week'+(vac.block_weeks>1?'s':''):'TBC block'}
+💰 ${vac.rate?'$'+vac.rate+'/day':'Rate TBC'}
+🏥 ${vac.role_type||'GP locum'}${vac.dpa==='true'?' · DPA location':''}${vac.travel==='true'?'\n✈️ Travel covered':''}${vac.accom==='true'?'\n🏠 Accommodation provided':''}
+
+${vac.notes?vac.notes+'\n\n':''}Are you available and interested? Let me know and I'll lock you in.
+
+Cheers,
+[Your name]`;
+
+  document.getElementById('msg-modal-title').textContent='Message for '+cand.name;
+  document.getElementById('msg-body').value=msg;
+  showModal('msg-modal');
+}
+
+function copyMsg(){
+  const ta=document.getElementById('msg-body');
+  navigator.clipboard.writeText(ta.value).then(()=>notify('Message copied to clipboard'));
+}
+
+// ─── VACANCIES TABLE ──────────────────────────────────────────────────────
+function renderVacanciesTable(){
+  const el=document.getElementById('vac-table-wrap');
+  if(vacancies.length===0){
+    el.innerHTML='<div class="empty"><div class="ei">💼</div><p>No vacancies yet. Add your first one above.</p></div>';
+    return;
+  }
+  el.innerHTML=`<table>
+    <thead><tr>
+      <th>Title</th><th>State</th><th>Role</th><th>Dates</th><th>Rate</th><th>DPA</th><th>Status</th><th>Urgency</th><th></th>
+    </tr></thead>
+    <tbody>${vacancies.map(v=>`
+      <tr>
+        <td style="font-weight:600;">${esc(v.title)}</td>
+        <td>${esc(v.state||'—')}</td>
+        <td>${esc(v.role_type||'—')}</td>
+        <td style="font-size:12px;">${v.start_date?fmtDate(v.start_date):'—'}${v.end_date?' – '+fmtDate(v.end_date):''}</td>
+        <td>${v.rate?'$'+v.rate+'/day':'—'}</td>
+        <td>${v.dpa==='true'?'<span class="b b-grn">Yes</span>':'No'}</td>
+        <td>${statusBadge(v.status)}</td>
+        <td>${urgencyBadge(v.urgency)}</td>
+        <td>
+          <button class="btn btn-sec btn-xs" onclick="openEditVacancy('${v.id}')" style="margin-right:4px;">Edit</button>
+          <button class="btn btn-xs" style="background:var(--pri-l);color:var(--pri);border:1px solid #bfdbfe;" onclick="openMatchForVac('${v.id}')" style="margin-right:4px;">Match</button>
+          <button class="btn btn-xs" style="background:var(--red-l);color:var(--red);border:1px solid #fecaca;" onclick="deleteVacancy('${v.id}')">Delete</button>
+        </td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ─── CANDIDATES TABLE ─────────────────────────────────────────────────────
+function renderCandidatesTable(){
+  const el=document.getElementById('cand-table-wrap');
+  if(candidates.length===0){
+    el.innerHTML='<div class="empty"><div class="ei">👨‍⚕️</div><p>No locum GP candidates found in CRM.<br>Check that candidates are set to type "locum" and status "Active".</p></div>';
+    return;
+  }
+  el.innerHTML<`<table>
+    <thead><tr>
+      <th>Name</th><th>Location</th><th>Rate</th><th>Available</th><th>DPA</th><th>Prefs set</th><th>Outcomes</th><th></th>
+    </tr></thead>
+    <tbody>${candidates.map(c=>{
+      const prefs=candPrefs[c.id]||{};
+      const cOutcomes=outcomes.filter(o=>o.cand_id===c.id);
+      const accepted=cOutcomes.filter(o=>o.outcome==='accepted').length;
+      const declined=cOutcomes.filter(o=>o.outcome==='declined').length;
+      const ghosted=cOutcomes.filter(o=>o.outcome==='ghosted').length;
+      const prefsSet=prefs.role_types||prefs.preferred_states;
+      return `<tr class="clk" onclick="openCandProfile('${c.id}')">
+        <td><strong>${esc(c.name)}</strong></td>
+        <td>${esc([c.current_location,c.state].filter(Boolean).join(', ')||'—')}</td>
+        <td>${c.daily_rate_min?'$'+c.daily_rate_min+(c.daily_rate_max?' – $'+c.daily_rate_max:''):c.hourly_rate_min?'$'+c.hourly_rate_min+'/hr':'—'}</td>
+        <td style="font-size:12px;">${c.availability_from?fmtDate(c.availability_from)+(c.availability_to?' – '+fmtDate(c.availability_to):''):'Not set'}</td>
+        <td>${c.dpa_areas&&c.dpa_areas.length?'<span class="b b-grn">DPA</span>':'—'}</td>
+        <td>${prefsSet?'<span class="b b-grn">✓</span>':'<span class="b b-gray">Needed</span>'}</td>
+        <td style="font-size:12px;">${accepted?'<span style="color:var(--grn)">✓'+accepted+'</span> ':''}${declined?'<span style="color:var(--red)">✗'+declined+'</span> ':''}${ghosted?'<span style="color:var(--amb)">👻'+ghosted+'</span>':''} ${!accepted&&!declined&&!ghosted?'—':''}</td>
+        <td onclick="event.stopPropagation()" style="white-space:nowrap;">
+          <button class="btn btn-sec btn-xs" onclick="openCandProfile('${c.id}')" style="margin-right:4px;">Prefs →</button>
+          <button class="btn btn-sec btn-xs" onclick="openEditCandModal('${c.id}')">Edit</button>
+        </td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+// ─── ADD / EDIT CANDIDATE ─────────────────────────────────────────────────
+let editingCandId=null;
+
+function openAddCandModal(){
+  editingCandId=null;
+  document.getElementById('cand-edit-title').textContent='Add Candidate';
+  document.getElementById('ce-delete-btn').style.display='none';
+  ['ce-name','ce-location','ce-phone','ce-email','ce-rate-min','ce-rate-max','ce-avail-from','ce-avail-to','ce-specialty','ce-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ce-state').value='';
+  document.getElementById('ce-dpa').value='';
+  document.getElementById('cand-edit-modal').classList.remove('hidden');
+}
+
+function openEditCandModal(candId){
+  editingCandId=candId;
+  const c=candidates.find(x=>x.id===candId);
+  if(!c)return;
+  document.getElementById('cand-edit-title').textContent='Edit Candidate';
+  document.getElementById('ce-delete-btn').style.display='';
+  document.getElementById('ce-name').value=c.name||'';
+  document.getElementById('ce-state').value=c.state||'';
+  document.getElementById('ce-location').value=c.current_location||'';
+  document.getElementById('ce-phone').value=c.phone||'';
+  document.getElementById('ce-email').value=c.email||'';
+  document.getElementById('ce-rate-min').value=c.daily_rate_min||'';
+  document.getElementById('ce-rate-max').value=c.daily_rate_max||'';
+  document.getElementById('ce-avail-from').value=c.availability_from||'';
+  document.getElementById('ce-avail-to').value=c.availability_to||'';
+  document.getElementById('ce-specialty').value=c.specialty||'';
+  document.getElementById('ce-dpa').value=(c.dpa_areas&&c.dpa_areas.length)?'yes':'';
+  document.getElementById('ce-notes').value=c.notes||'';
+  document.getElementById('cand-edit-modal').classList.remove('hidden');
+}
+
+function closeCandEditModal(){
+  document.getElementById('cand-edit-modal').classList.add('hidden');
+  editingCandId=null;
+}
+
+async function saveCandRecord(){
+  const name=document.getElementById('ce-name').value.trim();
+  if(!name){alert('Name is required');return;}
+  const dpaVal=document.getElementById('ce-dpa').value;
+  const payload={
+    name,
+    type:'locum',
+    status:'Active',
+    state:document.getElementById('ce-state').value||null,
+    current_location:document.getElementById('ce-location').value.trim()||null,
+    phone:document.getElementById('ce-phone').value.trim()||null,
+    email:document.getElementById('ce-email').value.trim()||null,
+    daily_rate_min:document.getElementById('ce-rate-min').value||null,
+    daily_rate_max:document.getElementById('ce-rate-max').value||null,
+    availability_from:document.getElementById('ce-avail-from').value||null,
+    availability_to:document.getElementById('ce-avail-to').value||null,
+    specialty:document.getElementById('ce-specialty').value.trim()||null,
+    dpa_areas:dpaVal==='yes'?['yes']:null,
+    notes:document.getElementById('ce-notes').value.trim()||null,
+  };
+  let error;
+  if(editingCandId){
+    ({error}=await sb.from('crm_profiles').update(payload).eq('id',editingCandId));
+  } else {
+    ({error}=await sb.from('crm_profiles').insert(payload));
+  }
+  if(error){alert('Error saving: '+error.message);return;}
+  closeCandEditModal();
+  await loadCandidates();
+  renderCandidatesTable();
+}
+
+async function deleteCandRecord(){
+  if(!editingCandId)return;
+  const c=candidates.find(x=>x.id===editingCandId);
+  if(!confirm(`Delete ${c?.name||'this candidate'}? This cannot be undone.`))return;
+  const{error}=await sb.from('crm_profiles').delete().eq('id',editingCandId);
+  if(error){alert('Error deleting: '+error.message);return;}
+  closeCandEditModal();
+  await loadCandidates();
+  renderCandidatesTable();
+}
+
+// ─── CANDIDATE PROFILE ────────────────────────────────────────────────────
+function openCandProfile(candId){
+  currentCandId=candId;
+  const cand=candidates.find(c=>c.id===candId);
+  if(!cand)return;
+  const prefs=candPrefs[candId]||{};
+  const cOutcomes=outcomes.filter(o=>o.cand_id===candId);
+
+  document.getElementById('cand-modal-name').textContent=cand.name;
+
+  const allStates=['NSW','VIC','QLD','WA','SA','TAS','NT','ACT','NZ'];
+  const prefStates=prefs.preferred_states||[];
+  const avoidStates=prefs.avoided_states||[];
+
+  document.getElementById('cand-modal-body').innerHTML=`
+    <div class="prof-grid">
+      <div class="di"><div class="dl">Specialty</div><div class="dv">${esc(cand.specialty||'—')}</div></div>
+      <div class="di"><div class="dl">Location</div><div class="dv">${esc([cand.current_location,cand.state].filter(Boolean).join(', ')||'—')}</div></div>
+      <div class="di"><div class="dl">Daily rate</div><div class="dv">${cand.daily_rate_min?'$'+cand.daily_rate_min+(cand.daily_rate_max?' – $'+cand.daily_rate_max:''):'Not set'}</div></div>
+      <div class="di"><div class="dl">Available from</div><div class="dv">${cand.availability_from?fmtDate(cand.availability_from):'—'}</div></div>
+      <div class="di"><div class="dl">Available to</div><div class="dv">${cand.availability_to?fmtDate(cand.availability_to):'—'}</div></div>
+      <div class="di"><div class="dl">DPA areas</div><div class="dv">${cand.dpa_areas&&cand.dpa_areas.length?cand.dpa_areas.join(', '):'—'}</div></div>
+    </div>
+    <div class="sec-title">Matching preferences <span style="font-weight:400;color:var(--g400);">(set these to improve match accuracy)</span></div>
+    <div class="fg" style="margin-bottom:12px;">
+      <div class="fi">
+        <label>Role type</label>
+        <select id="cp-role-type">
+          <option value="both" ${(!prefs.role_types||prefs.role_types==='both')?'selected':''}>Any / not set</option>
+          <option value="GP Only" ${prefs.role_types==='GP Only'?'selected':''}>GP Only</option>
+          <option value="GP VMO" ${prefs.role_types==='GP VMO'||prefs.role_types==='GPM VMO'?'selected':''}>GP VMO</option>
+          <option value="Interventional Radiologist" ${prefs.role_types==='Interventional Radiologist'||prefs.role_types==='IR'?'selected':''}>Interventional Radiologist</option>
+          <option value="General Radiologist" ${prefs.role_types==='General Radiologist'||prefs.role_types==='Gen Radiologist'?'selected':''}>General Radiologist</option>
+          <option value="ED VMO" ${prefs.role_types==='ED VMO'?'selected':''}>ED VMO</option>
+          <option value="UCC" ${prefs.role_types==='UCC'?'selected':''}>UCC</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Block length preference</label>
+        <select id="cp-block-pref">
+          <option value="any" ${(!prefs.block_pref||prefs.block_pref==='any')?'selected':''}>No preference</option>
+          <option value="short" ${prefs.block_pref==='short'?'selected':''}>Short (1–2 weeks)</option>
+          <option value="long" ${prefs.block_pref==='long'?'selected':''}>Long (3+ weeks)</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Rural / remote OK?</label>
+        <select id="cp-rural">
+          <option value="" ${prefs.rural_ok===undefined||prefs.rural_ok===''?'selected':''}>Not set</option>
+          <option value="true" ${prefs.rural_ok===true||prefs.rural_ok==='true'?'selected':''}>Yes — open to rural</option>
+          <option value="false" ${prefs.rural_ok===false||prefs.rural_ok==='false'?'selected':''}>No — metro/regional only</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>FIFO willing?</label>
+        <select id="cp-fifo">
+          <option value="" ${!prefs.fifo?'selected':''}>Not set</option>
+          <option value="true" ${prefs.fifo==='true'||prefs.fifo===true?'selected':''}>Yes</option>
+          <option value="false" ${prefs.fifo==='false'||prefs.fifo===false?'selected':''}>No</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Last contact date</label>
+        <input type="date" id="cp-last-contact" value="${prefs.last_contact||''}">
+      </div>
+    </div>
+    <div class="sec-title">Preferred states (tick all that apply)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;" id="cp-pref-states">
+      ${allStates.map(s=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" data-type="pref" data-state="${s}" ${prefStates.includes(s)?'checked':''}> ${s}
+      </label>`).join('')}
+    </div>
+    <div class="sec-title">Avoided states (will reduce match score)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+      ${allStates.map(s=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" data-type="avoid" data-state="${s}" ${avoidStates.includes(s)?'checked':''}> ${s}
+      </label>`).join('')}
+    </div>
+    ${cOutcomes.length>0?`
+    <div class="sec-title">Outcome history (${cOutcomes.length} logged)</div>
+    <div style="background:var(--g50);border-radius:8px;padding:10px;font-size:12px;">
+      ${cOutcomes.map(o=>`<div style="padding:4px 0;border-bottom:1px solid var(--g200);">${outcomeIcon(o.outcome)} <strong>${esc(o.vac_title||'Unknown vacancy')}</strong> — ${esc(o.outcome)}${o.reason?' ('+o.reason.replace('_',' ')+')':''} <span style="color:var(--g400);">${fmtDate(o.date)}</span></div>`).join('')}
+    </div>`:''} `;
+
+  showModal('cand-modal');
+}
+
+async function saveCandPrefs(){
+  if(!currentCandId)return;
+  const prefStates=Array.from(document.querySelectorAll('[data-type="pref"]:checked')).map(cb=>cb.dataset.state);
+  const avoidStates=Array.from(document.querySelectorAll('[data-type="avoid"]:checked')).map(cb=>cb.dataset.state);
+  const prefs={
+    role_types:document.getElementById('cp-role-type').value,
+    block_pref:document.getElementById('cp-block-pref').value,
+    rural_ok:document.getElementById('cp-rural').value,
+    fifo:document.getElementById('cp-fifo').value,
+    last_contact:document.getElementById('cp-last-contact').value,
+    preferred_states:prefStates,
+    avoided_states:avoidStates
+  };
+  candPrefs[currentCandId]={...candPrefs[currentCandId],...prefs};
+  const{error}=await savePrefs(currentCandId,prefs);
+  if(error){notify('Error saving prefs: '+error.message);return;}
+  closeModal('cand-modal');
+  notify('Preferences saved for '+candidates.find(c=>c.id===currentCandId)?.name);
+}
+
+// ─── OUTCOME LOG ─────────────────────────────────────────────────────────
+function openOutcome(candId,vacId){
+  const cand=candidates.find(c=>c.id===candId);
+  const vac=vacancies.find(v=>v.id===vacId);
+  outcomeContext={candId,vacId};
+  document.getElementById('o-cand-name').value=cand?cand.name:'';
+  document.getElementById('o-vac-title').value=vac?vac.title:'';
+  document.getElementById('o-outcome').value='';
+  document.getElementById('o-reason').value='';
+  document.getElementById('o-notes').value='';
+  document.getElementById('o-reason-wrap').style.display='flex';
+  showModal('outcome-modal');
+}
+
+function toggleOutcomeReason(){
+  const v=document.getElementById('o-outcome').value;
+  document.getElementById('o-reason-wrap').style.display=(v==='declined')?'flex':'none';
+}
+
+async function saveOutcome(){
+  const outcome=document.getElementById('o-outcome').value;
+  if(!outcome){notify('Please select an outcome');return;}
+  const cand=candidates.find(c=>c.id===outcomeContext.candId);
+  const vac=vacancies.find(v=>v.id===outcomeContext.vacId);
+  const o={
+    id:uid(),
+    cand_id:outcomeContext.candId,
+    vac_id:outcomeContext.vacId,
+    cand_name:cand?cand.name:'',
+    vac_title:vac?vac.title:'',
+    vac_state:vac?vac.state:'',
+    outcome,
+    reason:document.getElementById('o-reason').value||'',
+    notes:document.getElementById('o-notes').value||'',
+    date:new Date().toISOString().slice(0,10)
+  };
+  const{error}=await saveOutcomes(o);
+  if(error){notify('Error saving outcome: '+error.message);return;}
+  outcomes.unshift(o);
+  closeModal('outcome-modal');
+  notify('Outcome logged — candidate score updated');
+  // Re-render match results if we're on that view
+  if(document.getElementById('view-match').classList.contains('active')){
+    const selectedVli=document.querySelector('.vac-list-item.selected');
+    if(selectedVli){const vacId=selectedVli.id.replace('vli-','');selectVacancy(vacId);}
+  }
+}
+
+function renderOutcomeLog(){
+  const el=document.getElementById('outcome-list');
+  if(outcomes.length===0){
+    el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No outcomes logged yet.<br>After contacting a candidate, log the outcome from the Match engine.</p></div>';
+    return;
+  }
+  el.innerHTML=outcomes.map(o=>`
+    <div class="outcome-item">
+      <div style="font-size:18px;">${outcomeIcon(o.outcome)}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;">${esc(o.cand_name)} <span style="color:var(--g400);font-weight:400;">→</span> ${esc(o.vac_title)}</div>
+        <div style="font-size:12px;color:var(--g500);margin-top:2px;">${outcomeLabel(o.outcome)}${o.reason?' · '+o.reason.replace(/_/g,' '):''}${o.notes?' · '+o.notes:''} <span style="color:var(--g300);">· ${fmtDate(o.date)}</span></div>
+      </div>
+      <button class="btn btn-sec btn-xs" onclick="deleteOutcome('${o.id}')">Remove</button>
+    </div>`).join('');
+}
+
+async function deleteOutcome(id){
+  const{error}=await sb.from(TBL_OUTCOMES).delete().eq('id',id);
+  if(error){notify('Error deleting outcome: '+error.message);return;}
+  outcomes=outcomes.filter(o=>o.id!==id);
+  renderOutcomeLog();
+  notify('Outcome removed');
+}
+
+// ─── ADD/EDIT VACANCY ─────────────────────────────────────────────────────
+async function deleteVacancy(id){
+  if(!confirm('Delete this vacancy?'))return;
+  const{error}=await sb.from(TBL_VAC).delete().eq('id',id);
+  if(error){notify('Error deleting vacancy: '+error.message);return;}
+  vacancies=vacancies.filter(v=>v.id!==id);
+  renderVacanciesTable();
+  notify('Vacancy deleted');
+}
+
+function openAddVacancy(){
+  editingVacId=null;
+  document.getElementById('vac-modal-title').textContent='Add vacancy';
+  ['v-title','v-client','v-location','v-state','v-role-type','v-start','v-end',
+   'v-block-weeks','v-rate','v-dpa','v-rural','v-travel','v-accom','v-urgency','v-status','v-notes']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'?el.options[0]?.value||'':''});
+  document.getElementById('v-urgency').value='normal';
+  document.getElementById('v-status').value='Open';
+  showModal('vac-modal');
+}
+
+function openEditVacancy(id){
+  const v=vacancies.find(x=>x.id===id);
+  if(!v)return;
+  editingVacId=id;
+  document.getElementById('vac-modal-title').textContent='Edit vacancy';
+  setVal('v-title',v.title);setVal('v-client',v.client);setVal('v-location',v.location);
+  setVal('v-state',v.state);setVal('v-role-type',v.role_type);setVal('v-start',v.start_date);
+  setVal('v-end',v.end_date);setVal('v-block-weeks',v.block_weeks);setVal('v-rate',v.rate);
+  setVal('v-dpa',v.dpa);setVal('v-rural',v.rural);setVal('v-travel',v.travel);
+  setVal('v-accom',v.accom);setVal('v-urgency',v.urgency||'normal');setVal('v-status',v.status||'Open');
+  setVal('v-billings',v.billings_pct||'');
+  setVal('v-als2',v.is_als2?'true':'false');
+  setVal('v-ams',v.is_ams?'true':'false');
+  setVal('v-sessions',v.sessions||'');setVal('v-min-weeks',v.min_weeks||'Open');setVal('v-on-call',v.on_call||'TBC');
+  setVal('v-notes',v.notes);
+  showModal('vac-modal');
+}
+
+acync function saveVacancy(){
+  const title=document.getElementById('v-title').value.trim();
+  if(!title){notify('Please enter a job title');return;}
+  const v={
+    id:editingVacId||uid(),
+    title,
+    client:document.getElementById('v-client').value.trim(),
+    location:document.getElementById('v-location').value.trim(),
+    state:document.getElementById('v-state').value,
+    role_type:document.getElementById('v-role-type').value,
+    start_date:document.getElementById('v-start').value,
+    end_date:document.getElementById('v-end').value,
+    block_weeks:document.getElementById('v-block-weeks').value,
+    rate:document.getElementById('v-rate').value,
+    dpa:document.getElementById('v-dpa').value,
+    rural:document.getElementById('v-rural').value,
+    travel:document.getElementById('v-travel').value,
+    accom:document.getElementById('v-accom').value,
+    urgency:document.getElementById('v-urgency').value,
+    status:document.getElementById('v-status').value,
+    billings_pct:document.getElementById('v-billings').value||'',
+    is_als2:document.getElementById('v-als2').value==='true',
+    is_ams:document.getElementById('v-ams').value==='true',
+    sessions:document.getElementById('v-sessions').value,
+    min_weeks:document.getElementById('v-min-weeks').value,
+    on_call:document.getElementById('v-on-call').value,
+    notes:document.getElementById('v-notes').value.trim(),
+    created_at:editingVacId?(vacancies.find(x=>x.id===editingVacId)?.created_at||new Date().toISOString()):new Date().toISOString()
+  };
+  const{error}=await saveVacs(v);
+  if(error){notify('Error saving vacancy: '+error.message);return;}
+  if(editingVacId){vacancies=vacancies.map(x=>x.id===editingVacId?v:x);}
+  else{vacancies.unshift(v);}
+  closeModal('vac-modal');
+  notify(editingVacId?'Vacancy updated':'Vacancy added');
+  // Refresh current view
+  const active=document.querySelector('.view.active');
+  if(active?.id==='view-vacancies')renderVacanciesTable();
+  if(active?.id==='view-match')renderMatchView();
+  if(active?.id==='view-dash')renderDash();
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────
+function showModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+function setVal(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
+function notify(msg){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2500);}
+function initials(name){if(!name)return'?';const p=name.split(' ');return(p[0]?.[0]||'')+(p[1]?.[0]||'').toUpperCase();}
+function avColor(name){const colors=['#2563eb','#7c3aed','#059669','#d97706','#dc2626','#0891b2'];const i=name?name.charCodeAt(0)%colors.length:0;return colors[i];}
+function fmtDate(d){if(!d)return '';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}
+function urgencyBadge(u){
+  if(u==='critical')return'<span class="urgency-high">🚨 Critical</span>';
+  if(u==='high')return'<span class="urgency-high">⚡ Urgent</span>';
+  return'<span class="urgency-low">Normal</span>';
+}
+function statusBadge(s){
+  if(s==='Open')return'<span class="b b-grn">Open</span>';
+  if(s==='Filled')return'<span class="b b-blue">Filled</span>';
+  return'<span class="b b-gray">'+esc(s||'—')+'</span>';
+}
+function outcomeIcon(o){
+  if(o==='accepted')return'✅';
+  if(o==='declined')return'❌';
+  if(o==='ghosted')return'👻';
+  if(o==='pending')return'⏳';
+  return'📋';
+}
+function outcomeLabel(o){
+  if(o==='accepted')return'Accepted';
+  if(o==='declined')return'Declined';
+  if(o==='ghosted')return'Ghosted';
+  if(o==='pending')return'Sent — pending reply';
+  return o;
+}
+
+// ─── IMPORT / PARSE ───────────────────────────────────────────────────────
+let importedVacancies=[];
+
+const STATE_PATTERNS={
+  'SOUTH AUSTRALIA':'SA','WESTERN AUSTRALIA':'WA','QUEENSLAND':'QLD',
+  'NEW SOUTH WALES':'NSW','TASMANIA':'TAS','VICTORIA':'VIC',
+  'NORTHERN TERRITORY':'NT','AUSTRALIAN CAPITAL TERRITORY':'ACT','ACT':'ACT'
+};
+
+// Town → State lookup (sorted longest first for matching)
+const TOWN_STATE={
+  // NSW
+  'broken hill':'NSW','wilcannia':'NSW','condobolin':'NSW','batemans bay':'NSW',
+  'bega':'NSW','narooma':'NSW','goulburn':'NSW','dubbo':'NSW','orange':'NSW',
+  'wagga wagga':'NSW','wagga':'NSW','albury':'NSW','tamworth':'NSW','armidale':'NSW',
+  'lismore':'NSW','coffs harbour':'NSW','newcastle':'NSW','wollongong':'NSW',
+  'moree':'NSW','lightning ridge':'NSW','bourke':'NSW','cobar':'NSW','griffith':'NSW',
+  'walgett':'NSW','narrabri':'NSW','glen innes':'NSW','grafton':'NSW','kempsey':'NSW',
+  'port macquarie':'NSW','scone':'NSW','singleton':'NSW','muswellbrook':'NSW',
+  'mudgee':'NSW','bathurst':'NSW','young':'NSW','cowra':'NSW','parkes':'NSW',
+  'forbes':'NSW','west wyalong':'NSW','cooma':'NSW','merimbula':'NSW','eden':'NSW',
+  'nowra':'NSW','ulladulla':'NSW','bowral':'NSW','lithgow':'NSW','inverell':'NSW',
+  'gunnedah':'NSW','tenterfield':'NSW','dorrigo':'NSW','taree':'NSW',
+  'tibooburra':'NSW','ivanhoe':'NSW','wentworth':'NSW','nyngan':'NSW',
+  'brewarrina':'NSW','narrandera':'NSW','finley':'NSW','deniliquin':'NSW',
+  'tocumwal':'NSW','tumut':'NSW','queanbeyan':'NSW','yass':'NSW',
+  'katoomba':'NSW','penrith':'NSW','maitland':'NSW','cessnock':'NSW',
+  'corowa':'NSW','hay':'NSW','balranald':'NSW','menindee':'NSW',
+  // VIC
+  'corryong':'VIC','bright':'VIC','wangaratta':'VIC','wodonga':'VIC',
+  'benalla':'VIC','shepparton':'VIC','echuca':'VIC','swan hill':'VIC',
+  'mildura':'VIC','horsham':'VIC','ballarat':'VIC','ararat':'VIC',
+  'hamilton':'VIC','warrnambool':'VIC','colac':'VIC','geelong':'VIC',
+  'bairnsdale':'VIC','sale':'VIC','morwell':'VIC','traralgon':'VIC',
+  'moe':'VIC','wonthaggi':'VIC','leongatha':'VIC','omeo':'VIC',
+  'mansfield':'VIC','alexandra':'VIC','seymour':'VIC','yarrawonga':'VIC',
+  'cobram':'VIC','kyabram':'VIC','maryborough':'VIC','st arnaud':'VIC',
+  'ouyen':'VIC','portland':'VIC','camperdown':'VIC','nhill':'VIC',
+  'dimboola':'VIC','donald':'VIC','stawell':'VIC','mt gambier':'VIC',
+  // QLD
+  'charleville':'QLD','cunnamulla':'QLD','roma':'QLD','st george':'QLD',
+  'dirranbandi':'QLD','surat':'QLD','injune':'QLD','mitchell':'QLD',
+  'longreach':'QLD','barcaldine':'QLD','blackall':'QLD','emerald':'QLD',
+  'moranbah':'QLD','bowen':'QLD','charters towers':'QLD','mount isa':'QLD',
+  'cloncurry':'QLD','burketown':'QLD','normanton':'QLD','karumba':'QLD',
+  'cooktown':'QLD','weipa':'QLD','cairns':'QLD','townsville':'QLD',
+  'mackay':'QLD','rockhampton':'QLD','gladstone':'QLD','bundaberg':'QLD',
+  'gin gin':'QLD','mundubbera':'QLD','gayndah':'QLD','biggenden':'QLD',
+  'monto':'QLD','murgon':'QLD','kingaroy':'QLD','boonah':'QLD',
+  'warwick':'QLD','stanthorpe':'QLD','goondiwindi':'QLD','dalby':'QLD',
+  'chinchilla':'QLD','miles':'QLD','biloela':'QLD','moura':'QLD',
+  'hervey bay':'QLD','gympie':'QLD','toowoomba':'QLD','brisbane':'QLD',
+  'atherton':'QLD','mareeba':'QLD','innisfail':'QLD','ingham':'QLD',
+  'ayr':'QLD','proserpine':'QLD','yeppoon':'QLD','thursday island':'QLD',
+  // WA
+  'perth':'WA','bunbury':'WA','busselton':'WA','margaret river':'WA',
+  'manjimup':'WA','albany':'WA','esperance':'WA','kalgoorlie':'WA',
+  'coolgardie':'WA','leonora':'WA','laverton':'WA','meekatharra':'WA',
+  'geraldton':'WA','carnarvon':'WA','exmouth':'WA','karratha':'WA',
+  'onslow':'WA','tom price':'WA','paraburdoo':'WA','newman':'WA',
+  'port hedland':'WA','hedland':'WA','south hedland':'WA','broome':'WA',
+  'derby':'WA','fitzroy crossing':'WA','halls creek':'WA','kununurra':'WA',
+  'wyndham':'WA','merredin':'WA','northam':'WA','moora':'WA',
+  'narrogin':'WA','katanning':'WA','collie':'WA','denmark':'WA',
+  'norseman':'WA','marble bar':'WA','dampier':'WA',
+  // SA
+  'naracoorte':'SA','mount gambier':'SA','bordertown':'SA','robe':'SA',
+  'victor harbor':'SA','goolwa':'SA','strathalbyn':'SA','nuriootpa':'SA',
+  'burra':'SA','jamestown':'SA','port pirie':'SA','port augusta':'SA',
+  'whyalla':'SA','port lincoln':'SA','ceduna':'SA','streaky bay':'SA',
+  'coober pedy':'SA','marree':'SA','leigh creek':'SA','roxby downs':'SA',
+  'hawker':'SA','quorn':'SA','orroroo':'SA','peterborough':'SA',
+  'kadina':'SA','wallaroo':'SA','moonta':'SA','minlaton':'SA',
+  'crystal brook':'SA','kapunda':'SA','tanunda':'SA','angaston':'SA',
+  'millicent':'SA','murray bridge':'SA','adelaide':'SA',
+  // TAS
+  'hobart':'TAS','launceston':'TAS','devonport':'TAS','burnie':'TAS',
+  'ulverstone':'TAS','wynyard':'TAS','smithton':'TAS','queenstown':'TAS',
+  'strahan':'TAS','zeehan':'TAS','scottsdale':'TAS','st helens':'TAS',
+  'swansea':'TAS','oatlands':'TAS','campbell town':'TAS','deloraine':'TAS',
+  'sheffield':'TAS','longford':'TAS',"st mary's":'TAS','st marys':'TAS',
+  'george town':'TAS','beaconsfield':'TAS',
+  // NT
+  'darwin':'NT','alice springs':'NT','tennant creek':'NT','katherine':'NT',
+  'nhulunbuy':'NT','nhulunby':'NT',"galiwin'ku":'NT','galiwinku':'NT',
+  'yirrkala':'NT','gunyangara':'NT','gapuwiyak':'NT','milingimbi':'NT',
+  'ramingining':'NT','maningrida':'NT','jabiru':'NT','pine creek':'NT',
+  'batchelor':'NT','palmerston':'NT','borroloola':'NT','ngukurr':'NT',
+  'beswick':'NT','barunga':'NT','bulman':'NT','lajamanu':'NT',
+  'yuendumu':'NT','papunya':'NT','hermannsburg':'NT','yulara':'NT',
+  'elliot':'NT','mataranka':'NT','daly waters':'NT','alyangula':'NT',
+  // ACT
+  'canberra':'ACT',
+};
+
+function detectState(text){
+  const lower=text.replace(/[‘’‚‛′‵`]/g,"'").toLowerCase();
+  const sorted=Object.keys(TOWN_STATE).sort((a,b)=>b.length-a.length);
+  for(const town of sorted){
+    const idx=lower.indexOf(town);
+    if(idx>=0){
+      const b=idx>0?lower[idx-1]:' ';const a=idx+town.length<lower.length?lower[idx+town.length]:' ';
+      if(!/[a-z0-9]/.test(b)&&!/[a-z0-9]/.test(a))return TOWN_STATE[town];
+    }
+  }
+  const m=text.match(/\b(NSW|VIC|QLD|WA|SA|TAS|NT|ACT|NZ)\b/);
+  return m?m[1]:'';
+}
+
+function extractRate(text){
+  const p=[
+    /\$\s*[\d,]+\s*[-–]\s*\$\s*[\d,]+\s*(?:per\s*day|\/day|day\s*rate|pd)/i,
+    /\$\s*[\d,]+\s*\+?\s*(?:per\s*day|\/day|day\s*rate|pd)/i,
+    /\$\s*[\d,]+\s*[-–]\s*\$\s*[\d,]+\s*(?:per\s*hour|\/hr|\/hour)/i,
+    /\$\s*[\d,]+\s*(?:per\s*hour|\/hr|\/hour)/i,
+    /[\d]+%\s*of\s*billings(?:[^\n.]{0,40})?/i,
+    /SOA\s*rates?/i,
+  ];
+  for(const r of p){const m=text.match(r);if(m)return m[0].replace(/\s+/g,' ').trim();}
+  return'';
+}
+
+function extractInclusions(text){
+  const found=[];
+  if(/accommodation|self.contained|fully\s*furnished|unit\s*provided|housing\s*provided/i.test(text))found.push('Accommodation');
+  if(/flight|airfare|air\s*travel|return\s*flights|flights\s*capped/i.test(text))found.push('Flights');
+  if(/vehicle|hire\s*car|hire\s*vehicle|government.*car|car\s*provided|car\s*available|company\s*car|airport.*car/i.test(text))found.push('Vehicle');
+  if(found.length===0&&/travel\s*(provided|costs|covered|included|paid)/i.test(text))found.push('Travel');
+  return found.join(' • ');
+}
+
+function extractDates(text){
+  const found=[];const seen=new Set();
+  const month='(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)';
+  const day='\\d{1,2}(?:st|nd|rd|th)?';
+  const patterns=[
+    new RegExp(`${day}\\s*[-–]\\s*${day}\\s+${month}(?:\\s*\\d{4})?`,'gi'),
+    new RegExp(`${day}\\s+${month}\\s*[-–]\\s*${day}\\s+${month}(?:\\s*\\d{4})?`,'gi'),
+    new RegExp(`${day}\\s+${month}\\s*[-–]\\s*${day}\\s+${month}\\s+\\d{4}`,'gi'),
+    new RegExp(`(?:Monday|Tuesday|Wednesday|Thursday|Friday)\\s+${day}\\s+${month}\\s*[-–]\\s*(?:Monday|Tuesday|Wednesday|Thursday|Friday)\\s+${day}\\s+${month}(?:\\s+\\d{4})?`,'gi'),
+    /\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*[-–]\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?/g,
+    new RegExp(`All\\s+${month}`,'gi'),
+  ];
+  for(const p of patterns){
+    const re=new RegExp(p.source,p.flags);let m;
+    while((m=re.exec(text))!==null){
+      const d=m[0].trim();if(d.length>3&&!seen.has(d)){seen.add(d);found.push(d);}
+    }
+  }
+  if(found.length===0&&/\bASAP\b/i.test(text))found.push('ASAP — start immediately');
+  return found.join(' • ');
+}
+
+function detectRoleTypeFromText(text){
+  const t=text.toLowerCase();
+  if(/vmo\s*rights|on.call|after.hours|gp\/ed|gp\s*ed|credentialing|als\s*cert|apls|acem|facrrm|senior\s*ed|ed\s*locum|inpatient|24.hour|overnight/i.test(t))return'GP VMO';
+  if(/no\s*vmo|no\s*on.call|no\s*after.hours|clinic\s*only|mon.fri|monday\s*to\s*friday|bulk.bill|general\s*practice\s*only/i.test(t))return'GP Only';
+  if(/interventional\s*radiol/i.test(t))return'Interventional Radiologist';
+  if(/radiolog/i.test(t))return'General Radiologist';
+  return'GP Only';
+}
+
+function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
+
+const SKIP_RX=/^(hi |i hope|please |kind regards|regards|from:|to:|subject:|sent:|if any|you can earn|visit our|medipeople|tel:|mob:|email:|www\.|©|unsubscribe|refer a|earn \$|dear |good morning|good afternoon|happy monday|image)/i;
+const DATE_RX=/\d{1,2}[\/\.\-]\d{1,2}/;
+
+function parseImport(){
+  const raw=document.getElementById('import-paste').value.trim();
+  if(!raw){notify('Paste some email text first');return;}
+  importedVacancies=[];
+  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+
+  // Format 1: Structured — only if it has explicit state section headers (e.g. "SOUTH AUSTRALIA")
+  const hasStateHdr=lines.some(l=>STATE_PATTERNS[l.toUpperCase()]);
+  if(hasStateHdr){parseStructuredFormat(lines);applyZoneRates(raw);importedVacancies=importedVacancies.filter(v=>isValidLocation(v.location||v.title));renderImportResults();return;}
+
+  // Format 2: Multi-location list / paragraph / single location
+  smartExtract(raw,lines);
+  applyZoneRates(raw);
+  // Remove false-positive "vacancies" that are clearly email headers/descriptors
+  importedVacancies=importedVacancies.filter(v=>isValidLocation(v.location||v.title));
+  renderImportResults();
+}
+
+function parseStructuredFormat(lines){
+  let currentState='';let i=0;
+  while(i<lines.length){
+    const line=lines[i];
+    const stateKey=Object.keys(STATE_PATTERNS).find(k=>line.toUpperCase()===k);
+    if(stateKey){currentState=STATE_PATTERNS[stateKey];i++;continue;}
+    const titleMatch=line.match(/^(.+?)\s*[–\-]\s*(.+?)(?:\s{3,}|\t)(\$[\d,.\/–\-]+.*)?$/);
+    if(titleMatch&&line.length>5&&!line.startsWith('$')&&!DATE_RX.test(line.slice(0,5))){
+      const location=titleMatch[1].trim();const roleRaw=titleMatch[2].trim();
+      let rate=titleMatch[3]?titleMatch[3].trim():'';
+      if(!rate&&i+1<lines.length&&lines[i+1].match(/^\$[\d,]|^SOA|^From \$/)){rate=lines[i+1];i++;}
+      const roleType=detectRoleTypeFromText(roleRaw+' '+line);
+      let dates='',inclusions='',notes='',shiftHours='',suitableFor='';
+      i++;
+      while(i<lines.length){
+        const fl=lines[i];
+        if(STATE_PATTERNS[fl.toUpperCase()])break;
+        if(/^[A-Za-z].{3,50}\s*[–\-]\s*(GP|ED|VMO|Locum|Senior|SMO|Radiolog)/i.test(fl)&&!DATE_RX.test(fl.slice(0,5)))break;
+        const llow=fl.toLowerCase();
+        if(['dates','key upcoming ed shifts','gp/ed dates','gpo dates','gpa dates','day dates','afternoon dates'].includes(llow)){i++;if(i<lines.length)dates=lines[i];}
+        else if(llow==='inclusions'){i++;if(i<lines.length)inclusions=lines[i];}
+        else if(llow==='notes'){i++;if(i<lines.length)notes=lines[i];}
+        else if(llow==='shift hours'||llow==='shift types'){i++;if(i<lines.length)shiftHours=lines[i];}
+        else if(llow==='suitable for'){i++;if(i<lines.length)suitableFor=lines[i];}
+        i++;
+      }
+      importedVacancies.push({
+        id:uid(),title:location+' – '+roleRaw,client:'',location,state:currentState,
+        role_type:roleType,rate:parseRate(rate),rate_raw:rate,dates_raw:dates,
+        inclusions_raw:inclusions,notes:notes+(shiftHours?' Shift: '+shiftHours:'')+(suitableFor?' Suitable for: '+suitableFor:''),
+        status:'Open',urgency:'normal',created_at:new Date().toISOString()
+      });
+      continue;
+    }
+    i++;
+  }
+}
+
+function smartExtract(raw,lines){
+  raw=raw.replace(/[''‚‛′‵`]/g,"'");
+  lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  const lower=raw.toLowerCase();
+  const sorted=Object.keys(TOWN_STATE).sort((a,b)=>b.length-a.length);
+  const anchors=[];
+  for(const town of sorted){
+    const idx=lower.indexOf(town);
+    if(idx>=0){
+      const b=idx>0?lower[idx-1]:' ';const a=idx+town.length<lower.length?lower[idx+town.length]:' ';
+      if(!/[a-z0-9]/.test(b)&&!/[a-z0-9]/.test(a)){
+        if(!anchors.some(an=>Math.abs(an.idx-idx)<3))
+          anchors.push({town,idx,state:TOWN_STATE[town],displayName:capFirst(town)});
+      }
+    }
+  }
+  const lineAnchors=[];
+  lines.forEach((line,li)=>{
+    if(line.length>=3&&line.length<=60&&!SKIP_RX.test(line)&&!DATE_RX.test(line.slice(0,6))&&!line.startsWith('$')&&!line.match(/^\d/)&&!line.includes('@')&&!line.includes('http')){
+      const nextLines=lines.slice(li+1,li+5).join(' ');
+      if(extractDates(nextLines).length>0||/ASAP/i.test(nextLines)){
+        const st=detectState(line)||detectState(raw);
+        lineAnchors.push({town:line,idx:raw.indexOf(line),state:st,displayName:line});
+      }
+    }
+  });
+  let allAnchors=[...anchors];
+  lineAnchors.forEach(la=>{
+    if(!allAnchors.some(a=>a.displayName.toLowerCase().includes(la.town.toLowerCase())||la.town.toLowerCase().includes(a.displayName.toLowerCase())))
+      allAnchors.push(la);
+  });
+  allAnchors.sort((a,b)=>a.idx-b.idx);
+  const deduped=[];
+  allAnchors.forEach(a=>{
+    if(!deduped.some(d=>Math.abs(d.idx-a.idx)<50))deduped.push(a);
+  });
+  if(deduped.length===0){
+    const vac=extractBlockFields(raw,raw);
+    if(vac.dates_raw||vac.rate_raw){importedVacancies.push({id:uid(),title:'Unknown location',client:'',location:'',state:'',role_type:detectRoleTypeFromText(raw),...vac,status:'Open',urgency:'normal',created_at:new Date().toISOString()});}
+    return;
+  }
+  if(deduped.length===1||isMainlySingleVacancy(raw)){
+    const a=deduped[0];
+    const vac=extractBlockFields(raw,raw);
+    vac.location=vac.location||a.displayName;
+    vac.state=vac.state||a.state||detectState(raw);
+    vac.title=vac.title||vac.location;
+    importedVacancies.push({id:uid(),client:'',status:'Open',urgency:'normal',created_at:new Date().toISOString(),...vac});
+    return;
+  }
+  deduped.forEach((anchor,i)=>{
+    const blockStart=Math.max(0,anchor.idx-20);
+    const blockEnd=i+1<deduped.length?deduped[i+1].idx:raw.length;
+    const block=raw.slice(blockStart,blockEnd);
+    const vac=extractBlockFields(block,raw);
+    vac.location=vac.location||anchor.displayName;
+    vac.state=vac.state||anchor.state;
+    vac.title=vac.location;
+    vac.role_type=vac.role_type||detectRoleTypeFromText(raw);
+    if(vac.dates_raw||vac.rate_raw||vac.location)
+      importedVacancies.push({id:uid(),client:'',status:'Open',urgency:'normal',created_at:new Date().toISOString(),...vac});
+  });
+}
+
+function applyZoneRates(text){
+  const norm=text.replace(/[''‚‛′‵`]/g,"'");
+  const zoneMap={};
+  const zoneRx=/Zone\s*\d+\s+([^$\n]{5,80})\$\s*([\d,]+)/gi;
+  let m;
+  while((m=zoneRx.exec(norm))!==null){
+    const rate=m[2].replace(/,/g,'');
+    const rateRaw='$'+Number(rate).toLocaleString()+'/day';
+    const locs=m[1].split(/,|\band\b/i).map(l=>l.trim().toLowerCase()).filter(l=>l.length>2);
+    locs.forEach(loc=>zoneMap[loc]=rateRaw);
+  }
+  if(Object.keys(zoneMap).length===0)return;
+  importedVacancies.forEach(v=>{
+    if(v.rate_raw)return;
+    const loc=v.location.toLowerCase();
+    const match=Object.keys(zoneMap).find(z=>loc.includes(z)||z.includes(loc));
+    if(match){v.rate_raw=zoneMap[match];v.rate=parseRate(zoneMap[match]);}
+  });
+}
+
+function isValidLocation(name){
+  if(!name||name.length>60)return false;
+  if(/\bvacancies\b|\bvacancy\b|\bopportunities\b|\bpermanent\b|\blocum\b|\bFIFO\b|\bavailable\b|\brequired\b|\bseeking\b|\bwe\s+are\b|\bplease\b|\bkind\s+regards\b/i.test(name))return false;
+  if(/@|http|\d{8}/.test(name))return false;
+  return true;
+}
+
+function isMainlySingleVacancy(text){
+  const rateMatches=(text.match(/\$\s*[\d,]+\s*(?:per\s*day|\/day|day\s*rate)/gi)||[]).length;
+  return rateMatches<=1;
+}
+
+function findExistingVacancy(location,state){
+  if(!location)return null;
+  const loc=location.toLowerCase().trim();
+  return vacancies.find(v=>{
+    const vl =(v.location||v.title||'').toLowerCase().trim();
+    const sameState=!state||!v.state||v.state===state;
+    return sameState&&(vl===loc||vl.startsWith(loc)||loc.startsWith(vl));
+  })||null;
+}
+
+function removeImported(idx){importedVacancies.splice(idx,1);renderImportResults();}
+
+function renderImportResults(){
+  const el=document.getElementById('import-results');
+  const bar=document.getElementById('import-save-bar');
+  const cnt=document.getElementById('import-count');
+  if(importedVacancies.length===0){
+    el.innerHTML='<div class="empty"><p>No vacancies detected.<br>Check the format and try again.</p></div>';
+    bar.style.display='none';cnt.textContent='';return;
+  }
+  importedVacancies.forEach(v=>{v._existing=findExistingVacancy(v.location||v.title,v.state);});
+  const updates=importedVacancies.filter(v=>v._existing).length;
+  const news=importedVacancies.length-updates;
+  cnt.textContent=importedVacancies.length+' found';
+  bar.style.display='block';
+  document.getElementById('import-save-msg').textContent=(news?news+' new':'')+(news&&updates?' + ':'')+(updates?updates+' updates':'')+ ' ready to save';
+  el.innerHTML=importedVacancies.map((v,idx)=>`
+    <div style="border:1px solid var(--g200);border-radius:8px;overflow:hidden;margin-bottom:10px;">
+      <div style="background:var(--g50);padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--g200);">
+        <span style="font-size:13px;font-weight:600;flex:1;">${esc(v.title)}</span>
+        <input value="${esc(v.rate_raw||'')}" onchange="importedVacancies[${idx}].rate_raw=this.value;importedVacancies[${idx}].rate=parseRate(this.value);" placeholder="Rate e.g. $1,800/day" style="font-size:11px;padding:2px 6px;border:1px solid var(--g300);border-radius:4px;width:130px;color:var(--grn);font-weight:600;">
+        <span class="b b-${v.role_type==='GP Only'?'grn':v.role_type==='Interventional Radiologist'||v.role_type==='General Radiologist'?'blue':'pur'}">${esc(v.role_type)}</span>
+        ${v._existing?'<span class="b" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;">UPDATE</span>':'<span class="b b-blue">NEW</span>'}
+        <button class="btn btn-sec btn-xs" onclick="removeImported(${idx})">✕</button>
+      </div>
+      <div style="padding:8px 12px;font-size:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div><span style="color:var(--g500);">State: </span><strong>${esc(v.state||'—')}</strong></div>
+          <div><span style="color:var(--g500);">Role: </span>
+            <select onchange="importedVacancies[${idx}].role_type=this.value" style="font-size:11px;padding:1px 4px;border:1px solid var(--g300);border-radius:4px;">
+              ${['GP Only','GP VMO','ED VMO','UCC','Interventional Radiologist','General Radiologist'].map(r=>`<option ${r===v.role_type?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        ${v.dates_raw?`<div style="margin-top:4px;"><span style="color:var(--g500);">Dates: </span>${esc(v.dates_raw)}</div>`:''}
+        ${v.inclusions_raw?`<div style="margin-top:2px;"><span style="color:var(--g500);">Inclusions: </span>${esc(v.inclusions_raw)}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+async function saveAllImported(){
+  if(!importedVacancies.length)return;
+  let added=0,updated=0;
+  for(const v of importedVacancies){
+    const full={...v};delete full._existing;
+    const{error}=await sb.from(TBL_VAC).upsert(full);
+    if(error){notify('Error saving: '+error.message);console.error(error);return;}
+    const existing=findExistingVacancy(v.location||v.title,v.state);
+    if(existing){Object.assign(existing,{...full,id:existing.id,created_at:existing.created_at});updated++;}
+    else{vacancies.unshift(full);added++;}
+  }
+  clearImport();
+  notify((added?added+' added':'')+(added&&updated?' · ':'')+(updated?updated+' updated':''));
+  renderDash();
+}
+
+function clearImport(){
+  importedVacancies=[];
+  document.getElementById('import-paste').value='';
+  document.getElementById('import-results').innerHTML='<div class="empty"><p>Paste an email and click<br>"Extract vacancies" to begin.</p></div>';
+  document.getElementById('import-save-bar').style.display='none';
+  document.getElementById('import-count').textContent='';
+}
+
+// ─── BROADCAST ────────────────────────────────────────────────────────────
+function renderBroadcastView(){
+  renderBroadcastPicker();
+  renderBroadcastPreview();
+}
+
+function renderBroadcastPicker(){
+  const el=document.getElementById('bc-vac-picker');if(!el)return;
+  const open=vacancies.filter(v=>!v.status||v.status==='Open');
+  if(!open.length){el.innerHTML='<div style="padding:10px;font-size:12px;color:var(--g500);">No open vacancies.</div>';return;}
+  el.innerHTML=open.map(v=>`
+    <label style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--g100);cursor:pointer;">
+      <input type="checkbox" class="bc-vac-cb" data-id="${v.id}" style="margin-top:2px;" onchange="renderBroadcastPreview()">
+      <div>
+        <div style="font-size:12px;font-weight:600;">${esc(v.title)}</div>
+        <div style="font-size:11px;color:var(--g500);">${esc(v.state||'')}${v.rate_raw?' · '+esc(v.rate_raw):''}</div>
+      </div>
+    </label>`).join('');
+}
+
+function renderBroadcastPreview(){
+  const audience=getBroadcastAudience();
+  const vacs=getSelectedBroadcastVacs();
+  const preview=document.getElementById('bc-preview');
+  const subject=document.getElementById('bc-subject');
+  if(!preview)return;
+  const statesUniq=[...new Set(vacs.map(v=>v.state).filter(Boolean))];
+  const subjectText=statesUniq.length?`${audience} Locum Opportunities — ${statesUniq.join(', ')}`:`${audience} Locum Opportunities`;
+  if(subject)subject.value=subjectText;
+  preview.innerHTML=vacs.length?buildBroadcastHTML(audience,vacs):'<div class="empty"><p>Select vacancies on the left to preview.</p></div>';
+}
+
+function getBroadcastAudience(){
+  const q=document.querySelector('input[name="bc-audience"]:checked');
+  return r?r.value:'GP VMO';
+}
+
+function getSelectedBroadcastVacs(){
+  const checked=Array.from(document.querySelectorAll('.bc-vac-cb:checked')).map(cb=>cb.dataset.id);
+  return vacancies.filter(v=>checked.includes(v.id));
+}
+
+function buildBroadcastHTML(audience,vacs){
+  const stateOrder=['SA','WA','QLD','NSW','VIC','TAS','NT','ACT','NZ'];
+  const byState={};
+  vacs.forEach(v=>{const s=v.state||'Other';if(!byState[s])byState[s]=[];byState[s].push(v);});
+  const stateFullName={'NSW':'NEW SOUTH WALES','VIC':'VICTORIA','QLD':'QUEENSLAND','WA':'WESTERN AUSTRALIA','SA':'SOUTH AUSTRALIA','TAS':'TASMANIA','NT':'NORTHERN TERRITORY','ACT':'AUSTRALIAN CAPITAL TERRITORY','NZ':'NEW ZEALAND','Other':'OTHER'};
+  const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
+  const stateList=states.join(', ');
+  const audienceIntro={
+    'GP VMO':`I have some great GP/ED and VMO locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'GP Only':`I have some great GP locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'UCC':`I have some great Urgent Care Clinic (UCC) locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'Interventional Radiologist':'I have some great Interventional Radiology locum opportunities available. Please see the current vacancies below.',
+    'General Radiologist':'I have some great Radiology locum opportunities available. Please see the current vacancies below.'
+  };
+  let html=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 16px 0;">Hi $first name$,</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 20px 0;">${audienceIntro[audience]||'I have some great locum opportunities available. Please see the current vacancies below.'}</p>`;
+  states.forEach(state=>{
+    const svacs=byState[state];
+    html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:13px;margin:20px 0 10px 0;letter-spacing:0.02em;">${stateFullName[state]||state}</p>`;
+    svacs.forEach(v=>{
+      const rateDisplay=v.rate_raw||(v.rate&&v.rate!=='0'?'$'+Number(v.rate).toLocaleString()+'/day':'');
+      const datesDisplay=v.dates_raw||'';
+      const inclDisplay=v.inclusions_raw||'';
+      const billingsStr=v.billings_pct?` or ${v.billings_pct}% of billings`:'';
+      const fullRate=rateDisplay?(rateDisplay+billingsStr):'';
+      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${esc(v.title)}</span>${fullRate?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(fullRate)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
+      if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(datesDisplay)}</p>`;
+      if(inclDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Inclusions</p><p style="font-size:13px;margin:0;color:#111827;">${esc(inclDisplay)}</p>`;
+      html+=`</div></div>`;
+    });
+  });
+  if(!vacs.length)html+=`<p style="color:#9ca3af;font-style:italic;font-family:Arial,Helvetica,sans-serif;">No vacancies selected.</p>`;
+  html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:20px 0 6px 0;">If any of these interest you, please reply to this email or give me a call on <strong>0410 547 011</strong> and I'll get you across all the details.</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#16a34a;margin:0 0 20px 0;">You can earn $1,000 for referring a colleague! Visit our <a href="https://www.medipeople.com.au/rewards" style="color:#16a34a;">Rewards Page</a> for more details.</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;margin:0;">Kind regards,<br><strong>Chris Tsolakis</strong> | Director<br>MediPeople<br>T: +61 2 8001 6272 &nbsp;|&nbsp; M: +61 410 547 011<br><a href="mailto:chris.t@medipeople.com.au" style="color:#2e7d32;">chris.t@medipeople.com.au</a> &nbsp;|&nbsp; <a href="https://www.medipeople.com.au" style="color:#2e7d32;">www.medipeople.com.au</a></p>`;
+  return html;
+}
+
+function buildBroadcastPlain(audience,vacs){
+  const stateOrder=['QLD','NSW','VIC','SA','WA','TAS','NT','ACT','NZ'];
+  const byState={};
+  vacs.forEach(v=>{const s=v.state||'Other';if(!byState[s])byState[s]=[];byState[s].push(v);});
+  const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
+  let txt=`Hi [First Name],\n\nHope you're well! I have some locum opportunities that may suit you.\n\n`;
+  states.forEach(state=>{
+    txt+=`${'─'.repeat(40)}\n${state}\n${'─'.repeat(40)}\n\n`;
+    byState[state].forEach(v=>{
+      const rateDisplay=v.rate_raw||(v.rate?'$'+Number(v.rate).toLocaleString()+'/day':'');
+      txt+=`${v.title}${rateDisplay?'   '+rateDisplay:''}\n`;
+      if(v.dates_raw)txt+=`Dates: ${v.dates_raw}\n`;
+      if(v.inclusions_raw)txt+=`Inclusions: ${v.inclusions_raw}\n`;
+      txt+='\n';
+    });
+  });
+  txt+=`If any of these interest you, please reply or give me a call on 0410 547 011.\n\nKind regards,\nChris Tsolakis | Director\nMediPeople\nT: +61 2 8001 6272 | M: +61 410 547 011\nchris.t@medipeople.com.au | www.medipeople.com.au`;
+  return txt;
+}
+
+function copyBroadcastHTML(){
+  renderBroadcastPreview();
+  const pv=document.getElementById('bc-preview');if(!pv)return;
+  navigator.clipboard.writeText(pv.innerHTML).then(()=>notify('Broadcast HTML copied')).catch(()=>notify('Could not copy'));
+}
+
+function copyBroadcastPlain(){
+  const audience=getBroadcastAudience();
+  const vacs=getSelectedBroadcastVacs();
+  navigator.clipboard.writeText(buildBroadcastPlain(audience,vacs)).then(()=>notify('Broadcast plain text copied')).catch(()=>notify('Could not copy'));
+}
+
+function draftBroadcastMsg(vac,name){
+  const dateStr=vac.start_date?(fmtDate(vac.start_date)+(vac.end_date?' – '+fmtDate(vac.end_date):'')):'dates TBC';
+  return `Hi ${name||'[Name]'},\n\nHope you're well! I have a great locum opportunity I'd love to run by you.\n\n📍 Location: ${vac.location||''} ${vac.state||''}\n📅 Dates: ${dateStr}\n💰 Rate: ${vac.rate?'$'+vac.rate+'/day':'TBC'}\n🏥 Role: ${vac.role_type||'GP locum'}${vac.dpa==='true'?' (DPA location)':''}${vac.travel==='true'?'\n✈️ Travel provided':''}${vac.accom==='true'?'\n🏠 Accommodation provided':''}\n\n${vac.notes?'Additional details: '+vac.notes+'\n\n':''}Would this work for you? Happy to chat through any details.\n\nWarm regards,\nChris Tsolakis | MediPeople`;
+}
+
+function copyMsg(){
+  const ta=document.getElementById('msg-body');if(!ta)return;
+  navigator.clipboard.writeText(ta.value).then(()=>notify('Message copied to clipboard'));
+}
+
+function getTier(score){
+  if(score>=68)return'hot';
+  if(score>=42)return'warm';
+  return'cold';
+}
+
+function openAddCandidate(id){
+  // Candidates are managed in the CRM — this opens a read-only prefs view
+  if(id)openCandProfile(id);
+}
+
+function closeAddCand(){
+  const m=document.getElementById('addcand-modal');if(m)m.style.display='none';
+}
+
+// ─── BOOTSTRAP ────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+	</html>
