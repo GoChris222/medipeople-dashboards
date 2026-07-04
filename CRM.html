@@ -1306,7 +1306,7 @@ function matchJob(){}
   });
   });
   });
-    await sb.from('job_matches').delete().neq('id',0);
+    await sb.from('job_matches').delete().not('id','is',null);
     if(rows.length){
       for(let i=0;i<rows.length;i+=500){
         await sb.from('job_matches').insert(rows.slice(i,i+500));
