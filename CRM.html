@@ -634,7 +634,7 @@ let srchTimer=null;
 
 // ── INIT ──────────────────────────────────────────────────────
 window.onload=async()=>{
-  await Promise.all([loadDashboard(),loadJobsData(),loadClientsData(),loadCandsData()]);
+  await Promise.all([loadDashboard(),loadJobs(),loadClientsData(),loadCandsData()]);
   populateJobSelect();
   populateClientSelects();
   populateCandSelect();
@@ -1066,7 +1066,7 @@ async function saveJob(){
   };
   const{error}=editingJobId?await sb.from('crm_jobs').update(payload).eq('id',editingJobId):await sb.from('crm_jobs').insert(payload);
   if(error){toast('Error: '+error.message);return;}
-  closeM('m-job');toast('Job saved ✓');await loadJobsData();if(currentView==='jobs')loadJobs();
+  closeM('m-job');toast('Job saved ✓');await loadJobs();if(currentView==='jobs')loadJobs();
 }
 
 // ── PLACEMENT MODAL ───────────────────────────────────────────
@@ -1555,6 +1555,7 @@ function renderPlacements() {
     + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Rate</th>'
     + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Status</th>'
     + '<th style="padding:10px 12px;border-bottom:2px solid #ddd">Notes</th>'
+    + '<th style="padding:10px 12px;border-bottom:2px solid #ddd"></th>'
     + '</tr></thead><tbody>'
     + rows.map(function(p) {
         const statusCol = p.status === 'Active' ? '#16a34a' : p.status === 'Completed' ? '#4f46e5' : '#9ca3af';
@@ -1566,9 +1567,21 @@ function renderPlacements() {
           + '<td style="padding:9px 12px">$' + (p.rate || '') + '</td>'
           + '<td style="padding:9px 12px"><span style="color:' + statusCol + ';font-weight:600">' + (p.status || '') + '</span></td>'
           + '<td style="padding:9px 12px;font-size:12px;color:#555;max-width:200px">' + ((p.notes||'').slice(0,100)) + '</td>'
+          + '<td style="padding:9px 12px;white-space:nowrap">'
+          + '<button onclick="deleteLocumPlacement(\'' + p.id + '\')" style="padding:3px 9px;border:1px solid #fca5a5;color:#b91c1c;background:#fef2f2;border-radius:5px;cursor:pointer;font-size:11px">Delete</button>'
+          + '</td>'
           + '</tr>';
       }).join('')
     + '</tbody></table>';
+}
+
+async function deleteLocumPlacement(id){
+  if(!confirm('Delete this placement record? This cannot be undone.'))return;
+  const base="https://qoyokyuzkpfvaakdkmxg.supabase.co/rest/v1/locum_placements";
+  const headers={apikey:"sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W",Authorization:"Bearer sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W"};
+  const r=await fetch(base+'?id=eq.'+id,{method:'DELETE',headers});
+  if(r.ok){toast('Placement deleted');loadPlacements();updateQuarterGoalCard();}
+  else{toast('Error deleting placement');}
 }
 
 // ── QUARTERLY GOAL TRACKING ─────────────────────────────────────────────────
