@@ -1235,87 +1235,95 @@ function matchJob(){}
   function scoreMatch(){}
 
   async function computeAllMatches(){
-      const btn=document.getElementById('me-run');
-      if(btn){btn.disabled=true;btn.textContent='Matching…';}
-      const wrap=document.getElementById('match-results');
-      if(wrap)wrap.innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">Computing matches…</div>';
-      const[{data:cands,error:ce},{data:jobs,error:je}]=await Promise.all([
-            sb.from('crm_profiles').select('*').eq('status','Active'),
-            sb.from('crm_jobs').select('*').eq('status','Open')
-          ]);
-      if(ce||je){toast('Error loading data: '+((ce||je).message));if(btn){btn.disabled=false;btn.textContent='Run matching';}return;}
-      const typeMap={doctor:'Permanent',locum:'Locum',otd:'OTD'};
-      const norm=s=>(s||'').toLowerCase().trim();
-      const overlaps=(aFrom,aTo,bFrom,bTo)=>{
-            const af=aFrom?new Date(aFrom):null,at=aTo?new Date(aTo):null;
-            const bf=bFrom?new Date(bFrom):null,bt=bTo?new Date(bTo):null;
-            if(!af&&!at)return null;
-            if(!bf&&!bt)return null;
-            const start=af||new Date(0),end=at||new Date(8640000000000000);
-            const jstart=bf||new Date(0),jend=bt||new Date(8640000000000000);
-            return start<=jend&&end>=jstart;
-      };
-      const deskType=(job)=>{
-            const text=norm(job.title+' '+job.specialty+' '+(job.notes||''));
-            if(job.job_type==='OTD')return'OTD Permanent';
-            if(text.includes('urgent care')||text.includes('ucc'))return'UCC';
-            if(job.job_type==='Locum'&&text.includes('vmo'))return'GP VMO';
-            return'GP Only';
-      };
-      const rows=[];
-      (cands||[]).forEach(c=>{
-            const wantType=typeMap[c.type];if(!wantType)return;
-            (jobs||[]).filter(j=>j.job_type===wantType).forEach(j=>{
-                    let score=0;const reasons=[];
-                    const cSpec=norm(c.specialty),jSpec=norm(j.specialty);
-                    if(cSpec&&jSpec){
-                              if(cSpec===jSpec){score+=35;reasons.push('Specialty match');}
-                              else if(cSpec.includes(jSpec)||jSpec.includes(cSpec)){score+=20;reasons.push('Related specialty');}
-                    }
-                    const cSub=norm(c.sub_specialty),jSub=norm(j.sub_specialty);
-                    if(cSub&&jSub&&(cSub.includes(jSub)||jSub.includes(cSub))){score+=5;reasons.push('Sub-specialty match');}
-                    if(c.state&&j.state&&c.state===j.state){score+=20;reasons.push(j.state+' match');}
-                    else if(c.willing_to_relocate){score+=10;reasons.push('Willing to relocate');}
-                    if(j.dpa_required&&Array.isArray(c.dpa_areas)&&c.dpa_areas.some(a=>norm(a)&&(norm(j.suburb).includes(norm(a))||norm(a).includes(norm(j.suburb))))){
-                              score+=5;reasons.push('DPA area match');
-                    }
-                    if(c.mm_level!=null&&j.mm_level!=null){
-                              const diff=Math.abs(c.mm_level-j.mm_level);
-          if(diff===0){score+=10;reasons.push('MM level match');}
-          else if(diff===1){score+=5;}
-  }
-        if(j.job_type==='Locum'){
-          const ov=overlaps(c.available_from,c.available_to,j.start_date,j.end_date);
-          if(ov===true){score+=15;reasons.push('Dates overlap');}
-          else if(ov===null){score+=7;}
-          if(j.rate_budget_daily&&c.daily_rate_min){
-            if(j.rate_budget_daily>=c.daily_rate_min){score+=10;reasons.push('Rate meets ask');}
-            else if(j.rate_budget_daily>=c.daily_rate_min*0.85){score+=5;reasons.push('Rate close to ask');}
-  } else {score+=5;}
-  } else {
-          if(c.registration_status==='Full'){score+=15;reasons.push('Fully registered');}
-          else if(c.registration_status){score+=7;}
-          if((c.years_experience||0)>=3)score+=10;
-  }
-        score=Math.min(100,Math.round(score));
-        if(score<=0)return;
-        rows.push({
-          candidate_id:c.id,candidate_name:c.name,job_id:j.id,
-          job_location:j.suburb||j.title,job_state:j.state,desk_type:deskType(j),
-          score,match_reasons:reasons.join(' · ')||'Basic type match'
+  const btn=document.getElementById('me-run');
+  if(btn){btn.disabled=true;btn.textContent='Matching…';}
+  const wrap=document.getElementById('match-results');
+  if(wrap)wrap.innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">Computing matches…</div>';
+
+  const[{data:cands,error:ce},{data:locumJobs,error:je},{data:crmJobs,error:cje}]=await Promise.all([
+    sb.from('crm_profiles').select('*').eq('status','Active'),
+    sb.from('jobs').select('*').eq('status','Active'),
+    sb.from('crm_jobs').select('*').eq('status','Open')
+  ]);
+  if(ce||je||cje){toast('Error loading data: '+((ce||je||cje).message));if(btn){btn.disabled=false;btn.textContent='Run matching';}return;}
+
+  const norm=s=>(s||'').toLowerCase().trim();
+  const parseMM=s=>{if(!s)return null;const m=String(s).match(/(\d)/);return m?parseInt(m[1]):null;};
+  const parseRate=s=>{if(!s)return null;const nums=(String(s).match(/[\d,]{3,}/g)||[]).map(n=>parseInt(n.replace(/,/g,'')));if(!nums.length)return null;return nums.reduce((a,b)=>a+b,0)/nums.length;};
+  const rows=[];
+
+  // Locum shifts (real published listings) vs locum candidates
+  (cands||[]).filter(c=>c.type==='locum').forEach(c=>{
+    (locumJobs||[]).forEach(j=>{
+      let score=0;const reasons=[];
+      if(c.state&&j.state&&c.state===j.state){score+=20;reasons.push(j.state+' match');}
+      else if(c.willing_to_relocate){score+=8;reasons.push('Willing to relocate');}
+      const jMM=parseMM(j.mm_level);
+      if(c.mm_level!=null&&jMM!=null){const diff=Math.abs(c.mm_level-jMM);if(diff===0){score+=15;reasons.push('MM level match');}else if(diff===1){score+=7;}}
+      const cSkill=norm(c.sub_specialty)||norm(c.specialty),jSkill=norm(j.vacancy_type);
+      if(cSkill&&jSkill&&(jSkill.includes(cSkill)||cSkill.includes(jSkill))){score+=10;reasons.push('Skill area match');}
+      if(j.end_date){
+        const jend=new Date(j.end_date);
+        const availFrom=c.available_from?new Date(c.available_from):null;
+        const availTo=c.available_to?new Date(c.available_to):null;
+        const fits=(!availFrom||availFrom<=jend)&&(!availTo||availTo>=new Date());
+        if(fits){score+=25;reasons.push('Availability fits');}else{score+=5;}
+      } else {score+=12;}
+      const jRate=parseRate(j.rate_text);
+      if(jRate&&c.daily_rate_min){
+        if(jRate>=c.daily_rate_min){score+=20;reasons.push('Rate meets ask');}
+        else if(jRate>=c.daily_rate_min*0.85){score+=10;reasons.push('Rate close to ask');}
+      } else {score+=5;}
+      score=Math.min(100,Math.round(score));
+      if(score<=0)return;
+      rows.push({
+        candidate_id:c.id,candidate_name:c.name,job_id:j.id,
+        job_location:j.location||j.client,job_state:j.state,desk_type:j.desk_type||'GP Only',
+        score,match_reasons:reasons.join(' · ')||'Basic match'
+      });
+    });
   });
+
+  // Permanent / OTD roles (manually entered) vs doctor/otd candidates
+  const typeMap={doctor:'Permanent',otd:'OTD'};
+  (cands||[]).forEach(c=>{
+    const wantType=typeMap[c.type];if(!wantType)return;
+    (crmJobs||[]).filter(j=>j.job_type===wantType).forEach(j=>{
+      let score=0;const reasons=[];
+      const cSpec=norm(c.specialty),jSpec=norm(j.specialty);
+      if(cSpec&&jSpec){
+        if(cSpec===jSpec){score+=35;reasons.push('Specialty match');}
+        else if(cSpec.includes(jSpec)||jSpec.includes(cSpec)){score+=20;reasons.push('Related specialty');}
+      }
+      if(c.state&&j.state&&c.state===j.state){score+=20;reasons.push(j.state+' match');}
+      else if(c.willing_to_relocate){score+=10;reasons.push('Willing to relocate');}
+      if(c.mm_level!=null&&j.mm_level!=null){
+        const diff=Math.abs(c.mm_level-j.mm_level);
+        if(diff===0){score+=10;reasons.push('MM level match');}else if(diff===1){score+=5;}
+      }
+      if(c.registration_status==='Full'){score+=15;reasons.push('Fully registered');}
+      else if(c.registration_status){score+=7;}
+      if((c.years_experience||0)>=3)score+=10;
+      score=Math.min(100,Math.round(score));
+      if(score<=0)return;
+      rows.push({
+        candidate_id:c.id,candidate_name:c.name,job_id:j.id,
+        job_location:j.suburb||j.title,job_state:j.state,desk_type:'OTD Permanent',
+        score,match_reasons:reasons.join(' · ')||'Basic type match'
+      });
+    });
   });
-  });
-    await sb.from('job_matches').delete().not('id','is',null);
-    if(rows.length){
-      for(let i=0;i<rows.length;i+=500){
-        await sb.from('job_matches').insert(rows.slice(i,i+500));
+
+  await sb.from('job_matches').delete().not('id','is',null);
+  if(rows.length){
+    for(let i=0;i<rows.length;i+=500){
+      await sb.from('job_matches').insert(rows.slice(i,i+500));
+    }
   }
-  }
-    toast(rows.length+' matches computed ✓');
-    if(btn){btn.disabled=false;btn.textContent='Run matching';}
-    populateMatch();
-  }
+  toast(rows.length+' matches computed ✓');
+  if(btn){btn.disabled=false;btn.textContent='Run matching';}
+  populateMatch();
+}
 function doSearch(q){
   clearTimeout(srchTimer);
   if(!q||q.length<2){if(currentView==='search')nav('dashboard');return;}
