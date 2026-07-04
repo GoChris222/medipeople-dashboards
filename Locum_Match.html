@@ -1457,7 +1457,7 @@ function openEditVacancy(id){
   showModal('vac-modal');
 }
 
-acync function saveVacancy(){
+async function saveVacancy(){
   const title=document.getElementById('v-title').value.trim();
   if(!title){notify('Please enter a job title');return;}
   const v={
