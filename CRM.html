@@ -162,6 +162,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
   <div class="sb-sec">Tools</div>
   <div class="sb-item" data-v="pipeline" onclick="nav('pipeline')"><span class="ico">📋</span>Pipeline</div>
   <div class="sb-item" data-v="match" onclick="nav('match')"><span class="ico">🎯</span>Match Engine</div>
+  <div class="sb-item" data-v="broadcast" onclick="nav('broadcast')"><span class="ico">📣</span>Broadcast</div>
 </div>
 
 <!-- MAIN -->
@@ -299,6 +300,43 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       </div>
     </div>
     <div id="match-results" style="background:white;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden"><div style="padding:40px;text-align:center;color:#9ca3af">Click Refresh to load matches...</div></div>
+  </div>
+</div>
+
+<!-- BROADCAST -->
+<div id="v-broadcast" class="vw hidden">
+  <div style="padding:24px 28px;display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start;">
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="ch"><h3>Audience</h3></div>
+        <div style="padding:12px;display:flex;flex-direction:column;gap:6px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastPreview()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list — ED + clinic roles</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastPreview()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list — private clinic roles</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="UCC" onchange="renderBroadcastPreview()"> <span><strong>UCC</strong><br><span style="font-size:11px;color:var(--g500);">Urgent Care Clinic list</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="Interventional Radiologist" onchange="renderBroadcastPreview()"> <span><strong>Interventional Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">IR list</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="General Radiologist" onchange="renderBroadcastPreview()"> <span><strong>General Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">Gen Rad list</span></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><h3>Select jobs</h3><div class="sp"></div><button class="btn btn-sec btn-sm" onclick="loadBroadcastJobs()">&#8635;</button></div>
+        <div id="bc-job-picker" style="padding:10px;max-height:340px;overflow-y:auto;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">
+        <h3>Broadcast preview</h3>
+        <div class="sp"></div>
+        <button class="btn btn-sec btn-sm" onclick="copyBroadcastHTML()">Copy HTML</button>
+        <button class="btn btn-pri btn-sm" onclick="copyBroadcastPlain()">Copy plain text</button>
+      </div>
+      <div style="padding:14px;">
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px;font-weight:600;color:var(--g600);">Subject line</label>
+          <input id="bc-subject" style="width:100%;margin-top:4px;padding:7px 9px;border:1px solid var(--g300);border-radius:7px;font-size:13px;" readonly>
+        </div>
+        <div id="bc-preview" style="border:1px solid var(--g200);border-radius:8px;padding:16px;background:#fff;min-height:200px;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -745,12 +783,12 @@ function nav(v){
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
   document.getElementById('v-'+v)?.classList.remove('hidden');
   // Hide/show #content for full-page sections
-  const _fp=['match','placements','pipeline','followups','search'];
+  const _fp=['match','placements','pipeline','followups','search','broadcast'];
   const _ce=document.getElementById('content');
   if(_ce)_ce.style.display=_fp.includes(v)?'none':'';
   document.querySelector(`[data-v="${v}"]`)?.classList.add('active');
   currentView=v;
-  const titles={dashboard:'Dashboard',candidates:'Candidates',clients:'Clients',jobs:'Jobs',placements:'Placements',pipeline:'Pipeline',match:'Match Engine',followups:'Follow-ups',search:'Search Results'};
+  const titles={dashboard:'Dashboard',candidates:'Candidates',clients:'Clients',jobs:'Jobs',placements:'Placements',pipeline:'Pipeline',match:'Match Engine',followups:'Follow-ups',search:'Search Results',broadcast:'Broadcast'};
   document.getElementById('view-title').textContent=titles[v]||v;
   if(v==='candidates')loadCandidates();
   if(v==='clients')loadClients();
@@ -760,6 +798,7 @@ function nav(v){
   
   if(v==='followups')loadFollowups();
   if(v==='match')populateMatchJobSel();
+  if(v==='broadcast')loadBroadcastJobs();
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
@@ -1454,6 +1493,116 @@ function renderME(){
   }
 }
 function populateMatchJobSel(){populateMatch();}
+
+// ── BROADCAST TOOL ───────────────────────────────────────────────────────
+async function loadBroadcastJobs(){
+  const{data,error}=await sb.from('crm_jobs').select('*').eq('job_type','Locum').eq('status','Open').order('state');
+  if(error){toast('Error loading jobs: '+error.message);return;}
+  window._bcJobs=data||[];
+  renderBroadcastPicker();
+  renderBroadcastPreview();
+}
+function renderBroadcastPicker(){
+  const el=document.getElementById('bc-job-picker');if(!el)return;
+  const jobs=window._bcJobs||[];
+  if(!jobs.length){el.innerHTML='<div style="padding:10px;font-size:12px;color:var(--g500);">No open locum jobs. Add some in the Jobs tab first.</div>';return;}
+  el.innerHTML=jobs.map(j=>`
+    <label style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--g100);cursor:pointer;">
+      <input type="checkbox" class="bc-job-cb" data-id="${j.id}" style="margin-top:2px;" onchange="renderBroadcastPreview()">
+      <div>
+        <div style="font-size:12px;font-weight:600;">${esc(j.title||'')}</div>
+        <div style="font-size:11px;color:var(--g500);">${esc(j.state||'')}${j.rate_budget_daily?' · $'+fmt(j.rate_budget_daily)+'/day':''}</div>
+      </div>
+    </label>`).join('');
+}
+function getBroadcastAudience(){
+  const r=document.querySelector('input[name="bc-audience"]:checked');
+  return r?r.value:'GP VMO';
+}
+function getSelectedBroadcastJobs(){
+  const checked=Array.from(document.querySelectorAll('.bc-job-cb:checked')).map(cb=>cb.dataset.id);
+  return (window._bcJobs||[]).filter(j=>checked.includes(String(j.id)));
+}
+function renderBroadcastPreview(){
+  const audience=getBroadcastAudience();
+  const jobs=getSelectedBroadcastJobs();
+  const preview=document.getElementById('bc-preview');
+  const subject=document.getElementById('bc-subject');
+  if(!preview)return;
+  const statesUniq=[...new Set(jobs.map(j=>j.state).filter(Boolean))];
+  const subjectText=statesUniq.length?`${audience} Locum Opportunities — ${statesUniq.join(', ')}`:`${audience} Locum Opportunities`;
+  if(subject)subject.value=subjectText;
+  preview.innerHTML=jobs.length?buildBroadcastHTML(audience,jobs):'<div class="empty"><p style="color:var(--g400);">Select jobs on the left to preview.</p></div>';
+}
+function bcDatesDisplay(j){
+  if(!j.start_date)return'';
+  const s=String(j.start_date).slice(0,10),e=j.end_date?String(j.end_date).slice(0,10):'';
+  return e&&e!==s?(s+' – '+e):s;
+}
+function bcRateDisplay(j){
+  return j.rate_budget_daily?('$'+fmt(j.rate_budget_daily)+'/day'):'';
+}
+function buildBroadcastHTML(audience,jobs){
+  const stateOrder=['SA','WA','QLD','NSW','VIC','TAS','NT','ACT','NZ'];
+  const byState={};
+  jobs.forEach(j=>{const s=j.state||'Other';if(!byState[s])byState[s]=[];byState[s].push(j);});
+  const stateFullName={'NSW':'NEW SOUTH WALES','VIC':'VICTORIA','QLD':'QUEENSLAND','WA':'WESTERN AUSTRALIA','SA':'SOUTH AUSTRALIA','TAS':'TASMANIA','NT':'NORTHERN TERRITORY','ACT':'AUSTRALIAN CAPITAL TERRITORY','NZ':'NEW ZEALAND','Other':'OTHER'};
+  const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
+  const stateList=states.join(', ');
+  const audienceIntro={
+    'GP VMO':`I have some great GP/ED and VMO locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'GP Only':`I have some great GP locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'UCC':`I have some great Urgent Care Clinic (UCC) locum opportunities available across ${stateList}. Please see the current vacancies below.`,
+    'Interventional Radiologist':'I have some great Interventional Radiology locum opportunities available. Please see the current vacancies below.',
+    'General Radiologist':'I have some great Radiology locum opportunities available. Please see the current vacancies below.'
+  };
+  let html=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 16px 0;">Hi $first name$,</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 20px 0;">${audienceIntro[audience]||'I have some great locum opportunities available. Please see the current vacancies below.'}</p>`;
+  states.forEach(state=>{
+    const sjobs=byState[state];
+    html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:13px;margin:20px 0 10px 0;letter-spacing:0.02em;">${stateFullName[state]||state}</p>`;
+    sjobs.forEach(j=>{
+      const rateDisplay=bcRateDisplay(j);
+      const datesDisplay=bcDatesDisplay(j);
+      const notesDisplay=j.notes||'';
+      html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${esc(j.title||'')}</span>${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
+      if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(datesDisplay)}</p>`;
+      if(notesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Details</p><p style="font-size:13px;margin:0;color:#111827;">${esc(notesDisplay)}</p>`;
+      html+=`</div></div>`;
+    });
+  });
+  if(!jobs.length)html+=`<p style="color:#9ca3af;font-style:italic;font-family:Arial,Helvetica,sans-serif;">No jobs selected.</p>`;
+  html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:20px 0 6px 0;">If any of these interest you, please reply to this email or give me a call and I'll get you across all the details.</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#16a34a;margin:0 0 20px 0;">You can earn $1,000 for referring a colleague! Visit our <a href="https://www.medipeople.com.au/rewards" style="color:#16a34a;">Rewards Page</a> for more details.</p>\n<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;margin:0;">Kind regards,<br><strong>Chris Tsolakis</strong> | Director<br>MediPeople<br>T: +61 2 8001 6272 &nbsp;|&nbsp; M: +61 410 547 011<br><a href="mailto:chris.t@medipeople.com.au" style="color:#2e7d32;">chris.t@medipeople.com.au</a> &nbsp;|&nbsp; <a href="https://www.medipeople.com.au" style="color:#2e7d32;">www.medipeople.com.au</a></p>`;
+  return html;
+}
+function buildBroadcastPlain(audience,jobs){
+  const stateOrder=['QLD','NSW','VIC','SA','WA','TAS','NT','ACT','NZ'];
+  const byState={};
+  jobs.forEach(j=>{const s=j.state||'Other';if(!byState[s])byState[s]=[];byState[s].push(j);});
+  const states=[...new Set([...stateOrder,...Object.keys(byState)])].filter(s=>byState[s]);
+  let txt=`Hi [First Name],\n\nHope you're well! I have some locum opportunities that may suit you.\n\n`;
+  states.forEach(state=>{
+    txt+=`${'─'.repeat(40)}\n${state}\n${'─'.repeat(40)}\n\n`;
+    byState[state].forEach(j=>{
+      const rateDisplay=bcRateDisplay(j),datesDisplay=bcDatesDisplay(j);
+      txt+=`${j.title||''}${rateDisplay?'   '+rateDisplay:''}\n`;
+      if(datesDisplay)txt+=`Dates: ${datesDisplay}\n`;
+      if(j.notes)txt+=`Details: ${j.notes}\n`;
+      txt+='\n';
+    });
+  });
+  txt+=`If any of these interest you, please reply or give me a call.\n\nKind regards,\nChris Tsolakis | Director\nMediPeople\nT: +61 2 8001 6272 | M: +61 410 547 011\nchris.t@medipeople.com.au | www.medipeople.com.au`;
+  return txt;
+}
+function copyBroadcastHTML(){
+  renderBroadcastPreview();
+  const pv=document.getElementById('bc-preview');if(!pv)return;
+  navigator.clipboard.writeText(pv.innerHTML).then(()=>toast('Broadcast HTML copied ✓')).catch(()=>toast('Could not copy'));
+}
+function copyBroadcastPlain(){
+  const audience=getBroadcastAudience();
+  const jobs=getSelectedBroadcastJobs();
+  navigator.clipboard.writeText(buildBroadcastPlain(audience,jobs)).then(()=>toast('Broadcast plain text copied ✓')).catch(()=>toast('Could not copy'));
+}
 
 // ── MATCH OUTCOME LOGGING ───────────────────────────────────────────────────
 let ocContext=null;
