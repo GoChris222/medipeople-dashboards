@@ -247,7 +247,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <div id="plac-stats" style="font-size:13px;color:#666;margin-bottom:12px"></div>
     <div id="plac-list"></div>
   </div>
-<div id="v-pipeline" class="vw hidden">
+    </div><div id="v-pipeline" class="vw hidden">
       <div class="card" style="overflow:visible;">
         <div class="ch">
           <h3>Pipeline</h3><div class="sp"></div>
@@ -260,14 +260,14 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     </div>
 
     <!-- MATCH -->
-    <div <div id="v-match" class="vw hidden">
+    <div id="v-match" class="vw hidden">
   <div style="padding:24px 28px">
     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 24px;min-width:130px"><div id="me-total" style="font-size:28px;font-weight:700;color:#166534">-</div><div style="font-size:12px;color:#6b7280;margin-top:2px">Total Matches</div></div>
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 24px;min-width:130px"><div id="me-strong" style="font-size:28px;font-weight:700;color:#1e40af">-</div><div style="font-size:12px;color:#6b7280;margin-top:2px">Strong (70+)</div></div>
       <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:16px 24px;min-width:130px"><div id="me-cands" style="font-size:28px;font-weight:700;color:#7e22ce">-</div><div style="font-size:12px;color:#6b7280;margin-top:2px">Candidates</div></div>
       <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 24px;min-width:130px"><div id="me-jobs" style="font-size:28px;font-weight:700;color:#c2410c">-</div><div style="font-size:12px;color:#6b7280;margin-top:2px">Jobs Covered</div></div>
-      <div style="display:flex;align-items:center;margin-left:auto"><button onclick="populateMatch()" style="background:#1a56db;color:white;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer">Refresh</button></div>
+      <div style="display:flex;align-items:center;margin-left:auto;gap:8px"><button id="me-run" onclick="computeAllMatches()" style="background:#0e9f6e;color:white;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer">Run matching</button>button><button onclick="populateMatch()" style="background:#1a56db;color:white;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer">Refresh</button>button></div>
     </div>
     <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:14px 18px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
       <input type="text" id="me-fname" placeholder="Candidate name..." oninput="renderME()" style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px">
@@ -284,10 +284,9 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
   </div>
 </div>
 
-    </div>
-
+    
     <!-- FOLLOW-UPS -->
-    <div <section id="v-followups" class="view" style="display:none">
+    <section id="v-followups" class="vw hidden">
   <div class="view-header" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px">
     <h2 style="margin:0">Follow-ups</h2>
     <select id="fu-filter-stage" onchange="renderFollowups()" style="padding:5px 8px;border:1px solid #ddd;border-radius:4px"><option value="">All Stages</option></select>
