@@ -295,6 +295,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div style="margin-left:auto;display:flex;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden">
         <button id="me-bcand" onclick="meV='cand';renderME()" style="padding:6px 14px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:#1a56db;color:white">By Candidate</button>
         <button id="me-bjob" onclick="meV='job';renderME()" style="padding:6px 14px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:white;color:#374151">By Job</button>
+        <button id="me-boutcomes" onclick="meV='outcomes';renderME()" style="padding:6px 14px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:white;color:#374151">Outcome Log</button>
       </div>
     </div>
     <div id="match-results" style="background:white;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden"><div style="padding:40px;text-align:center;color:#9ca3af">Click Refresh to load matches...</div></div>
@@ -560,7 +561,49 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
 </div>
 </div>
 
-<!-- PROFILE MODAL (candidate detail) -->
+<!-- OUTCOME MODAL (Match Engine) -->
+<div class="ov hidden" id="m-outcome">
+<div class="modal">
+  <div class="mh"><h3>Log Outcome</h3><button class="x" onclick="closeM('m-outcome')">✕</button></div>
+  <div class="mb">
+    <div class="fg" style="margin-bottom:12px;">
+      <div class="fi"><label>Candidate</label><input id="oc-cand-name" disabled style="background:var(--g50);"></div>
+      <div class="fi"><label>Job</label><input id="oc-job-title" disabled style="background:var(--g50);"></div>
+    </div>
+    <div class="fg">
+      <div class="fi"><label>Outcome *</label>
+        <select id="oc-outcome" onchange="toggleOcReason()">
+          <option value="">Select outcome</option>
+          <option value="accepted">✅ Accepted</option>
+          <option value="declined">❌ Declined</option>
+          <option value="ghosted">👻 Ghosted (no reply)</option>
+          <option value="pending">⏳ Sent — awaiting reply</option>
+        </select>
+      </div>
+      <div class="fi" id="oc-reason-wrap" style="display:none;">
+        <label>Reason (if declined)</label>
+        <select id="oc-reason">
+          <option value="">Select reason</option>
+          <option value="rate_low">Rate too low</option>
+          <option value="location">Location not suitable</option>
+          <option value="dates">Dates don't work</option>
+          <option value="block_too_long">Block too long</option>
+          <option value="block_too_short">Block too short</option>
+          <option value="not_available">Not available</option>
+          <option value="personal">Personal / family reason</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="fi s2"><label>Notes</label><input id="oc-notes" placeholder="Any extra context..."></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="btn btn-sec" onclick="closeM('m-outcome')">Cancel</button>
+    <button class="btn btn-pri" onclick="saveMatchOutcome()">Log Outcome</button>
+  </div>
+</div>
+</div>
+
 <div class="ov hidden" id="m-profile">
 <div class="modal" style="max-width:800px;">
   <div class="mh">
@@ -1248,9 +1291,12 @@ async function saveActivity(){
 function populateMatch(){
   const sb='https://qoyokyuzkpfvaakdkmxg.supabase.co',key='sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W',el=id=>document.getElementById(id);
   if(el('match-results'))el('match-results').innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">Loading...</div>';
-  fetch(sb+'/rest/v1/job_matches?order=score.desc&limit=2000',{headers:{apikey:key,Authorization:'Bearer '+key}})
-  .then(r=>r.json()).then(rows=>{
+  Promise.all([
+    fetch(sb+'/rest/v1/job_matches?order=score.desc&limit=2000',{headers:{apikey:key,Authorization:'Bearer '+key}}).then(r=>r.json()),
+    fetch(sb+'/rest/v1/match_outcomes?order=created_at.desc&limit=2000',{headers:{apikey:key,Authorization:'Bearer '+key}}).then(r=>r.json())
+  ]).then(([rows,outcomes])=>{
     window._meData=rows;
+    window._meOutcomes=outcomes||[];
     const strong=rows.filter(r=>r.score>=70).length,cands=new Set(rows.map(r=>r.candidate_name)).size,jobs=new Set(rows.map(r=>r.job_id)).size;
     if(el('me-total'))el('me-total').textContent=rows.length;
     if(el('me-strong'))el('me-strong').textContent=strong;
@@ -1258,6 +1304,18 @@ function populateMatch(){
     if(el('me-jobs'))el('me-jobs').textContent=jobs;
     renderME();
   }).catch(e=>{if(el('match-results'))el('match-results').innerHTML='<div style="padding:40px;text-align:center;color:#e02424">Error: '+e.message+'</div>';});
+}
+function latestOutcomeFor(candId,jobId){
+  if(!window._meOutcomes)return null;
+  return window._meOutcomes.find(o=>String(o.candidate_id)===String(candId)&&String(o.job_id)===String(jobId))||null;
+}
+function outcomeIconME(o){
+  if(!o)return '';
+  if(o.outcome==='accepted')return '<span title="Accepted" style="font-size:14px">✅</span>';
+  if(o.outcome==='declined')return '<span title="Declined'+(o.reason?': '+o.reason.replace(/_/g,' '):'')+'" style="font-size:14px">❌</span>';
+  if(o.outcome==='ghosted')return '<span title="Ghosted" style="font-size:14px">👻</span>';
+  if(o.outcome==='pending')return '<span title="Sent — awaiting reply" style="font-size:14px">⏳</span>';
+  return '';
 }
 let meV='cand';
 function renderME(){
@@ -1267,6 +1325,8 @@ function renderME(){
   const fdesk=el('me-fdesk')?el('me-fdesk').value:'',fstate=el('me-fstate')?el('me-fstate').value:'',fscore=el('me-fscore')?parseInt(el('me-fscore').value):0;
   if(el('me-bcand')){el('me-bcand').style.background=meV==='cand'?'#1a56db':'white';el('me-bcand').style.color=meV==='cand'?'white':'#374151';}
   if(el('me-bjob')){el('me-bjob').style.background=meV==='job'?'#1a56db':'white';el('me-bjob').style.color=meV==='job'?'white':'#374151';}
+  if(el('me-boutcomes')){el('me-boutcomes').style.background=meV==='outcomes'?'#1a56db':'white';el('me-boutcomes').style.color=meV==='outcomes'?'white':'#374151';}
+  if(meV==='outcomes'){renderOutcomeLogME();return;}
   const rows=window._meData.filter(r=>(!fname||(r.candidate_name||'').toLowerCase().includes(fname))&&(!fjob||(r.job_location||'').toLowerCase().includes(fjob))&&(!fdesk||r.desk_type===fdesk)&&(!fstate||r.job_state===fstate)&&r.score>=fscore);
   const wrap=el('match-results');if(!wrap)return;
   if(!rows.length){wrap.innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">No matches found</div>';return;}
@@ -1276,17 +1336,89 @@ function renderME(){
   const badge=t=>'<span style="font-size:11px;background:#e8efff;color:#1a56db;padding:2px 6px;border-radius:4px">'+t+'</span>';
   if(meV==='cand'){
     const byC={};rows.forEach(r=>{if(!byC[r.candidate_name])byC[r.candidate_name]=[];byC[r.candidate_name].push(r);});
-    let h='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'+th('Candidate')+th('Top Job')+th('Score')+th('Breakdown')+th('Jobs')+'</tr></thead><tbody>';
-    Object.entries(byC).sort((a,b)=>b[1][0].score-a[1][0].score).forEach(([name,ms])=>{const top=ms[0];h+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px;font-size:13px;font-weight:600">'+name+'</td>'+td(top.job_location+' ('+top.job_state+') '+badge(top.desk_type))+td(sBar(top.score))+td('<span style="font-size:11px;color:#6b7280">'+top.match_reasons+'</span>')+td(ms.length)+'</tr>';});
+    let h='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'+th('Candidate')+th('Top Job')+th('Score')+th('Breakdown')+th('Jobs')+th('Outcome')+'</tr></thead><tbody>';
+    Object.entries(byC).sort((a,b)=>b[1][0].score-a[1][0].score).forEach(([name,ms])=>{
+      const top=ms[0];
+      const oc=latestOutcomeFor(top.candidate_id,top.job_id);
+      const ocCell=outcomeIconME(oc)+' <button onclick="openOutcomeModal(\''+String(top.candidate_id)+'\',\''+esc(top.candidate_name)+'\',\''+String(top.job_id)+'\',\''+esc(top.job_location)+'\',\''+esc(top.job_state)+'\')" style="padding:2px 8px;border:1px solid #e5e7eb;border-radius:5px;background:white;cursor:pointer;font-size:11px;margin-left:4px">Log outcome</button>';
+      h+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px;font-size:13px;font-weight:600">'+name+'</td>'+td(top.job_location+' ('+top.job_state+') '+badge(top.desk_type))+td(sBar(top.score))+td('<span style="font-size:11px;color:#6b7280">'+top.match_reasons+'</span>')+td(ms.length)+td(ocCell)+'</tr>';});
     wrap.innerHTML=h+'</tbody></table>';
   } else {
     const byJ={};rows.forEach(r=>{if(!byJ[r.job_id])byJ[r.job_id]={loc:r.job_location,state:r.job_state,desk:r.desk_type,ms:[]};byJ[r.job_id].ms.push(r);});
-    let h='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'+th('Job')+th('Top Candidate')+th('Score')+th('Breakdown')+th('Candidates')+'</tr></thead><tbody>';
-    Object.values(byJ).sort((a,b)=>b.ms[0].score-a.ms[0].score).forEach(job=>{const top=job.ms[0];h+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px;font-size:13px;font-weight:600">'+job.loc+' ('+job.state+') '+badge(job.desk)+'</td><td style="padding:10px 14px;font-size:13px;font-weight:600">'+top.candidate_name+'</td>'+td(sBar(top.score))+td('<span style="font-size:11px;color:#6b7280">'+top.match_reasons+'</span>')+td(job.ms.length)+'</tr>';});
+    let h='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'+th('Job')+th('Top Candidate')+th('Score')+th('Breakdown')+th('Candidates')+th('Outcome')+'</tr></thead><tbody>';
+    Object.entries(byJ).sort((a,b)=>b[1].ms[0].score-a[1].ms[0].score).forEach(([jobId,job])=>{
+      const top=job.ms[0];
+      const oc=latestOutcomeFor(top.candidate_id,jobId);
+      const ocCell=outcomeIconME(oc)+' <button onclick="openOutcomeModal(\''+String(top.candidate_id)+'\',\''+esc(top.candidate_name)+'\',\''+String(jobId)+'\',\''+esc(job.loc)+'\',\''+esc(job.state)+'\')" style="padding:2px 8px;border:1px solid #e5e7eb;border-radius:5px;background:white;cursor:pointer;font-size:11px;margin-left:4px">Log outcome</button>';
+      h+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:10px 14px;font-size:13px;font-weight:600">'+job.loc+' ('+job.state+') '+badge(job.desk)+'</td><td style="padding:10px 14px;font-size:13px;font-weight:600">'+top.candidate_name+'</td>'+td(sBar(top.score))+td('<span style="font-size:11px;color:#6b7280">'+top.match_reasons+'</span>')+td(job.ms.length)+td(ocCell)+'</tr>';});
     wrap.innerHTML=h+'</tbody></table>';
   }
 }
 function populateMatchJobSel(){populateMatch();}
+
+// ── MATCH OUTCOME LOGGING ───────────────────────────────────────────────────
+let ocContext=null;
+function openOutcomeModal(candId,candName,jobId,jobLoc,jobState){
+  ocContext={candId,candName,jobId,jobLoc,jobState};
+  document.getElementById('oc-cand-name').value=candName||'';
+  document.getElementById('oc-job-title').value=(jobLoc||'')+(jobState?' ('+jobState+')':'');
+  document.getElementById('oc-outcome').value='';
+  document.getElementById('oc-reason').value='';
+  document.getElementById('oc-notes').value='';
+  document.getElementById('oc-reason-wrap').style.display='none';
+  document.getElementById('m-outcome').classList.remove('hidden');
+}
+function toggleOcReason(){
+  const v=document.getElementById('oc-outcome').value;
+  document.getElementById('oc-reason-wrap').style.display=(v==='declined')?'flex':'none';
+}
+async function saveMatchOutcome(){
+  const outcome=document.getElementById('oc-outcome').value;
+  if(!outcome){toast('Please select an outcome');return;}
+  if(!ocContext){toast('Something went wrong — please reopen the outcome dialog');return;}
+  const payload={
+    candidate_id: ocContext.candId,
+    candidate_name: ocContext.candName,
+    job_id: ocContext.jobId,
+    job_location: ocContext.jobLoc,
+    job_state: ocContext.jobState,
+    outcome,
+    reason: document.getElementById('oc-reason').value||null,
+    notes: document.getElementById('oc-notes').value||'',
+    date: new Date().toISOString().slice(0,10)
+  };
+  const{error}=await sb.from('match_outcomes').insert(payload);
+  if(error){toast('Error saving outcome: '+error.message);return;}
+  closeM('m-outcome');
+  toast('Outcome logged ✓');
+  populateMatch();
+}
+function renderOutcomeLogME(){
+  const wrap=document.getElementById('match-results');if(!wrap)return;
+  const list=window._meOutcomes||[];
+  if(!list.length){wrap.innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">No outcomes logged yet. After contacting a candidate about a match, use "Log outcome" to track it here.</div>';return;}
+  const th=t=>'<th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb">'+t+'</th>';
+  const td=t=>'<td style="padding:10px 14px;font-size:13px">'+t+'</td>';
+  let h='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'+th('Candidate')+th('Job')+th('Outcome')+th('Reason / Notes')+th('Date')+th('')+'</tr></thead><tbody>';
+  list.forEach(o=>{
+    h+='<tr style="border-bottom:1px solid #f3f4f6">'
+      +td('<strong>'+esc(o.candidate_name||'')+'</strong>')
+      +td(esc(o.job_location||'')+(o.job_state?' ('+esc(o.job_state)+')':''))
+      +td(outcomeIconME(o)+' <span style="font-size:12px">'+esc(o.outcome||'')+'</span>')
+      +td('<span style="font-size:12px;color:#6b7280">'+esc((o.reason||'').replace(/_/g,' '))+(o.reason&&o.notes?' · ':'')+esc(o.notes||'')+'</span>')
+      +td('<span style="font-size:12px;color:#9ca3af">'+esc((o.date||'').slice(0,10))+'</span>')
+      +td('<button onclick="deleteMatchOutcome('+o.id+')" style="padding:3px 9px;border:1px solid #fca5a5;color:#b91c1c;background:#fef2f2;border-radius:5px;cursor:pointer;font-size:11px">Remove</button>')
+      +'</tr>';
+  });
+  wrap.innerHTML=h+'</tbody></table>';
+}
+async function deleteMatchOutcome(id){
+  if(!confirm('Remove this logged outcome?'))return;
+  const{error}=await sb.from('match_outcomes').delete().eq('id',id);
+  if(error){toast('Error removing outcome');return;}
+  toast('Outcome removed');
+  populateMatch();
+}
 function matchJob(){}
 
   function runMatch(){populateMatch();}
