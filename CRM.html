@@ -380,6 +380,60 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
         <div class="fi"><label>Hourly Rate Min ($)</label><input type="number" id="c-hmin"></div>
         <div class="fi"><label>Hourly Rate Max ($)</label><input type="number" id="c-hmax"></div>
       </div>
+      <div class="sec-title">Matching Preferences <span style="font-weight:400;color:var(--g400);">(improves Match Engine accuracy)</span></div>
+      <div class="fg fg3">
+        <div class="fi"><label>Role type</label>
+          <select id="cp-role-type">
+            <option value="both">Any / not set</option>
+            <option value="GP Only">GP Only</option>
+            <option value="GP VMO">GP VMO</option>
+            <option value="Interventional Radiologist">Interventional Radiologist</option>
+            <option value="General Radiologist">General Radiologist</option>
+            <option value="ED VMO">ED VMO</option>
+            <option value="UCC">UCC</option>
+          </select>
+        </div>
+        <div class="fi"><label>Block length preference</label>
+          <select id="cp-block-pref">
+            <option value="any">No preference</option>
+            <option value="short">Short (1–2 weeks)</option>
+            <option value="long">Long (3+ weeks)</option>
+          </select>
+        </div>
+        <div class="fi"><label>Rural / remote OK?</label>
+          <select id="cp-rural"><option value="">Not set</option><option value="true">Yes — open to rural</option><option value="false">No — metro/regional only</option></select>
+        </div>
+        <div class="fi"><label>FIFO willing?</label>
+          <select id="cp-fifo"><option value="">Not set</option><option value="true">Yes</option><option value="false">No</option></select>
+        </div>
+        <div class="fi"><label>Last contact date</label><input type="date" id="cp-last-contact"></div>
+      </div>
+      <div class="fi" style="margin-bottom:8px;">
+        <label>Preferred states (tick all that apply)</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-pref="NSW" style="width:auto;"> NSW</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-pref="VIC" style="width:auto;"> VIC</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-pref="QLD" style="width:auto;"> QLD</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-pref="WA" style="width:auto;"> WA</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-pref="SA" style="width:auto;"> SA</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-pref="TAS" style="width:auto;"> TAS</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-pref="ACT" style="width:auto;"> ACT</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-pref="NT" style="width:auto;"> NT</label>
+        </div>
+      </div>
+      <div class="fi">
+        <label>Avoided states (reduces match score)</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-avoid="NSW" style="width:auto;"> NSW</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-avoid="VIC" style="width:auto;"> VIC</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-avoid="QLD" style="width:auto;"> QLD</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-avoid="WA" style="width:auto;"> WA</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-avoid="SA" style="width:auto;"> SA</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-avoid="TAS" style="width:auto;"> TAS</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-avoid="ACT" style="width:auto;"> ACT</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;"><input type="checkbox" data-cp-avoid="NT" style="width:auto;"> NT</label>
+        </div>
+      </div>
     </div>
     <!-- OTD FIELDS -->
     <div id="otd-sec" class="hidden">
@@ -506,6 +560,8 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="fi"><label>End Date (Locum)</label><input type="date" id="j-end"></div>
       <div class="fi"><label>Daily Rate Budget ($)</label><input type="number" id="j-rday"></div>
       <div class="fi"><label>Annual Salary Budget ($)</label><input type="number" id="j-rann"></div>
+      <div class="fi"><label>Rural / Remote?</label><select id="j-rural"><option value="false">No</option><option value="true">Yes</option></select></div>
+      <div class="fi"><label>Block Length (weeks, Locum)</label><input type="number" id="j-blockwks" min="0" placeholder="e.g. 2"></div>
       <div class="fi"><label>Status</label><select id="j-status"><option>Open</option><option>Filled</option><option>On Hold</option><option>Cancelled</option></select></div>
       <div class="fi s2"><label>Notes</label><textarea id="j-notes" rows="2"></textarea></div>
     </div>
@@ -918,7 +974,12 @@ function openAdd(type){
 function openCandModal(id){
   editingCandId=id||null;
   document.getElementById('mc-title').textContent=id?'Edit Candidate':'Add Candidate';
-  if(!id)clearForm(['c-name','c-email','c-phone','c-spec','c-subspec','c-yrs','c-loc','c-dpa','c-visa','c-ahpra','c-afrom','c-ato','c-dmin','c-dmax','c-hmin','c-hmax','c-refsrc','c-refsplit','c-source','c-cv','c-notes','c-fu']);
+  if(!id){
+    clearForm(['c-name','c-email','c-phone','c-spec','c-subspec','c-yrs','c-loc','c-dpa','c-visa','c-ahpra','c-afrom','c-ato','c-dmin','c-dmax','c-hmin','c-hmax','c-refsrc','c-refsplit','c-source','c-cv','c-notes','c-fu']);
+    clearForm(['cp-rural','cp-fifo','cp-last-contact']);
+    set('cp-role-type','both');set('cp-block-pref','any');
+    document.querySelectorAll('[data-cp-pref],[data-cp-avoid]').forEach(cb=>cb.checked=false);
+  }
   toggleCandFields();
   document.getElementById('m-cand').classList.remove('hidden');
 }
@@ -941,6 +1002,7 @@ async function editCand(id){
   set('c-stage',p.pipeline_stage);set('c-status',p.status);set('c-source',p.source);
   set('c-fu',p.follow_up_date);set('c-notes',p.notes);set('c-cv',p.cv_text);
   toggleCandFields();
+  await loadCandPrefsIntoForm(id);
   document.getElementById('m-cand').classList.remove('hidden');
 }
 
@@ -962,6 +1024,34 @@ function parseCV(){
   if(hints.length){const h=document.getElementById('cv-hint');h.innerHTML='🤖 Detected: '+hints.join(' · ');h.classList.remove('hidden');}
 }
 
+async function loadCandPrefsIntoForm(candId){
+  const{data}=await sb.from('locum_cand_prefs').select('*').eq('cand_id',candId).maybeSingle();
+  const prefs=data||{};
+  set('cp-role-type',prefs.role_types||'both');
+  set('cp-block-pref',prefs.block_pref||'any');
+  set('cp-rural',prefs.rural_ok===true||prefs.rural_ok==='true'?'true':(prefs.rural_ok===false||prefs.rural_ok==='false'?'false':''));
+  set('cp-fifo',prefs.fifo===true||prefs.fifo==='true'?'true':(prefs.fifo===false||prefs.fifo==='false'?'false':''));
+  set('cp-last-contact',prefs.last_contact||'');
+  const prefStates=prefs.preferred_states||[],avoidStates=prefs.avoided_states||[];
+  document.querySelectorAll('[data-cp-pref]').forEach(cb=>cb.checked=prefStates.includes(cb.dataset.cpPref));
+  document.querySelectorAll('[data-cp-avoid]').forEach(cb=>cb.checked=avoidStates.includes(cb.dataset.cpAvoid));
+}
+async function saveCandPrefsFromForm(candId){
+  const prefStates=Array.from(document.querySelectorAll('[data-cp-pref]:checked')).map(cb=>cb.dataset.cpPref);
+  const avoidStates=Array.from(document.querySelectorAll('[data-cp-avoid]:checked')).map(cb=>cb.dataset.cpAvoid);
+  const prefs={
+    cand_id:candId,
+    role_types:val('cp-role-type')||'both',
+    block_pref:val('cp-block-pref')||'any',
+    rural_ok:val('cp-rural')||null,
+    fifo:val('cp-fifo')||null,
+    last_contact:val('cp-last-contact')||null,
+    preferred_states:prefStates,
+    avoided_states:avoidStates
+  };
+  await sb.from('locum_cand_prefs').upsert(prefs);
+}
+
 async function saveCand(){
   const name=val('c-name').trim();
   if(!name){toast('Name required');return;}
@@ -979,8 +1069,12 @@ async function saveCand(){
     follow_up_date:val('c-fu')||null,notes:val('c-notes')||null,
     cv_text:val('c-cv')||null,updated_at:new Date().toISOString()
   };
-  const{error}=editingCandId?await sb.from('crm_profiles').update(payload).eq('id',editingCandId):await sb.from('crm_profiles').insert(payload);
+  const{data:savedRow,error}=editingCandId
+    ?await sb.from('crm_profiles').update(payload).eq('id',editingCandId).select().single()
+    :await sb.from('crm_profiles').insert(payload).select().single();
   if(error){toast('Error: '+error.message);return;}
+  const candId=editingCandId||savedRow.id;
+  if(val('c-type')==='locum'){await saveCandPrefsFromForm(candId);}
   closeM('m-cand');toast(editingCandId?'Candidate updated ✓':'Candidate added ✓');
   await loadCandsData();loadDashboard();if(currentView==='candidates')loadCandidates();if(currentView==='pipeline')loadPipeline();
 }
@@ -1078,7 +1172,10 @@ async function saveClient(){
 function openJobModal(id){
   editingJobId=id||null;
   document.getElementById('mj-title').textContent=id?'Edit Job':'Add Job';
-  if(!id)clearForm(['j-title','j-spec','j-subspec','j-suburb','j-rday','j-rann','j-notes','j-start','j-end']);
+  if(!id){
+    clearForm(['j-title','j-spec','j-subspec','j-suburb','j-rday','j-rann','j-notes','j-start','j-end','j-blockwks']);
+    set('j-rural','false');
+  }
   populateClientSelects();
   document.getElementById('m-job').classList.remove('hidden');
 }
@@ -1092,6 +1189,7 @@ async function editJob(id){
   set('j-state',j.state);set('j-country',j.country);set('j-dpa',j.dpa_required?'true':'false');
   set('j-mm',j.mm_level);set('j-start',j.start_date);set('j-end',j.end_date);
   set('j-rday',j.rate_budget_daily);set('j-rann',j.rate_budget_annual);
+  set('j-rural',j.rural?'true':'false');set('j-blockwks',j.block_weeks);
   set('j-status',j.status);set('j-notes',j.notes);
   document.getElementById('m-job').classList.remove('hidden');
 }
@@ -1105,6 +1203,7 @@ async function saveJob(){
     dpa_required:val('j-dpa')==='true',mm_level:n('j-mm'),
     start_date:val('j-start')||null,end_date:val('j-end')||null,
     rate_budget_daily:f('j-rday'),rate_budget_annual:f('j-rann'),
+    rural:val('j-rural')==='true',block_weeks:n('j-blockwks'),
     status:val('j-status'),notes:val('j-notes')||null,updated_at:new Date().toISOString()
   };
   const{error}=editingJobId?await sb.from('crm_jobs').update(payload).eq('id',editingJobId):await sb.from('crm_jobs').insert(payload);
@@ -1431,16 +1530,38 @@ function matchJob(){}
   const wrap=document.getElementById('match-results');
   if(wrap)wrap.innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">Computing matches…</div>';
 
-  const[{data:cands,error:ce},{data:locumJobs,error:je},{data:crmJobs,error:cje}]=await Promise.all([
+  const[{data:cands,error:ce},{data:locumJobs,error:je},{data:crmJobs,error:cje},{data:prefsRows,error:pe},{data:outcomeRows,error:oe}]=await Promise.all([
     sb.from('crm_profiles').select('*').eq('status','Active'),
     sb.from('jobs').select('*').eq('status','Active'),
-    sb.from('crm_jobs').select('*').eq('status','Open')
+    sb.from('crm_jobs').select('*').eq('status','Open'),
+    sb.from('locum_cand_prefs').select('*'),
+    sb.from('match_outcomes').select('*')
   ]);
-  if(ce||je||cje){toast('Error loading data: '+((ce||je||cje).message));if(btn){btn.disabled=false;btn.textContent='Run matching';}return;}
+  if(ce||je||cje||pe||oe){toast('Error loading data: '+((ce||je||cje||pe||oe).message));if(btn){btn.disabled=false;btn.textContent='Run matching';}return;}
+  const prefsByCid={};(prefsRows||[]).forEach(p=>{prefsByCid[p.cand_id]=p;});
+  const outcomesByCid={};(outcomeRows||[]).forEach(o=>{if(!outcomesByCid[o.candidate_id])outcomesByCid[o.candidate_id]=[];outcomesByCid[o.candidate_id].push(o);});
 
   const norm=s=>(s||'').toLowerCase().trim();
   const parseMM=s=>{if(!s)return null;const m=String(s).match(/(\d)/);return m?parseInt(m[1]):null;};
   const parseRate=s=>{if(!s)return null;const nums=(String(s).match(/[\d,]{3,}/g)||[]).map(n=>parseInt(n.replace(/,/g,'')));if(!nums.length)return null;return nums.reduce((a,b)=>a+b,0)/nums.length;};
+  // Shared preference + outcome adjustment used by all locum-matching loops
+  const applyPrefsAndOutcomes=(c,score,reasons,jobState)=>{
+    const prefs=prefsByCid[c.id]||{};
+    const prefStates=prefs.preferred_states||[],avoidStates=prefs.avoided_states||[];
+    if(jobState&&avoidStates.includes(jobState)){score-=15;reasons.push('⚠ Avoids '+jobState);}
+    else if(jobState&&prefStates.includes(jobState)){score+=8;reasons.push('✓ Prefers '+jobState);}
+    const cOutcomes=outcomesByCid[c.id]||[];
+    const ghosted=cOutcomes.filter(o=>o.outcome==='ghosted').length;
+    const accepted=cOutcomes.filter(o=>o.outcome==='accepted').length;
+    const stateAccepted=jobState?cOutcomes.filter(o=>o.outcome==='accepted'&&o.job_state===jobState).length:0;
+    const stateDeclinedLocation=jobState?cOutcomes.filter(o=>o.outcome==='declined'&&o.job_state===jobState&&o.reason==='location').length:0;
+    if(stateAccepted>0){score+=6;reasons.push('✓ Placed in '+jobState+' before');}
+    if(stateDeclinedLocation>0){score-=8;reasons.push('⚠ Previously declined '+jobState);}
+    if(ghosted>=2){score-=15;reasons.push('⚠ Ghosted '+ghosted+'x — reliability risk');}
+    else if(ghosted===1){score-=5;reasons.push('⚠ Ghosted once previously');}
+    if(accepted>=3){score+=5;reasons.push('✓ Strong acceptance history');}
+    return score;
+  };
   const rows=[];
 
   // Locum shifts (real published listings) vs locum candidates
@@ -1465,11 +1586,62 @@ function matchJob(){}
         if(jRate>=c.daily_rate_min){score+=20;reasons.push('Rate meets ask');}
         else if(jRate>=c.daily_rate_min*0.85){score+=10;reasons.push('Rate close to ask');}
       } else {score+=5;}
-      score=Math.min(100,Math.round(score));
+      score=applyPrefsAndOutcomes(c,score,reasons,j.state);
+      score=Math.max(0,Math.min(100,Math.round(score)));
       if(score<=0)return;
       rows.push({
         candidate_id:c.id,candidate_name:c.name,job_id:j.id,
         job_location:j.location||j.client,job_state:j.state,desk_type:j.desk_type||'GP Only',
+        score,match_reasons:reasons.join(' · ')||'Basic match'
+      });
+    });
+  });
+
+  // Locum jobs entered directly in the CRM (crm_jobs, job_type='Locum') vs locum candidates
+  (cands||[]).filter(c=>c.type==='locum').forEach(c=>{
+    const prefs=prefsByCid[c.id]||{};
+    (crmJobs||[]).filter(j=>j.job_type==='Locum').forEach(j=>{
+      let score=0;const reasons=[];
+      const roleType=prefs.role_types||'both';
+      if(roleType==='both'){score+=10;}
+      else if(norm(j.specialty).includes(norm(roleType))||norm(roleType).includes(norm(j.specialty))){score+=15;reasons.push('✓ Role type match');}
+      if(c.state&&j.state&&c.state===j.state){score+=20;reasons.push(j.state+' match');}
+      else if(c.willing_to_relocate){score+=8;reasons.push('Willing to relocate');}
+      if(c.mm_level!=null&&j.mm_level!=null){const diff=Math.abs(c.mm_level-j.mm_level);if(diff===0){score+=12;reasons.push('MM level match');}else if(diff===1){score+=6;}}
+      const cSkill=norm(c.sub_specialty)||norm(c.specialty),jSkill=norm(j.specialty);
+      if(cSkill&&jSkill&&(jSkill.includes(cSkill)||cSkill.includes(jSkill))){score+=10;reasons.push('Skill area match');}
+      if(j.end_date){
+        const jend=new Date(j.end_date);
+        const availFrom=c.available_from?new Date(c.available_from):null;
+        const availTo=c.available_to?new Date(c.available_to):null;
+        const fits=(!availFrom||availFrom<=jend)&&(!availTo||availTo>=new Date());
+        if(fits){score+=20;reasons.push('Availability fits');}else{score+=5;}
+      } else {score+=10;}
+      if(j.rate_budget_daily&&c.daily_rate_min){
+        if(j.rate_budget_daily>=c.daily_rate_min){score+=15;reasons.push('Rate meets ask');}
+        else if(j.rate_budget_daily>=c.daily_rate_min*0.85){score+=7;reasons.push('Rate close to ask');}
+      } else {score+=5;}
+      // Block length preference
+      const blockPref=prefs.block_pref||'any';
+      if(j.block_weeks){
+        if(blockPref==='any'){score+=8;}
+        else if(blockPref==='short'&&j.block_weeks<=2){score+=8;reasons.push('✓ Short block preferred');}
+        else if(blockPref==='long'&&j.block_weeks>=3){score+=8;reasons.push('✓ Long block preferred');}
+        else{reasons.push('⚠ Block length ('+j.block_weeks+'wk) not preferred');score+=2;}
+      } else {score+=5;}
+      // Rural preference
+      if(j.rural){
+        const ruralOk=prefs.rural_ok;
+        if(ruralOk==='true'||ruralOk===true){score+=8;reasons.push('✓ Open to rural/remote');}
+        else if(ruralOk==='false'||ruralOk===false){score-=10;reasons.push('⚠ Not interested in rural/remote');}
+        else{reasons.push('⚠ Rural role — preference not set');}
+      }
+      score=applyPrefsAndOutcomes(c,score,reasons,j.state);
+      score=Math.max(0,Math.min(100,Math.round(score)));
+      if(score<=0)return;
+      rows.push({
+        candidate_id:c.id,candidate_name:c.name,job_id:j.id,
+        job_location:j.suburb||j.title,job_state:j.state,desk_type:j.specialty||'Locum',
         score,match_reasons:reasons.join(' · ')||'Basic match'
       });
     });
