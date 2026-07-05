@@ -332,11 +332,11 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="card" style="margin-bottom:12px;">
         <div class="ch"><h3>Audience</h3></div>
         <div style="padding:12px;display:flex;flex-direction:column;gap:6px;">
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastPreview()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list — ED + clinic roles</span></span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastPreview()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list — private clinic roles</span></span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="UCC" onchange="renderBroadcastPreview()"> <span><strong>UCC</strong><br><span style="font-size:11px;color:var(--g500);">Urgent Care Clinic list</span></span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="Interventional Radiologist" onchange="renderBroadcastPreview()"> <span><strong>Interventional Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">IR list</span></span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="General Radiologist" onchange="renderBroadcastPreview()"> <span><strong>General Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">Gen Rad list</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP VMO" onchange="renderBroadcastPicker();renderBroadcastPreview()" checked> <span><strong>GP VMO</strong><br><span style="font-size:11px;color:var(--g500);">GP VMO list — ED + clinic roles</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="GP Only" onchange="renderBroadcastPicker();renderBroadcastPreview()"> <span><strong>GP Only</strong><br><span style="font-size:11px;color:var(--g500);">GP Only list — private clinic roles</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="UCC" onchange="renderBroadcastPicker();renderBroadcastPreview()"> <span><strong>UCC</strong><br><span style="font-size:11px;color:var(--g500);">Urgent Care Clinic list</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="Interventional Radiologist" onchange="renderBroadcastPicker();renderBroadcastPreview()"> <span><strong>Interventional Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">IR list</span></span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--g200);border-radius:7px;"><input type="radio" name="bc-audience" value="General Radiologist" onchange="renderBroadcastPicker();renderBroadcastPreview()"> <span><strong>General Radiologist</strong><br><span style="font-size:11px;color:var(--g500);">Gen Rad list</span></span></label>
         </div>
       </div>
       <div class="card">
@@ -1547,10 +1547,21 @@ async function loadBroadcastJobs(){
   renderBroadcastPicker();
   renderBroadcastPreview();
 }
+function bcAudienceMatchesSpecialty(specialty,audience){
+  const s=(specialty||'').toLowerCase().trim();
+  if(!s)return false;
+  if(audience==='GP VMO')return s==='gp vmo'||s==='gpm vmo'||s.includes('vmo');
+  if(audience==='GP Only')return s==='gp only'||(s.includes('gp')&&!s.includes('vmo'));
+  if(audience==='UCC')return s==='ucc'||s.includes('urgent care');
+  if(audience==='Interventional Radiologist')return s.includes('interventional')||s==='ir';
+  if(audience==='General Radiologist')return (s.includes('radiolog')&&!s.includes('interventional'))||s==='gen rad';
+  return false;
+}
 function renderBroadcastPicker(){
   const el=document.getElementById('bc-job-picker');if(!el)return;
-  const jobs=window._bcJobs||[];
-  if(!jobs.length){el.innerHTML='<div style="padding:10px;font-size:12px;color:var(--g500);">No open locum jobs. Add some in the Jobs tab first.</div>';return;}
+  const audience=getBroadcastAudience();
+  const jobs=(window._bcJobs||[]).filter(j=>bcAudienceMatchesSpecialty(j.specialty,audience));
+  if(!jobs.length){el.innerHTML=`<div style="padding:10px;font-size:12px;color:var(--g500);">No open Locum jobs match "${esc(audience)}". Try a different audience, or add matching jobs in the Jobs tab.</div>`;return;}
   el.innerHTML=jobs.map(j=>`
     <label style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--g100);cursor:pointer;">
       <input type="checkbox" class="bc-job-cb" data-id="${j.id}" style="margin-top:2px;" onchange="renderBroadcastPreview()">
