@@ -207,6 +207,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
           <select id="cf-state" onchange="loadCandidates()"><option value="">All States</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
           <select id="cf-stage" onchange="loadCandidates()"><option value="">All Stages</option><option>New</option><option>Contacted</option><option>Qualified</option><option>Submitted</option><option>Placed</option></select>
           <select id="cf-status" onchange="loadCandidates()"><option value="">All Statuses</option><option>Active</option><option>Inactive</option><option>Placed</option><option>On Hold</option></select>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;font-weight:400;padding:5px 8px;"><input type="checkbox" id="cf-auReg" onchange="loadCandidates()" style="width:auto;"> AU Registered only</label>
         </div>
         <table><thead><tr><th>Name</th><th>Type</th><th>Specialty</th><th>Location</th><th>Stage</th><th>Follow-up</th><th></th></tr></thead>
         <tbody id="cand-tbody"></tbody></table>
@@ -404,6 +405,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       </div>
       <div class="fi"><label>Email</label><input type="email" id="c-email" placeholder="jane@email.com"></div>
       <div class="fi"><label>Phone</label><input id="c-phone" placeholder="04XX XXX XXX"></div>
+      <div class="fi s2"><label style="font-weight:400;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="c-auReg" style="width:auto;"> AU Registered / AU-trained doctor (independent of work type below)</label></div>
     </div>
     <div class="sec-title">Clinical</div>
     <div class="fg fg3">
@@ -874,15 +876,17 @@ async function loadCandidates(){
   const st=document.getElementById('cf-state')?.value;
   const sg=document.getElementById('cf-stage')?.value;
   const sx=document.getElementById('cf-status')?.value;
+  const auOnly=document.getElementById('cf-auReg')?.checked;
   if(sp)data=data.filter(c=>c.specialty===sp);
   if(st)data=data.filter(c=>c.state===st);
   if(sg)data=data.filter(c=>c.pipeline_stage===sg);
   if(sx)data=data.filter(c=>c.status===sx);
+  if(auOnly)data=data.filter(c=>c.au_registered);
   const tbody=document.getElementById('cand-tbody');
   if(!data.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="ei">🔍</div><p>No candidates found.</p></div></td></tr>`;return;}
   tbody.innerHTML=data.map(c=>`<tr class="clk" onclick="openProfile('${c.id}')">
     <td><strong>${esc(c.name)}</strong>${c.referral_source?` <span class="b b-amb" style="font-size:9px;">REF</span>`:''}</td>
-    <td>${typeBadge(c.type)}</td>
+    <td>${typeBadge(c.type)}${c.au_registered?` <span class="b b-blue" style="font-size:9px;" title="AU Registered">AU</span>`:''}</td>
     <td>${esc(c.specialty||'—')}</td>
     <td>${[c.current_location,c.state].filter(Boolean).join(', ')||'—'}</td>
     <td>${stageBadge(c.pipeline_stage)}</td>
@@ -1044,6 +1048,7 @@ function openCandModal(id){
     clearForm(['cp-rural','cp-fifo','cp-last-contact']);
     set('cp-role-type','both');set('cp-block-pref','any');
     document.querySelectorAll('[data-cp-pref],[data-cp-avoid]').forEach(cb=>cb.checked=false);
+    const auBox=document.getElementById('c-auReg');if(auBox)auBox.checked=false;
   }
   toggleCandFields();
   document.getElementById('m-cand').classList.remove('hidden');
@@ -1056,6 +1061,7 @@ async function editCand(id){
   editingCandId=id;
   document.getElementById('mc-title').textContent='Edit Candidate';
   set('c-name',p.name);set('c-type',p.type);set('c-email',p.email);set('c-phone',p.phone);
+  const auBox=document.getElementById('c-auReg');if(auBox)auBox.checked=!!p.au_registered;
   set('c-spec',p.specialty);set('c-subspec',p.sub_specialty);set('c-yrs',p.years_experience);
   set('c-loc',p.current_location);set('c-state',p.state);set('c-mm',p.mm_level);
   set('c-dpa',(p.dpa_areas||[]).join(', '));set('c-reloc',p.willing_to_relocate?'true':'false');
@@ -1123,6 +1129,7 @@ async function saveCand(){
   const dpa=val('c-dpa').split(',').map(s=>s.trim()).filter(Boolean);
   const payload={
     name,type:val('c-type'),email:val('c-email')||null,phone:val('c-phone')||null,
+    au_registered:!!document.getElementById('c-auReg')?.checked,
     specialty:val('c-spec')||null,sub_specialty:val('c-subspec')||null,years_experience:n('c-yrs'),
     current_location:val('c-loc')||null,state:val('c-state')||null,mm_level:n('c-mm'),
     dpa_areas:dpa.length?dpa:null,willing_to_relocate:val('c-reloc')==='true',
