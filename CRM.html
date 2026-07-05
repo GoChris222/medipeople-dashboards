@@ -1825,7 +1825,10 @@ function parseVacancyEmail(){
   const hasStateHdr=lines.some(l=>IE_STATE_PATTERNS[l.toUpperCase()]);
   if(hasStateHdr){
     ieParseStructured(lines);
-  } else {
+  }
+  if(!importedJobs.length){
+    // Either no state header was found, or the structured format didn't actually match this email
+    // (a single incidental state-name mention shouldn't discard everything) — try the smart parser instead.
     ieSmartExtract(raw);
   }
   importedJobs=importedJobs.filter(v=>ieIsValidLocation(v.location||v.title));
@@ -1865,8 +1868,13 @@ function ieParseStructured(lines){
 
 function ieSmartExtract(raw){
   raw=raw.replace(/['''‚‛′‵`]/g,"'");
-  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
-  const lower=raw.toLowerCase();
+  // Cut off location detection at the first sign-off ("Kind regards", "Cheers", etc.) —
+  // a signature block often mentions a town (e.g. a head office address) that isn't the
+  // actual vacancy location, and shouldn't be picked up as one.
+  const sigMatch=raw.search(/\b(kind regards|warm regards|best regards|many thanks|regards|cheers|thanks[,.]|sincerely)\b/i);
+  const bodyText=sigMatch>=0?raw.slice(0,sigMatch):raw;
+  const lines=bodyText.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  const lower=bodyText.toLowerCase();
   const sorted=Object.keys(IE_TOWN_STATE).sort((a,b)=>b.length-a.length);
   const anchors=[];
   for(const town of sorted){
@@ -1881,12 +1889,14 @@ function ieSmartExtract(raw){
   }
   const lineAnchors=[];
   lines.forEach((line)=>{
-    if(line.length>=3&&line.length<=60&&!IE_SKIP_RX.test(line)&&!IE_DATE_RX.test(line.slice(0,6))&&!line.startsWith('$')&&!line.match(/^\d/)&&!line.includes('@')&&!line.includes('http')){
+    if(line.length>=3&&line.length<=60&&!IE_SKIP_RX.test(line)&&!IE_DATE_RX.test(line.slice(0,6))&&!line.startsWith('$')&&!line.match(/^\d/)&&!line.includes('@')&&!line.includes('http')
+       &&!IE_STATE_PATTERNS[line.toUpperCase()]&&ieExtractDates(line).length===0&&!/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/i.test(line)){
       const li=lines.indexOf(line);
       const nextLines=lines.slice(li+1,li+5).join(' ');
       if(ieExtractDates(nextLines).length>0||/ASAP/i.test(nextLines)){
         const st=ieDetectState(line)||ieDetectState(raw);
-        lineAnchors.push({town:line,idx:raw.indexOf(line),state:st,displayName:line});
+        const cleanName=line.split('|')[0].trim();
+        lineAnchors.push({town:cleanName,idx:raw.indexOf(line),state:st,displayName:cleanName});
       }
     }
   });
