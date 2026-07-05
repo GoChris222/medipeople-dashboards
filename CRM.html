@@ -1587,6 +1587,13 @@ function bcDatesDisplay(j){
 function bcRateDisplay(j){
   return j.rate_budget_daily?('$'+fmt(j.rate_budget_daily)+'/day'):'';
 }
+function bcCleanNotes(notes){
+  if(!notes)return'';
+  return notes.split(' · ')
+    .filter(seg=>!/^Client \(legacy, unlinked\):/i.test(seg)&&!/^MM level \(original\):/i.test(seg))
+    .join(' · ');
+}
+
 function buildBroadcastHTML(audience,jobs){
   const stateOrder=['SA','WA','QLD','NSW','VIC','TAS','NT','ACT','NZ'];
   const byState={};
@@ -1608,7 +1615,7 @@ function buildBroadcastHTML(audience,jobs){
     sjobs.forEach(j=>{
       const rateDisplay=bcRateDisplay(j);
       const datesDisplay=bcDatesDisplay(j);
-      const notesDisplay=j.notes||'';
+      const notesDisplay=bcCleanNotes(j.notes);
       html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${esc(j.title||'')}</span>${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
       if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(datesDisplay)}</p>`;
       if(notesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Details</p><p style="font-size:13px;margin:0;color:#111827;">${esc(notesDisplay)}</p>`;
@@ -1631,7 +1638,7 @@ function buildBroadcastPlain(audience,jobs){
       const rateDisplay=bcRateDisplay(j),datesDisplay=bcDatesDisplay(j);
       txt+=`${j.title||''}${rateDisplay?'   '+rateDisplay:''}\n`;
       if(datesDisplay)txt+=`Dates: ${datesDisplay}\n`;
-      if(j.notes)txt+=`Details: ${j.notes}\n`;
+      if(j.notes){const cleanNotes=bcCleanNotes(j.notes);if(cleanNotes)txt+=`Details: ${cleanNotes}\n`;}
       txt+='\n';
     });
   });
