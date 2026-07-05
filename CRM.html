@@ -1261,7 +1261,7 @@ function openJobModal(id){
 }
 
 async function editJob(id){
-  const j=allJobs.find(x=>x.id===id);if(!j)return;
+  const j=(window._jobsData||[]).find(x=>String(x.id)===String(id));if(!j)return;
   editingJobId=id;
   document.getElementById('mj-title').textContent='Edit Job';
   clearForm(['j-title','j-spec','j-subspec','j-suburb','j-rday','j-rann','j-notes','j-start','j-end','j-blockwks']);
