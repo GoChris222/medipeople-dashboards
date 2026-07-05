@@ -1587,10 +1587,16 @@ function bcDatesDisplay(j){
 function bcRateDisplay(j){
   return j.rate_budget_daily?('$'+fmt(j.rate_budget_daily)+'/day'):'';
 }
+function bcExtractDatesFromNotes(notes){
+  if(!notes)return'';
+  const seg=notes.split(' · ').find(s=>/^Dates:/i.test(s));
+  return seg?seg.replace(/^Dates:\s*/i,'').trim():'';
+}
+
 function bcCleanNotes(notes){
   if(!notes)return'';
   return notes.split(' · ')
-    .filter(seg=>!/^Client \(legacy, unlinked\):/i.test(seg)&&!/^MM level \(original\):/i.test(seg))
+    .filter(seg=>!/^Client \(legacy, unlinked\):/i.test(seg)&&!/^MM level \(original\):/i.test(seg)&&!/^Dates:/i.test(seg))
     .join(' · ');
 }
 
@@ -1614,10 +1620,11 @@ function buildBroadcastHTML(audience,jobs){
     html+=`<p style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:13px;margin:20px 0 10px 0;letter-spacing:0.02em;">${stateFullName[state]||state}</p>`;
     sjobs.forEach(j=>{
       const rateDisplay=bcRateDisplay(j);
-      const datesDisplay=bcDatesDisplay(j);
+      let datesDisplay=bcDatesDisplay(j);
+      if(!datesDisplay)datesDisplay=bcExtractDatesFromNotes(j.notes);
       const notesDisplay=bcCleanNotes(j.notes);
       html+=`<div style="font-family:Arial,Helvetica,sans-serif;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;margin-bottom:12px;"><div style="background:#f5f5f5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:bold;font-size:14px;color:#111827;">${esc(j.title||'')}</span>${rateDisplay?`<span style="color:#2e7d32;font-weight:bold;font-size:13px;">${esc(rateDisplay)}</span>`:''}</div><div style="padding:10px 14px 12px 14px;background:#ffffff;">`;
-      if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#111827;">${esc(datesDisplay)}</p>`;
+      if(datesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Dates</p><p style="font-weight:bold;font-size:13px;margin:0 0 10px 0;color:#1a56db;">${esc(datesDisplay)}</p>`;
       if(notesDisplay)html+=`<p style="color:#9ca3af;font-size:11px;margin:0 0 2px 0;">Details</p><p style="font-size:13px;margin:0;color:#111827;">${esc(notesDisplay)}</p>`;
       html+=`</div></div>`;
     });
@@ -1635,7 +1642,9 @@ function buildBroadcastPlain(audience,jobs){
   states.forEach(state=>{
     txt+=`${'─'.repeat(40)}\n${state}\n${'─'.repeat(40)}\n\n`;
     byState[state].forEach(j=>{
-      const rateDisplay=bcRateDisplay(j),datesDisplay=bcDatesDisplay(j);
+      const rateDisplay=bcRateDisplay(j);
+      let datesDisplay=bcDatesDisplay(j);
+      if(!datesDisplay)datesDisplay=bcExtractDatesFromNotes(j.notes);
       txt+=`${j.title||''}${rateDisplay?'   '+rateDisplay:''}\n`;
       if(datesDisplay)txt+=`Dates: ${datesDisplay}\n`;
       if(j.notes){const cleanNotes=bcCleanNotes(j.notes);if(cleanNotes)txt+=`Details: ${cleanNotes}\n`;}
