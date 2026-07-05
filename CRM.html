@@ -1675,7 +1675,7 @@ function renderPipeline(){
     return `<div class="kbcol">
       <h4>${stage}<span>${cands.length}</span></h4>
       ${cands.length?cands.map(c=>`
-        <div class="kbc" onclick="openCandModal('${c.id}')">
+        <div class="kbc" onclick="editCand('${c.id}')">
           <h5>${esc(c.name)}</h5>
           <p>${esc(c.specialty||typeBadgeText(c.type))}${c.current_location?' · '+esc(c.current_location):''}${c.state?' ('+esc(c.state)+')':''}</p>
         </div>`).join(''):'<p style="font-size:11px;color:var(--g400);padding:8px 0;">No candidates</p>'}
@@ -2295,7 +2295,7 @@ function renderFollowups() {
 
 
 // openProfile is an alias used by candidate row View buttons
-function openProfile(id){ openCandModal(id); }
+function openProfile(id){ editCand(id); }
 
 // ── PLACEMENTS ──────────────────────────────────────────────────────────────
 async function loadPlacements() {
