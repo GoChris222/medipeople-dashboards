@@ -1063,6 +1063,8 @@ async function editCand(id){
   if(!p)return;
   editingCandId=id;
   document.getElementById('mc-title').textContent='Edit Candidate';
+  clearForm(['c-name','c-email','c-phone','c-spec','c-subspec','c-yrs','c-loc','c-dpa','c-visa','c-ahpra','c-afrom','c-ato','c-dmin','c-dmax','c-hmin','c-hmax','c-refsrc','c-refsplit','c-source','c-cv','c-notes','c-fu']);
+  set('c-state','');set('c-mm','');set('c-reg','');
   set('c-name',p.name);set('c-type',p.type);set('c-email',p.email);set('c-phone',p.phone);
   const auBox=document.getElementById('c-auReg');if(auBox)auBox.checked=!!p.au_registered;
   set('c-spec',p.specialty);set('c-subspec',p.sub_specialty);set('c-yrs',p.years_experience);
@@ -1172,10 +1174,11 @@ async function editClient(id){
   if(!c)return;
   editingClientId=id;
   document.getElementById('ml-title').textContent='Edit Client';
+  clearForm(['l-name','l-email','l-phone','l-suburb','l-pm','l-billing','l-htype','l-dept','l-district','l-notes','l-fu']);
   set('l-name',c.name);set('l-type',c.client_type);set('l-email',c.email);set('l-phone',c.phone);
-  set('l-suburb',c.suburb);set('l-state',c.state);set('l-country',c.country);
-  set('l-dpa',c.dpa_status?'true':'false');set('l-pm',c.practice_manager);set('l-billing',c.billing_type);
-  set('l-htype',c.hospital_type);set('l-dept',c.specialty_department);set('l-district',c.health_district);
+  set('l-suburb',c.suburb);set('l-state',c.state||'');set('l-country',c.country);
+  set('l-dpa',c.dpa_status?'true':'false');set('l-pm',c.practice_manager);set('l-billing',c.billing_type||'');
+  set('l-htype',c.hospital_type||'');set('l-dept',c.specialty_department);set('l-district',c.health_district);
   set('l-status',c.status);set('l-fu',c.follow_up_date);set('l-notes',c.notes);
   contactRows=[];
   const el=document.getElementById('client-contacts-list');
@@ -1261,6 +1264,8 @@ async function editJob(id){
   const j=allJobs.find(x=>x.id===id);if(!j)return;
   editingJobId=id;
   document.getElementById('mj-title').textContent='Edit Job';
+  clearForm(['j-title','j-spec','j-subspec','j-suburb','j-rday','j-rann','j-notes','j-start','j-end','j-blockwks']);
+  set('j-state','');set('j-mm','');
   set('j-title',j.title);set('j-client',j.client_id);set('j-type',j.job_type);
   set('j-spec',j.specialty);set('j-subspec',j.sub_specialty);set('j-suburb',j.suburb);
   set('j-state',j.state);set('j-country',j.country);set('j-dpa',j.dpa_required?'true':'false');
@@ -1314,6 +1319,8 @@ async function editPlace(id){
   if(!allClients.length) await loadClientsData();
   if(!allCands.length) await loadCandsData();
   await populateCandSelect();await populateClientSelects();
+  clearForm(['p-rate','p-pct','p-refsrc','p-refsplit','p-notes','p-duration','p-followup']);
+  const flagBoxReset=document.getElementById('p-flag');if(flagBoxReset)flagBoxReset.checked=false;
   set('p-cand',p.candidate_id);set('p-client',p.client_id);
   set('p-type',p.placement_type);set('p-start',p.start_date);set('p-end',p.end_date);
   set('p-rate',p.agreed_rate);set('p-pct',p.fee_pct);
