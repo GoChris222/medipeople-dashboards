@@ -224,6 +224,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
           <div class="tab" data-lt="Hospital" onclick="setClientTab(this,'Hospital')">Hospitals</div>
           <div class="tab" data-lt="Multi Purpose" onclick="setClientTab(this,'Multi Purpose')">Multi Purpose</div>
           <div class="tab" data-lt="Radiology" onclick="setClientTab(this,'Radiology')">Radiology</div>
+          <div class="tab" data-lt="UCC" onclick="setClientTab(this,'UCC')">UCC</div>
         </div>
         <div class="filters">
           <select id="lf-state" onchange="loadClients()"><option value="">All States/Countries</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option><option>New Zealand</option></select>
@@ -549,7 +550,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <div class="fg">
       <div class="fi"><label>Name *</label><input id="l-name" placeholder="e.g. Blacktown Medical Centre"></div>
       <div class="fi"><label>Type *</label>
-        <select id="l-type" onchange="toggleClientFields()"><option value="GP Practice">GP Practice</option><option value="Hospital">Hospital</option><option value="Multi Purpose">Multi Purpose (clinic + hospital/on-call)</option><option value="Radiology">Radiology</option></select>
+        <select id="l-type" onchange="toggleClientFields()"><option value="GP Practice">GP Practice</option><option value="Hospital">Hospital</option><option value="Multi Purpose">Multi Purpose (clinic + hospital/on-call)</option><option value="Radiology">Radiology</option><option value="UCC">UCC (Urgent Care Clinic)</option></select>
       </div>
       <div class="fi"><label>Email</label><input type="email" id="l-email"></div>
       <div class="fi"><label>Phone</label><input id="l-phone"></div>
@@ -922,7 +923,7 @@ async function loadClients(){
   if(!data.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="ei">🏨</div><p>No clients found.</p></div></td></tr>`;return;}
   tbody.innerHTML=data.map(c=>`<tr class="clk" onclick="editClient('${c.id}')">
     <td><strong>${esc(c.name)}</strong></td>
-    <td>${c.client_type==='Hospital'?'<span class="b b-pur">Hospital</span>':c.client_type==='Multi Purpose'?'<span class="b b-amb">Multi Purpose</span>':c.client_type==='Radiology'?'<span class="b b-gray">Radiology</span>':'<span class="b b-blue">Medical Centre</span>'}</td>
+    <td>${c.client_type==='Hospital'?'<span class="b b-pur">Hospital</span>':c.client_type==='Multi Purpose'?'<span class="b b-amb">Multi Purpose</span>':c.client_type==='Radiology'?'<span class="b b-gray">Radiology</span>':c.client_type==='UCC'?'<span class="b b-grn">UCC</span>':'<span class="b b-blue">Medical Centre</span>'}</td>
     <td>${esc(c.suburb||'—')}</td>
     <td>${c.country==='New Zealand'?'NZ':esc(c.state||'—')}</td>
     <td>${c.dpa_status?'<span class="b b-grn">DPA</span>':'—'}</td>
@@ -1186,7 +1187,7 @@ async function editClient(id){
 
 function toggleClientFields(){
   const t=val('l-type');
-  const showGp=(t==='GP Practice'||t==='Multi Purpose'||t==='Radiology');
+  const showGp=(t==='GP Practice'||t==='Multi Purpose'||t==='Radiology'||t==='UCC');
   const showHosp=(t==='Hospital'||t==='Multi Purpose');
   document.getElementById('gp-sec').classList.toggle('hidden',!showGp);
   document.getElementById('hosp-sec').classList.toggle('hidden',!showHosp);
