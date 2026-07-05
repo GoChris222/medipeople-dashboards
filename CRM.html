@@ -1940,7 +1940,7 @@ const IE_MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov
 function ieParseDateRange(text){
   if(!text)return null;
   const first=text.split('•')[0].trim(); // only use the first block if multiple are listed
-  const clean=first.replace(/(\d)(st|nd|rd|th)/gi,'$1');
+  const clean=first.replace(/(\d)(st|nd|rd|th)/gi,'$1').replace(/\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+/gi,'');
   // Pattern A: "12-15 Jun" or "12 - 15 Jun 2026"
   let m=clean.match(/(\d{1,2})\s*[-–]\s*(\d{1,2})\s+([A-Za-z]{3,9})(?:\s+(\d{4}))?/);
   if(m){
@@ -1987,19 +1987,26 @@ function findMatchingJob(v){
 function renderImportedJobs(){
   const el=document.getElementById('ie-results');if(!el)return;
   if(!importedJobs.length){el.innerHTML='<div style="padding:30px;text-align:center;color:#9ca3af;font-size:12px;">No jobs detected. Try pasting the full email including location names and dates/rates.</div>';return;}
+  const roleOptions=['GP Only','GP VMO','UCC','Interventional Radiologist','General Radiologist'];
   el.innerHTML=importedJobs.map((v,idx)=>{
     const match=findMatchingJob(v);
+    const currentRate=match&&match.rate_budget_daily?('$'+fmt(match.rate_budget_daily)+'/day'):'no rate on file';
+    const currentDates=match&&match.start_date?(String(match.start_date).slice(0,10)+' – '+(match.end_date?String(match.end_date).slice(0,10):'?')):'no dates on file';
     return `
     <div style="padding:10px 12px;border-bottom:1px solid #f0f0f0;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
         <div style="font-size:13px;font-weight:600;">${esc(v.title||v.location||'Unnamed')}</div>
         <button onclick="importedJobs.splice(${idx},1);renderImportedJobs();" style="font-size:11px;color:#b91c1c;background:none;border:none;cursor:pointer;">✕</button>
       </div>
-      <div style="font-size:11px;color:#6b7280;margin-top:2px;">${esc(v.state||'—')} · ${esc(v.role_type||'')}</div>
-      <div style="font-size:11px;color:#166534;margin-top:2px;">${esc(v.rate_raw||'No rate detected')}</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:4px;display:flex;align-items:center;gap:6px;">${esc(v.state||'—')} ·
+        <select onchange="importedJobs[${idx}].role_type=this.value;renderImportedJobs();" style="font-size:11px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;">
+          ${roleOptions.map(r=>`<option value="${r}" ${v.role_type===r?'selected':''}>${r}</option>`).join('')}
+        </select>
+      </div>
+      <div style="font-size:11px;color:#166534;margin-top:4px;">${esc(v.rate_raw||'No rate detected')}</div>
       ${v.dates_raw?`<div style="font-size:11px;color:#6b7280;margin-top:2px;">📅 ${esc(v.dates_raw)}</div>`:''}
       ${v.inclusions_raw?`<div style="font-size:11px;color:#6b7280;margin-top:2px;">🎁 ${esc(v.inclusions_raw)}</div>`:''}
-      ${match?`<div style="font-size:11px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:5px;padding:5px 8px;margin-top:6px;">⚠ Looks like an existing job: <strong>${esc(match.title||'')}</strong> — update it instead of adding a duplicate?</div>`:''}
+      ${match?`<div style="font-size:11px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:5px;padding:5px 8px;margin-top:6px;">⚠ Looks like an existing job: <strong>${esc(match.title||'')}</strong><br>Currently on file: ${esc(currentRate)} · ${esc(currentDates)}<br>Update it instead of adding a duplicate?</div>`:''}
       <div style="display:flex;gap:6px;margin-top:6px;">
         ${match?`<button onclick="updateExistingJob(${idx},'${match.id}')" style="padding:4px 10px;background:#1a56db;color:white;border:none;border-radius:5px;cursor:pointer;font-size:11px;">Update existing</button>`:''}
         <button onclick="saveImportedJob(${idx})" style="padding:4px 10px;background:#0e9f6e;color:white;border:none;border-radius:5px;cursor:pointer;font-size:11px;">${match?'Add as new instead':'+ Add to Jobs'}</button>
@@ -2011,16 +2018,20 @@ function renderImportedJobs(){
 async function updateExistingJob(idx,existingId){
   const v=importedJobs[idx];if(!v)return;
   const parsedDates=ieParseDateRange(v.dates_raw);
+  const newRate=ieRateNum(v.rate_raw);
   const payload={
-    start_date:parsedDates?parsedDates.start:null,
-    end_date:parsedDates?parsedDates.end:null,
-    rate_budget_daily:ieRateNum(v.rate_raw),
     notes:[v.dates_raw?('Dates: '+v.dates_raw):'',v.inclusions_raw?('Inclusions: '+v.inclusions_raw):'',!parsedDates&&v.dates_raw?'(dates not auto-parsed — set Start/End manually in Edit Job for accurate matching)':''].filter(Boolean).join(' · ')||null,
     updated_at:new Date().toISOString()
   };
+  // Only overwrite dates/rate if this email actually contained new values — never blank out existing good data
+  if(parsedDates){payload.start_date=parsedDates.start;payload.end_date=parsedDates.end;}
+  if(newRate!=null){payload.rate_budget_daily=newRate;}
   const{error}=await sb.from('crm_jobs').update(payload).eq('id',existingId);
   if(error){toast('Error updating: '+error.message);return;}
-  toast(parsedDates?'Job updated ✓ — new dates parsed for matching':'Job updated ✓ — please check dates manually');
+  const skippedParts=[];
+  if(!parsedDates)skippedParts.push('dates');
+  if(newRate==null)skippedParts.push('rate');
+  toast(skippedParts.length?`Job updated ✓ — no ${skippedParts.join('/')} detected, existing kept`:'Job updated ✓ — dates and rate refreshed');
   importedJobs.splice(idx,1);
   renderImportedJobs();
   loadJobs();
