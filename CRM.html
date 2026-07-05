@@ -1254,7 +1254,8 @@ function openJobModal(id){
   document.getElementById('mj-title').textContent=id?'Edit Job':'Add Job';
   if(!id){
     clearForm(['j-title','j-spec','j-subspec','j-suburb','j-rday','j-rann','j-notes','j-start','j-end','j-blockwks']);
-    set('j-rural','false');
+    set('j-client','');set('j-type','Locum');set('j-state','');set('j-country','Australia');
+    set('j-dpa','false');set('j-mm','');set('j-rural','false');set('j-status','Open');
   }
   populateClientSelects();
   document.getElementById('m-job').classList.remove('hidden');
