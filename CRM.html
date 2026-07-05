@@ -2345,6 +2345,17 @@ async function populateCandSelect(){
   const sel=document.getElementById('p-cand');
   if(sel)sel.innerHTML='<option value="">— Select —</option>'+(data||[]).map(c=>`<option value="${c.id}">${esc(c.name)} (${c.type})</option>`).join('');
 }
+async function populateJobsByClient(){
+  const sel=document.getElementById('p-job');if(!sel)return;
+  const clientId=val('p-client');
+  const currentVal=sel.value;
+  sel.innerHTML='<option value="">— Select —</option>';
+  if(!clientId)return;
+  const{data,error}=await sb.from('crm_jobs').select('id,title').eq('client_id',clientId).order('title');
+  if(error||!data||!data.length)return;
+  sel.innerHTML+=data.map(j=>`<option value="${j.id}">${esc(j.title)}</option>`).join('');
+  if(currentVal)sel.value=currentVal;
+}
 function populateJobSelect(){
   const sel=document.getElementById('match-job');if(!sel)return;
   const open=allJobs.filter(j=>j.status==='Open');
@@ -2491,6 +2502,7 @@ function renderPlacements() {
     + '</tr></thead><tbody>'
     + rows.map(function(p) {
         const statusCol = p.status === 'Active' ? '#16a34a' : p.status === 'Completed' ? '#4f46e5' : '#9ca3af';
+        const canEdit = !!p.crm_placement_id;
         return '<tr style="border-bottom:1px solid #eee">'
           + '<td style="padding:9px 12px;font-weight:600">' + (p.doctor || '') + '</td>'
           + '<td style="padding:9px 12px">' + (p.facility || '') + '</td>'
@@ -2500,6 +2512,9 @@ function renderPlacements() {
           + '<td style="padding:9px 12px"><span style="color:' + statusCol + ';font-weight:600">' + (p.status || '') + '</span></td>'
           + '<td style="padding:9px 12px;font-size:12px;color:#555;max-width:200px">' + ((p.notes||'').slice(0,100)) + '</td>'
           + '<td style="padding:9px 12px;white-space:nowrap">'
+          + (canEdit
+              ? '<button onclick="editPlace(\'' + p.crm_placement_id + '\')" style="padding:3px 9px;border:1px solid #d1d5db;color:#374151;background:white;border-radius:5px;cursor:pointer;font-size:11px;margin-right:4px">Edit</button>'
+              : '<span title="This record predates full record-linking and can only be deleted, not edited here" style="font-size:11px;color:#9ca3af;margin-right:4px">—</span>')
           + '<button onclick="deleteLocumPlacement(\'' + p.id + '\')" style="padding:3px 9px;border:1px solid #fca5a5;color:#b91c1c;background:#fef2f2;border-radius:5px;cursor:pointer;font-size:11px">Delete</button>'
           + '</td>'
           + '</tr>';
