@@ -287,7 +287,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="card" style="overflow:visible;">
         <div class="ch">
           <h3>Pipeline</h3><div class="sp"></div>
-          <select id="pf-spec" onchange="loadPipeline()" style="padding:5px 8px;border:1px solid var(--g200);border-radius:6px;font-size:12px;"><option value="">All Specialties</option></select>
+          <select id="pf-spec" onchange="renderPipeline()" style="padding:5px 8px;border:1px solid var(--g200);border-radius:6px;font-size:12px;"><option value="">All Specialties</option></select>
         </div>
         <div style="padding:16px;">
           <div class="kb" id="kanban"></div>
@@ -1641,6 +1641,40 @@ const IE_TOWN_STATE={
 const IE_SKIP_RX=/^(hi |i hope|please |kind regards|regards|from:|to:|subject:|sent:|if any|you can earn|visit our|medipeople|tel:|mob:|email:|www\.|©|unsubscribe|refer a|earn \$|dear |good morning|good afternoon|happy monday|image)/i;
 const IE_DATE_RX=/\d{1,2}[\/\.\-]\d{1,2}/;
 function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
+
+// ── PIPELINE (kanban) ────────────────────────────────────────────────────
+const PIPELINE_STAGES=['New','Contacted','Qualified','Submitted','Placed'];
+async function loadPipeline(){
+  const kanban=document.getElementById('kanban');
+  if(kanban)kanban.innerHTML='<div style="padding:40px;text-align:center;color:var(--g400);">Loading…</div>';
+  const{data,error}=await sb.from('crm_profiles').select('id,name,type,specialty,current_location,state,pipeline_stage').neq('status','Inactive');
+  if(error){if(kanban)kanban.innerHTML='<div style="padding:40px;text-align:center;color:#e02424">Error: '+error.message+'</div>';return;}
+  window._pipelineData=data||[];
+  // Populate specialty filter once
+  const specSel=document.getElementById('pf-spec');
+  if(specSel&&specSel.options.length<=1){
+    const specs=[...new Set((data||[]).map(p=>p.specialty).filter(Boolean))].sort();
+    specs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;specSel.appendChild(o);});
+  }
+  renderPipeline();
+}
+function renderPipeline(){
+  const kanban=document.getElementById('kanban');if(!kanban)return;
+  const specFilter=document.getElementById('pf-spec')?document.getElementById('pf-spec').value:'';
+  const data=(window._pipelineData||[]).filter(p=>!specFilter||p.specialty===specFilter);
+  kanban.innerHTML=PIPELINE_STAGES.map(stage=>{
+    const cands=data.filter(p=>(p.pipeline_stage||'New')===stage);
+    return `<div class="kbcol">
+      <h4>${stage}<span>${cands.length}</span></h4>
+      ${cands.length?cands.map(c=>`
+        <div class="kbc" onclick="openCandModal('${c.id}')">
+          <h5>${esc(c.name)}</h5>
+          <p>${esc(c.specialty||typeBadgeText(c.type))}${c.current_location?' · '+esc(c.current_location):''}${c.state?' ('+esc(c.state)+')':''}</p>
+        </div>`).join(''):'<p style="font-size:11px;color:var(--g400);padding:8px 0;">No candidates</p>'}
+    </div>`;
+  }).join('');
+}
+function typeBadgeText(t){return t==='locum'?'Locum':t==='otd'?'OTD':'Doctor';}
 
 function ieDetectState(text){
   const lower=text.replace(/['''‚‛′‵`]/g,"'").toLowerCase();
