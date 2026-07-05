@@ -454,7 +454,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
             <option value="UCC">UCC</option>
           </select>
         </div>
-        <div class="fi"><label>Block length preference</label>
+        <div class="fi"><label>Preferred stay length <span style="font-weight:400;color:var(--g400);">(used only if exact available dates aren't set)</span></label>
           <select id="cp-block-pref">
             <option value="any">No preference</option>
             <option value="short">Short (1–2 weeks)</option>
@@ -622,7 +622,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="fi"><label>Daily Rate Budget ($)</label><input type="number" id="j-rday"></div>
       <div class="fi"><label>Annual Salary Budget ($)</label><input type="number" id="j-rann"></div>
       <div class="fi"><label>Rural / Remote?</label><select id="j-rural"><option value="false">No</option><option value="true">Yes</option></select></div>
-      <div class="fi"><label>Block Length (weeks, Locum)</label><input type="number" id="j-blockwks" min="0" placeholder="e.g. 2"></div>
+      <div class="fi"><label>Minimum Locum Period (weeks)</label><input type="number" id="j-blockwks" min="0" placeholder="e.g. 2 — shortest stay the client will accept"></div>
       <div class="fi"><label>Status</label><select id="j-status"><option>Open</option><option>Filled</option><option>On Hold</option><option>Cancelled</option></select></div>
       <div class="fi s2"><label>Notes</label><textarea id="j-notes" rows="2"></textarea></div>
     </div>
@@ -1907,10 +1907,62 @@ function ieRateNum(rateStr){
   return nums.reduce((a,b)=>a+b,0)/nums.length;
 }
 
+// Attempt to turn a free-text date range like "12-15 Jun" or "12 Jun - 19 Jun" into real dates.
+// Returns {start, end} as YYYY-MM-DD strings, or null if it can't confidently parse.
+const IE_MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function ieParseDateRange(text){
+  if(!text)return null;
+  const first=text.split('•')[0].trim(); // only use the first block if multiple are listed
+  const clean=first.replace(/(\d)(st|nd|rd|th)/gi,'$1');
+  // Pattern A: "12-15 Jun" or "12 - 15 Jun 2026"
+  let m=clean.match(/(\d{1,2})\s*[-–]\s*(\d{1,2})\s+([A-Za-z]{3,9})(?:\s+(\d{4}))?/);
+  if(m){
+    const mon=IE_MONTHS[m[3].slice(0,3).toLowerCase()];
+    if(mon==null)return null;
+    const d1=parseInt(m[1]),d2=parseInt(m[2]);
+    let year=m[4]?parseInt(m[4]):resolveYear(mon,d1);
+    return{start:toISO(year,mon,d1),end:toISO(year,mon,d2)};
+  }
+  // Pattern B: "12 Jun - 19 Jun" or "12 Jun - 3 Jul 2026" (different months)
+  m=clean.match(/(\d{1,2})\s+([A-Za-z]{3,9})\s*[-–]\s*(\d{1,2})\s+([A-Za-z]{3,9})(?:\s+(\d{4}))?/);
+  if(m){
+    const mon1=IE_MONTHS[m[2].slice(0,3).toLowerCase()],mon2=IE_MONTHS[m[4].slice(0,3).toLowerCase()];
+    if(mon1==null||mon2==null)return null;
+    const d1=parseInt(m[1]),d2=parseInt(m[3]);
+    let year1=m[5]?parseInt(m[5]):resolveYear(mon1,d1);
+    let year2=m[5]?parseInt(m[5]):(mon2<mon1?year1+1:year1);
+    return{start:toISO(year1,mon1,d1),end:toISO(year2,mon2,d2)};
+  }
+  return null;
+}
+function resolveYear(month,day){
+  const now=new Date();
+  let year=now.getFullYear();
+  const candidate=new Date(year,month,day);
+  if(candidate<now)year+=1; // if that date already passed this year, assume next year
+  return year;
+}
+function toISO(year,month,day){
+  return new Date(year,month,day).toISOString().slice(0,10);
+}
+
+function findMatchingJob(v){
+  if(!v.location||!window._jobsData)return null;
+  const loc=v.location.toLowerCase().trim();
+  return (window._jobsData||[]).find(j=>{
+    if(j.job_type!=='Locum'||j.status!=='Open')return false;
+    const jloc=(j.suburb||'').toLowerCase().trim();
+    if(!jloc)return false;
+    return jloc===loc||jloc.includes(loc)||loc.includes(jloc);
+  })||null;
+}
+
 function renderImportedJobs(){
   const el=document.getElementById('ie-results');if(!el)return;
   if(!importedJobs.length){el.innerHTML='<div style="padding:30px;text-align:center;color:#9ca3af;font-size:12px;">No jobs detected. Try pasting the full email including location names and dates/rates.</div>';return;}
-  el.innerHTML=importedJobs.map((v,idx)=>`
+  el.innerHTML=importedJobs.map((v,idx)=>{
+    const match=findMatchingJob(v);
+    return `
     <div style="padding:10px 12px;border-bottom:1px solid #f0f0f0;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
         <div style="font-size:13px;font-weight:600;">${esc(v.title||v.location||'Unnamed')}</div>
@@ -1920,12 +1972,36 @@ function renderImportedJobs(){
       <div style="font-size:11px;color:#166534;margin-top:2px;">${esc(v.rate_raw||'No rate detected')}</div>
       ${v.dates_raw?`<div style="font-size:11px;color:#6b7280;margin-top:2px;">📅 ${esc(v.dates_raw)}</div>`:''}
       ${v.inclusions_raw?`<div style="font-size:11px;color:#6b7280;margin-top:2px;">🎁 ${esc(v.inclusions_raw)}</div>`:''}
-      <button onclick="saveImportedJob(${idx})" style="margin-top:6px;padding:4px 10px;background:#0e9f6e;color:white;border:none;border-radius:5px;cursor:pointer;font-size:11px;">+ Add to Jobs</button>
-    </div>`).join('');
+      ${match?`<div style="font-size:11px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:5px;padding:5px 8px;margin-top:6px;">⚠ Looks like an existing job: <strong>${esc(match.title||'')}</strong> — update it instead of adding a duplicate?</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        ${match?`<button onclick="updateExistingJob(${idx},'${match.id}')" style="padding:4px 10px;background:#1a56db;color:white;border:none;border-radius:5px;cursor:pointer;font-size:11px;">Update existing</button>`:''}
+        <button onclick="saveImportedJob(${idx})" style="padding:4px 10px;background:#0e9f6e;color:white;border:none;border-radius:5px;cursor:pointer;font-size:11px;">${match?'Add as new instead':'+ Add to Jobs'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function updateExistingJob(idx,existingId){
+  const v=importedJobs[idx];if(!v)return;
+  const parsedDates=ieParseDateRange(v.dates_raw);
+  const payload={
+    start_date:parsedDates?parsedDates.start:null,
+    end_date:parsedDates?parsedDates.end:null,
+    rate_budget_daily:ieRateNum(v.rate_raw),
+    notes:[v.dates_raw?('Dates: '+v.dates_raw):'',v.inclusions_raw?('Inclusions: '+v.inclusions_raw):'',!parsedDates&&v.dates_raw?'(dates not auto-parsed — set Start/End manually in Edit Job for accurate matching)':''].filter(Boolean).join(' · ')||null,
+    updated_at:new Date().toISOString()
+  };
+  const{error}=await sb.from('crm_jobs').update(payload).eq('id',existingId);
+  if(error){toast('Error updating: '+error.message);return;}
+  toast(parsedDates?'Job updated ✓ — new dates parsed for matching':'Job updated ✓ — please check dates manually');
+  importedJobs.splice(idx,1);
+  renderImportedJobs();
+  loadJobs();
 }
 
 async function saveImportedJob(idx){
   const v=importedJobs[idx];if(!v)return;
+  const parsedDates=ieParseDateRange(v.dates_raw);
   const payload={
     title:v.title||v.location||'Imported vacancy',
     job_type:'Locum',
@@ -1934,13 +2010,15 @@ async function saveImportedJob(idx){
     state:v.state||null,
     country:'Australia',
     rate_budget_daily:ieRateNum(v.rate_raw),
-    notes:[v.dates_raw?('Dates: '+v.dates_raw):'',v.inclusions_raw?('Inclusions: '+v.inclusions_raw):''].filter(Boolean).join(' · ')||null,
+    start_date:parsedDates?parsedDates.start:null,
+    end_date:parsedDates?parsedDates.end:null,
+    notes:[v.dates_raw?('Dates: '+v.dates_raw):'',v.inclusions_raw?('Inclusions: '+v.inclusions_raw):'',!parsedDates&&v.dates_raw?'(dates not auto-parsed — set Start/End manually in Edit Job for accurate matching)':''].filter(Boolean).join(' · ')||null,
     status:'Open',
     updated_at:new Date().toISOString()
   };
   const{error}=await sb.from('crm_jobs').insert(payload);
   if(error){toast('Error saving: '+error.message);return;}
-  toast('Added to Jobs ✓ — visible in Match Engine and Broadcast');
+  toast(parsedDates?'Added to Jobs ✓ — dates parsed for matching':'Added to Jobs ✓ — please check dates manually');
   importedJobs.splice(idx,1);
   renderImportedJobs();
 }
@@ -2111,13 +2189,22 @@ function matchJob(){}
         if(j.rate_budget_daily>=c.daily_rate_min){score+=15;reasons.push('Rate meets ask');}
         else if(j.rate_budget_daily>=c.daily_rate_min*0.85){score+=7;reasons.push('Rate close to ask');}
       } else {score+=5;}
-      // Block length preference
-      const blockPref=prefs.block_pref||'any';
+      // Minimum locum period vs candidate's actual available duration
       if(j.block_weeks){
-        if(blockPref==='any'){score+=8;}
-        else if(blockPref==='short'&&j.block_weeks<=2){score+=8;reasons.push('✓ Short block preferred');}
-        else if(blockPref==='long'&&j.block_weeks>=3){score+=8;reasons.push('✓ Long block preferred');}
-        else{reasons.push('⚠ Block length ('+j.block_weeks+'wk) not preferred');score+=2;}
+        const availFrom=c.available_from?new Date(c.available_from):null;
+        const availTo=c.available_to?new Date(c.available_to):null;
+        if(availFrom&&availTo){
+          const candWeeks=Math.round((availTo-availFrom)/(7*24*60*60*1000));
+          if(candWeeks>=j.block_weeks){score+=15;reasons.push('✓ Available '+candWeeks+'wk — meets '+j.block_weeks+'wk minimum stay');}
+          else{score-=10;reasons.push('⚠ Only available '+candWeeks+'wk — below '+j.block_weeks+'wk minimum stay');}
+        } else {
+          // No specific dates on file — fall back to the coarse stay-length preference as a weaker signal
+          const blockPref=prefs.block_pref||'any';
+          if(blockPref==='any'){score+=6;}
+          else if(blockPref==='short'&&j.block_weeks<=2){score+=6;reasons.push('✓ Short-stay preference fits minimum');}
+          else if(blockPref==='long'&&j.block_weeks>=3){score+=6;reasons.push('✓ Long-stay preference fits minimum');}
+          else{reasons.push('⚠ Stay preference may not meet '+j.block_weeks+'wk minimum');score+=2;}
+        }
       } else {score+=5;}
       // Rural preference
       if(j.rural){
