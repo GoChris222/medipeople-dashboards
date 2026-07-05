@@ -1266,8 +1266,10 @@ async function editJob(id){
   editingJobId=id;
   document.getElementById('mj-title').textContent='Edit Job';
   clearForm(['j-title','j-spec','j-subspec','j-suburb','j-rday','j-rann','j-notes','j-start','j-end','j-blockwks']);
-  set('j-state','');set('j-mm','');
-  set('j-title',j.title);set('j-client',j.client_id);set('j-type',j.job_type);
+  set('j-client','');set('j-type','Locum');set('j-state','');set('j-country','Australia');set('j-mm','');set('j-status','Open');
+  if(!allClients.length) await loadClientsData();
+  populateClientSelects();
+  set('j-title',j.title);set('j-client',j.client_id||'');set('j-type',j.job_type);
   set('j-spec',j.specialty);set('j-subspec',j.sub_specialty);set('j-suburb',j.suburb);
   set('j-state',j.state);set('j-country',j.country);set('j-dpa',j.dpa_required?'true':'false');
   set('j-mm',j.mm_level);set('j-start',j.start_date);set('j-end',j.end_date);
