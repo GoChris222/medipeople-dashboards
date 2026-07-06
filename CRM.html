@@ -666,7 +666,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     </div>
     <div class="sec-title">CRM</div>
     <div class="fg">
-      <div class="fi"><label>Status</label><select id="p-status"><option>Confirmed</option><option>Completed</option><option>Cancelled</option><option>On Hold</option></select></div>
+      <div class="fi"><label>Status</label><select id="p-status"><option>Confirmed</option><option>On-assignment</option><option>Completed</option><option>Cancelled</option><option>On Hold</option></select></div>
       <div class="fi"><label>&nbsp;</label><label style="font-weight:400;display:flex;align-items:center;gap:6px;margin-top:6px;"><input type="checkbox" id="p-flag" style="width:auto;"> Flag for attention</label></div>
       <div class="fi s2"><label>Notes</label><textarea id="p-notes" rows="2"></textarea></div>
     </div>
@@ -1407,10 +1407,13 @@ async function savePlace(){
     referral_fee:fc.refFee||null,net_fee:fc.net||null,
     status:val('p-status'),notes:val('p-notes')||null,updated_at:new Date().toISOString()
   };
-  const{error}=editingPlaceId?await sb.from('crm_placements').update(payload).eq('id',editingPlaceId):await sb.from('crm_placements').insert(payload);
+  const{data:savedRow,error}=editingPlaceId
+    ?await sb.from('crm_placements').update(payload).eq('id',editingPlaceId).select().single()
+    :await sb.from('crm_placements').insert(payload).select().single();
   if(error){toast('Error: '+error.message);return;}
+  const placeId=editingPlaceId||savedRow.id;
   // Update candidate stage to Placed
-  await sb.from('crm_profiles').update({pipeline_stage:'Placed',status:'Placed'}).eq('id',candId);
+  await sb.from('crm_profiles').update({pipeline_stage:'Placed'}).eq('id',candId);
   
   // Save to Supabase locum_placements (upsert keyed on crm_placement_id to avoid duplicate rows on edit)
   const durationVal=parseFloat(val('p-duration'))||null;
@@ -1418,7 +1421,7 @@ async function savePlace(){
   const LP_URL="https://qoyokyuzkpfvaakdkmxg.supabase.co/rest/v1/locum_placements";
   const LP_HEADERS={apikey:"sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W",Authorization:"Bearer sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W","Content-Type":"application/json"};
   const lpPayload={
-    crm_placement_id: editingPlaceId||null,
+    crm_placement_id: placeId,
     doctor: cand ? cand.name : candId,
     facility: client ? client.name : clientId,
     specialty: cand ? cand.specialty : '',
@@ -1436,11 +1439,9 @@ async function savePlace(){
   };
   try {
     let existingId=null;
-    if(editingPlaceId){
-      const chk=await fetch(`${LP_URL}?crm_placement_id=eq.${editingPlaceId}&select=id&limit=1`,{headers:LP_HEADERS});
-      const rows=await chk.json();
-      if(rows && rows[0]) existingId=rows[0].id;
-    }
+    const chk=await fetch(`${LP_URL}?crm_placement_id=eq.${placeId}&select=id&limit=1`,{headers:LP_HEADERS});
+    const rows=await chk.json();
+    if(rows && rows[0]) existingId=rows[0].id;
     if(existingId){
       await fetch(`${LP_URL}?id=eq.${existingId}`,{method:'PATCH',headers:{...LP_HEADERS,Prefer:'return=minimal'},body:JSON.stringify(lpPayload)});
     } else {
@@ -2149,16 +2150,29 @@ function matchJob(){}
   const wrap=document.getElementById('match-results');
   if(wrap)wrap.innerHTML='<div style="padding:40px;text-align:center;color:#9ca3af">Computing matches…</div>';
 
-  const[{data:cands,error:ce},{data:locumJobs,error:je},{data:crmJobs,error:cje},{data:prefsRows,error:pe},{data:outcomeRows,error:oe}]=await Promise.all([
+  const[{data:cands,error:ce},{data:locumJobs,error:je},{data:crmJobs,error:cje},{data:prefsRows,error:pe},{data:outcomeRows,error:oe},{data:activePlacements,error:ape}]=await Promise.all([
     sb.from('crm_profiles').select('*').eq('status','Active'),
     sb.from('jobs').select('*').eq('status','Active'),
     sb.from('crm_jobs').select('*').eq('status','Open'),
     sb.from('locum_cand_prefs').select('*'),
-    sb.from('match_outcomes').select('*')
+    sb.from('match_outcomes').select('*'),
+    sb.from('crm_placements').select('candidate_id,start_date,end_date,status').in('status',['Confirmed','On-assignment'])
   ]);
-  if(ce||je||cje||pe||oe){toast('Error loading data: '+((ce||je||cje||pe||oe).message));if(btn){btn.disabled=false;btn.textContent='Run matching';}return;}
+  if(ce||je||cje||pe||oe||ape){toast('Error loading data: '+((ce||je||cje||pe||oe||ape).message));if(btn){btn.disabled=false;btn.textContent='Run matching';}return;}
   const prefsByCid={};(prefsRows||[]).forEach(p=>{prefsByCid[p.cand_id]=p;});
   const outcomesByCid={};(outcomeRows||[]).forEach(o=>{if(!outcomesByCid[o.candidate_id])outcomesByCid[o.candidate_id]=[];outcomesByCid[o.candidate_id].push(o);});
+  const placementsByCid={};(activePlacements||[]).forEach(p=>{if(!placementsByCid[p.candidate_id])placementsByCid[p.candidate_id]=[];placementsByCid[p.candidate_id].push(p);});
+  // Returns true if this candidate has a Confirmed/On-assignment placement whose dates overlap the given job window
+  const isOnAssignmentDuring=(candId,jobStart,jobEnd)=>{
+    const placements=placementsByCid[candId];if(!placements||!placements.length)return false;
+    const jStart=jobStart?new Date(jobStart):null,jEnd=jobEnd?new Date(jobEnd):jStart;
+    if(!jStart)return false; // no job dates to compare against — can't determine overlap, don't block
+    return placements.some(p=>{
+      if(!p.start_date)return false;
+      const pStart=new Date(p.start_date),pEnd=p.end_date?new Date(p.end_date):pStart;
+      return pStart<=jEnd&&pEnd>=jStart; // date ranges overlap
+    });
+  };
 
   const norm=s=>(s||'').toLowerCase().trim();
   const parseMM=s=>{if(!s)return null;const m=String(s).match(/(\d)/);return m?parseInt(m[1]):null;};
@@ -2220,6 +2234,7 @@ function matchJob(){}
   (cands||[]).filter(c=>c.type==='locum').forEach(c=>{
     const prefs=prefsByCid[c.id]||{};
     (crmJobs||[]).filter(j=>j.job_type==='Locum').forEach(j=>{
+      if(isOnAssignmentDuring(c.id,j.start_date,j.end_date))return; // already confirmed/on-assignment elsewhere during this job's dates
       let score=0;const reasons=[];
       const roleType=prefs.role_types||'both';
       if(roleType==='both'){score+=10;}
@@ -2501,7 +2516,7 @@ function renderPlacements() {
     + '<th style="padding:10px 12px;border-bottom:2px solid #ddd"></th>'
     + '</tr></thead><tbody>'
     + rows.map(function(p) {
-        const statusCol = p.status === 'Active' ? '#16a34a' : p.status === 'Completed' ? '#4f46e5' : '#9ca3af';
+        const statusCol = p.status === 'Active' ? '#16a34a' : (p.status === 'On-assignment') ? '#ea580c' : p.status === 'Completed' ? '#4f46e5' : '#9ca3af';
         const canEdit = !!p.crm_placement_id;
         return '<tr style="border-bottom:1px solid #eee">'
           + '<td style="padding:9px 12px;font-weight:600">' + (p.doctor || '') + '</td>'
