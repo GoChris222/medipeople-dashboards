@@ -536,6 +536,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <div class="fi"><label>Notes</label><textarea id="c-notes" rows="2" placeholder="Any additional notes…"></textarea></div>
   </div>
   <div class="mf">
+    <button class="btn btn-sec" id="c-delete-btn" onclick="deleteCand()" style="border:1px solid #fca5a5;color:#b91c1c;background:#fef2f2;margin-right:auto;display:none;">Delete Candidate</button>
     <button class="btn btn-sec" onclick="closeM('m-cand')">Cancel</button>
     <button class="btn btn-pri" onclick="saveCand()">Save Candidate</button>
   </div>
@@ -1053,6 +1054,7 @@ function openCandModal(id){
     document.querySelectorAll('[data-cp-pref],[data-cp-avoid]').forEach(cb=>cb.checked=false);
     const auBox=document.getElementById('c-auReg');if(auBox)auBox.checked=false;
   }
+  const delBtn=document.getElementById('c-delete-btn');if(delBtn)delBtn.style.display=id?'inline-block':'none';
   toggleCandFields();
   document.getElementById('m-cand').classList.remove('hidden');
 }
@@ -1063,6 +1065,7 @@ async function editCand(id){
   if(!p)return;
   editingCandId=id;
   document.getElementById('mc-title').textContent='Edit Candidate';
+  const delBtn=document.getElementById('c-delete-btn');if(delBtn)delBtn.style.display='inline-block';
   clearForm(['c-name','c-email','c-phone','c-spec','c-subspec','c-yrs','c-loc','c-dpa','c-visa','c-ahpra','c-afrom','c-ato','c-dmin','c-dmax','c-hmin','c-hmax','c-refsrc','c-refsplit','c-source','c-cv','c-notes','c-fu']);
   set('c-state','');set('c-mm','');set('c-reg','');
   set('c-name',p.name);set('c-type',p.type);set('c-email',p.email);set('c-phone',p.phone);
@@ -1126,6 +1129,23 @@ async function saveCandPrefsFromForm(candId){
     avoided_states:avoidStates
   };
   await sb.from('locum_cand_prefs').upsert(prefs);
+}
+
+async function deleteCand(){
+  if(!editingCandId)return;
+  const id=editingCandId;
+  const{data:placements}=await sb.from('crm_placements').select('id').eq('candidate_id',id);
+  if(placements&&placements.length){
+    toast(`Cannot delete — this candidate has ${placements.length} placement record(s) linked. Remove or reassign those first.`);
+    return;
+  }
+  if(!confirm('Delete this candidate permanently? This cannot be undone.'))return;
+  await sb.from('locum_cand_prefs').delete().eq('cand_id',id);
+  const{error}=await sb.from('crm_profiles').delete().eq('id',id);
+  if(error){toast('Error deleting: '+error.message);return;}
+  closeM('m-cand');
+  toast('Candidate deleted');
+  await loadCandsData();loadDashboard();if(currentView==='candidates')loadCandidates();if(currentView==='pipeline')loadPipeline();
 }
 
 async function saveCand(){
@@ -1594,10 +1614,22 @@ function renderBroadcastPreview(){
   if(subject)subject.value=subjectText;
   preview.innerHTML=jobs.length?buildBroadcastHTML(audience,jobs):'<div class="empty"><p style="color:var(--g400);">Select jobs on the left to preview.</p></div>';
 }
+const BC_MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function bcFormatDate(iso){
+  const d=new Date(iso+'T00:00:00');
+  if(isNaN(d))return'';
+  return{day:d.getDate(),month:BC_MONTH_NAMES[d.getMonth()],year:d.getFullYear()};
+}
 function bcDatesDisplay(j){
   if(!j.start_date)return'';
-  const s=String(j.start_date).slice(0,10),e=j.end_date?String(j.end_date).slice(0,10):'';
-  return e&&e!==s?(s+' – '+e):s;
+  const s=bcFormatDate(String(j.start_date).slice(0,10));
+  if(!s)return'';
+  if(!j.end_date||j.end_date===j.start_date)return`${s.day} ${s.month} ${s.year}`;
+  const e=bcFormatDate(String(j.end_date).slice(0,10));
+  if(!e)return`${s.day} ${s.month} ${s.year}`;
+  if(s.year===e.year&&s.month===e.month)return`${s.day}–${e.day} ${s.month} ${s.year}`;
+  if(s.year===e.year)return`${s.day} ${s.month} – ${e.day} ${e.month} ${s.year}`;
+  return`${s.day} ${s.month} ${s.year} – ${e.day} ${e.month} ${e.year}`;
 }
 function bcRateDisplay(j){
   return j.rate_budget_daily?('$'+fmt(j.rate_budget_daily)+'/day'):'';
