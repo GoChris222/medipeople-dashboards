@@ -2610,7 +2610,15 @@ async function loadPlacements() {
 function renderPlacements() {
   const data = window._placData || [];
   const statusFilter = (document.getElementById('plac-filter-status') || {}).value || '';
-  const rows = data.filter(p => !statusFilter || p.status === statusFilter);
+  const PERMANENT_TYPES=['Permanent OTD','Permanent Specialist AU','Permanent Specialist NZ'];
+  const rows = data.filter(p => {
+    if (statusFilter) return p.status === statusFilter;
+    // Default view: hide Permanent/OTD placements once the doctor has actually started (Completed) —
+    // they're done and don't need ongoing attention. Locum placements always stay visible regardless of
+    // status, since they matter for history/reference. Still fully accessible by selecting "Completed" above.
+    if (PERMANENT_TYPES.includes(p.rate_type) && p.status === 'Completed') return false;
+    return true;
+  });
 
   const stats = document.getElementById('plac-stats');
   const active = rows.filter(p => p.status === 'Active').length;
