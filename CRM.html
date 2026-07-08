@@ -1765,13 +1765,18 @@ const IE_DATE_RX=/\d{1,2}[\/\.\-]\d{1,2}/;
 function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
 
 // ── PIPELINE (kanban) ────────────────────────────────────────────────────
-const PIPELINE_STAGES=['New','Contacted','Qualified','Submitted','Placed'];
+const PIPELINE_STAGES=['New','Contacted','Qualified','Submitted','Placed','Pending Start','Available Again'];
+const PERMANENT_TYPES=['Permanent OTD','Permanent Specialist AU','Permanent Specialist NZ'];
 async function loadPipeline(){
   const kanban=document.getElementById('kanban');
   if(kanban)kanban.innerHTML='<div style="padding:40px;text-align:center;color:var(--g400);">Loading…</div>';
-  const{data,error}=await sb.from('crm_profiles').select('id,name,type,specialty,current_location,state,pipeline_stage').neq('status','Inactive');
-  if(error){if(kanban)kanban.innerHTML='<div style="padding:40px;text-align:center;color:#e02424">Error: '+error.message+'</div>';return;}
+  const[{data,error},{data:placements,error:pe}]=await Promise.all([
+    sb.from('crm_profiles').select('id,name,type,specialty,current_location,state,pipeline_stage').neq('status','Inactive'),
+    sb.from('crm_placements').select('candidate_id,placement_type,status,start_date,end_date')
+  ]);
+  if(error||pe){if(kanban)kanban.innerHTML='<div style="padding:40px;text-align:center;color:#e02424">Error: '+((error||pe).message)+'</div>';return;}
   window._pipelineData=data||[];
+  window._pipelinePlacements=placements||[];
   // Populate specialty filter once
   const specSel=document.getElementById('pf-spec');
   if(specSel&&specSel.options.length<=1){
@@ -1780,18 +1785,47 @@ async function loadPipeline(){
   }
   renderPipeline();
 }
+// Works out whether a candidate should be hidden (permanent placement fully wrapped up),
+// bumped into "Available Again" (locum whose last assignment has ended), or shown as normal.
+function pipelineStatusFor(candId,type,fallbackStage){
+  const placements=(window._pipelinePlacements||[]).filter(p=>p.candidate_id===candId);
+  if(!placements.length)return{hide:false,stage:fallbackStage};
+  const todayStr=new Date().toISOString().slice(0,10);
+  // Permanent placement, marked Completed → fully done, nothing left to track
+  const completedPermanent=placements.some(p=>PERMANENT_TYPES.includes(p.placement_type)&&p.status==='Completed');
+  if(completedPermanent)return{hide:true,stage:fallbackStage};
+  // Permanent placement, fee confirmed but candidate hasn't actually started yet (visa/registration pending)
+  const pendingStart=placements.find(p=>PERMANENT_TYPES.includes(p.placement_type)&&p.status==='Confirmed');
+  if(pendingStart)return{hide:false,stage:'Pending Start',expectedStart:pendingStart.start_date};
+  if(type==='locum'){
+    const locumPlacements=placements.filter(p=>p.placement_type==='Locum'&&p.end_date);
+    const pastEnded=locumPlacements.filter(p=>p.end_date<todayStr);
+    const stillCurrentOrFuture=locumPlacements.some(p=>!p.end_date||p.end_date>=todayStr);
+    if(pastEnded.length&&!stillCurrentOrFuture){
+      const mostRecentEnd=pastEnded.map(p=>p.end_date).sort().reverse()[0];
+      return{hide:false,stage:'Available Again',availableSince:mostRecentEnd};
+    }
+  }
+  return{hide:false,stage:fallbackStage};
+}
 function renderPipeline(){
   const kanban=document.getElementById('kanban');if(!kanban)return;
   const specFilter=document.getElementById('pf-spec')?document.getElementById('pf-spec').value:'';
-  const data=(window._pipelineData||[]).filter(p=>!specFilter||p.specialty===specFilter);
+  const raw=(window._pipelineData||[]).filter(p=>!specFilter||p.specialty===specFilter);
+  const data=raw.map(c=>{
+    const st=pipelineStatusFor(c.id,c.type,c.pipeline_stage||'New');
+    return{...c,_hide:st.hide,_stage:st.stage,_availableSince:st.availableSince,_expectedStart:st.expectedStart};
+  }).filter(c=>!c._hide);
   kanban.innerHTML=PIPELINE_STAGES.map(stage=>{
-    const cands=data.filter(p=>(p.pipeline_stage||'New')===stage);
+    const cands=data.filter(p=>p._stage===stage);
     return `<div class="kbcol">
       <h4>${stage}<span>${cands.length}</span></h4>
       ${cands.length?cands.map(c=>`
         <div class="kbc" onclick="editCand('${c.id}')">
           <h5>${esc(c.name)}</h5>
           <p>${esc(c.specialty||typeBadgeText(c.type))}${c.current_location?' · '+esc(c.current_location):''}${c.state?' ('+esc(c.state)+')':''}</p>
+          ${c._availableSince?`<p style="color:var(--pri);font-weight:600;">Available since ${String(c._availableSince).slice(0,10)}</p>`:''}
+          ${c._expectedStart?`<p style="color:var(--amb);font-weight:600;">Expected start: ${String(c._expectedStart).slice(0,10)}</p>`:''}
         </div>`).join(''):'<p style="font-size:11px;color:var(--g400);padding:8px 0;">No candidates</p>'}
     </div>`;
   }).join('');
