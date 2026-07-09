@@ -559,6 +559,31 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div id="cv-hint" class="parse-hint hidden"></div>
     </div>
     <div class="fi"><label>Notes</label><textarea id="c-notes" rows="2" placeholder="Any additional notes…"></textarea></div>
+    <div class="sec-title">Documents (PDF) <span style="font-weight:400;color:var(--g400);">— upload once, ready to share on the go</span></div>
+    <div class="fg fg3" style="margin-bottom:10px;">
+      <div class="fi">
+        <label>CV</label>
+        <input type="file" id="c-cv-file" accept="application/pdf" onchange="uploadCandidateDoc('cv')" style="font-size:12px;">
+        <div id="c-cv-file-status" style="font-size:11px;margin-top:4px;"></div>
+      </div>
+      <div class="fi">
+        <label>Reference 1</label>
+        <input type="file" id="c-ref1-file" accept="application/pdf" onchange="uploadCandidateDoc('reference1')" style="font-size:12px;">
+        <div id="c-ref1-file-status" style="font-size:11px;margin-top:4px;"></div>
+      </div>
+      <div class="fi">
+        <label>Reference 2</label>
+        <input type="file" id="c-ref2-file" accept="application/pdf" onchange="uploadCandidateDoc('reference2')" style="font-size:12px;">
+        <div id="c-ref2-file-status" style="font-size:11px;margin-top:4px;"></div>
+      </div>
+    </div>
+    <div class="fi" id="send-to-client-wrap" style="display:none;background:var(--pri-l);border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:10px;">
+      <label>Send documents to client</label>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <input type="email" id="send-client-email" placeholder="client@email.com" style="flex:1;">
+        <button type="button" class="btn btn-pri btn-sm" onclick="sendCandidateDocsEmail()">Send</button>
+      </div>
+    </div>
   </div>
   <div class="mf">
     <button class="btn btn-sec" id="c-delete-btn" onclick="deleteCand()" style="border:1px solid #fca5a5;color:#b91c1c;background:#fef2f2;margin-right:auto;display:none;">Delete Candidate</button>
@@ -1085,6 +1110,11 @@ function openCandModal(id){
     set('cp-role-type','both');set('cp-block-pref','any');
     document.querySelectorAll('[data-cp-pref],[data-cp-avoid]').forEach(cb=>cb.checked=false);
     const auBox=document.getElementById('c-auReg');if(auBox)auBox.checked=false;
+    window._candDocUrls={};
+    ['c-cv-file','c-ref1-file','c-ref2-file'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['c-cv-file-status','c-ref1-file-status','c-ref2-file-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
+    const sendWrap=document.getElementById('send-to-client-wrap');if(sendWrap)sendWrap.style.display='none';
+    const sendEmail=document.getElementById('send-client-email');if(sendEmail)sendEmail.value='';
   }
   const delBtn=document.getElementById('c-delete-btn');if(delBtn)delBtn.style.display=id?'inline-block':'none';
   toggleCandFields();
@@ -1112,6 +1142,12 @@ async function editCand(id){
   set('c-refsrc',p.referral_source);set('c-refsplit',p.referral_split_pct);
   set('c-stage',p.pipeline_stage);set('c-status',p.status);set('c-source',p.source);
   set('c-fu',p.follow_up_date);set('c-notes',p.notes);set('c-cv',p.cv_text);
+  window._candDocUrls={cv:p.cv_file_url||null,reference1:p.reference1_url||null,reference2:p.reference2_url||null};
+  showCandidateDocStatus('cv',p.cv_file_url,p.cv_file_name);
+  showCandidateDocStatus('reference1',p.reference1_url,p.reference1_name);
+  showCandidateDocStatus('reference2',p.reference2_url,p.reference2_name);
+  const anyDoc=p.cv_file_url||p.reference1_url||p.reference2_url;
+  const sendWrap=document.getElementById('send-to-client-wrap');if(sendWrap)sendWrap.style.display=anyDoc?'block':'none';
   toggleCandFields();
   await loadCandPrefsIntoForm(id);
   document.getElementById('m-cand').classList.remove('hidden');
@@ -1161,6 +1197,50 @@ async function saveCandPrefsFromForm(candId){
     avoided_states:avoidStates
   };
   await sb.from('locum_cand_prefs').upsert(prefs);
+}
+
+const CDOC_LABELS={cv:{urlCol:'cv_file_url',nameCol:'cv_file_name',statusId:'c-cv-file-status',label:'CV'},reference1:{urlCol:'reference1_url',nameCol:'reference1_name',statusId:'c-ref1-file-status',label:'Reference 1'},reference2:{urlCol:'reference2_url',nameCol:'reference2_name',statusId:'c-ref2-file-status',label:'Reference 2'}};
+async function uploadCandidateDoc(docType){
+  if(!editingCandId){toast('Save the candidate first, then upload documents');return;}
+  const inputId={cv:'c-cv-file',reference1:'c-ref1-file',reference2:'c-ref2-file'}[docType];
+  const input=document.getElementById(inputId);
+  const file=input.files[0];if(!file)return;
+  const meta=CDOC_LABELS[docType];
+  const statusEl=document.getElementById(meta.statusId);
+  statusEl.textContent='Uploading…';statusEl.style.color='var(--g500)';
+  const path=`${editingCandId}/${docType}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  const uploadUrl=`https://qoyokyuzkpfvaakdkmxg.supabase.co/storage/v1/object/candidate-docs/${path}`;
+  const headers={apikey:"sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W",Authorization:"Bearer sb_publishable_DUHM9n-IlC17dV4TrPRIoA_1AoVM16W","Content-Type":file.type||'application/pdf'};
+  try{
+    const up=await fetch(uploadUrl,{method:'POST',headers,body:file});
+    if(!up.ok){statusEl.textContent='Upload failed';statusEl.style.color='var(--red)';return;}
+    const publicUrl=`https://qoyokyuzkpfvaakdkmxg.supabase.co/storage/v1/object/public/candidate-docs/${path}`;
+    const payload={};payload[meta.urlCol]=publicUrl;payload[meta.nameCol]=file.name;
+    await sb.from('crm_profiles').update(payload).eq('id',editingCandId);
+    if(!window._candDocUrls)window._candDocUrls={};
+    window._candDocUrls[docType]=publicUrl;
+    statusEl.innerHTML=`✓ <a href="${publicUrl}" target="_blank" style="color:var(--pri);">${esc(file.name)}</a>`;
+    document.getElementById('send-to-client-wrap').style.display='block';
+    toast(meta.label+' uploaded ✓');
+  }catch(e){statusEl.textContent='Upload error';statusEl.style.color='var(--red)';console.warn(e);}
+}
+function showCandidateDocStatus(docType,url,name){
+  const meta=CDOC_LABELS[docType];
+  const statusEl=document.getElementById(meta.statusId);if(!statusEl)return;
+  statusEl.innerHTML=url?`✓ <a href="${url}" target="_blank" style="color:var(--pri);">${esc(name||'View file')}</a>`:'';
+}
+function sendCandidateDocsEmail(){
+  const clientEmail=document.getElementById('send-client-email').value.trim();
+  if(!clientEmail){toast('Enter the client\'s email first');return;}
+  const name=val('c-name')||'the candidate';
+  const links=[];
+  if(window._candDocUrls?.cv)links.push(`CV: ${window._candDocUrls.cv}`);
+  if(window._candDocUrls?.reference1)links.push(`Reference 1: ${window._candDocUrls.reference1}`);
+  if(window._candDocUrls?.reference2)links.push(`Reference 2: ${window._candDocUrls.reference2}`);
+  if(!links.length){toast('No documents uploaded yet for this candidate');return;}
+  const subject=encodeURIComponent(`Candidate for your locum vacancy — ${name}`);
+  const body=encodeURIComponent(`Hi,\n\nPlease find ${name}'s documents below for your current vacancy:\n\n${links.join('\n')}\n\nHappy to discuss further — let me know if you'd like to proceed.\n\nKind regards,\nChris`);
+  window.location.href=`mailto:${encodeURIComponent(clientEmail)}?subject=${subject}&body=${body}`;
 }
 
 async function deleteCand(){
