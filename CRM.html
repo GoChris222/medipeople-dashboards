@@ -500,17 +500,27 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
       <div class="fi"><label>Sub-specialty</label><input id="c-subspec" placeholder="Optional"></div>
       <div class="fi"><label>Years Experience</label><input type="number" id="c-yrs" min="0" max="50" placeholder="0"></div>
     </div>
-    <div class="sec-title">Location &amp; DPA</div>
+    <div class="sec-title">Home Location <span style="font-weight:400;color:var(--g400);">— where they currently live</span></div>
     <div class="fg fg3">
       <div class="fi"><label>Suburb / Location</label><input id="c-loc" placeholder="e.g. Parramatta"></div>
       <div class="fi"><label>State</label>
         <select id="c-state"><option value="">—</option><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
       </div>
-      <div class="fi"><label>MM Level (1=Metro, 7=Remote)</label>
+      <div class="fi"><label>MM Level (1=Metro, 7=Remote) <span style="font-weight:400;color:var(--g400);">— rural remoteness classification</span></label>
         <select id="c-mm"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select>
       </div>
-      <div class="fi s3"><label>DPA Areas (comma-separated)</label><input id="c-dpa" placeholder="e.g. Blacktown, Penrith, Liverpool"></div>
       <div class="fi"><label>Willing to Relocate?</label><select id="c-reloc"><option value="false">No</option><option value="true">Yes</option></select></div>
+    </div>
+    <div class="sec-title">DPA / Visa Restriction <span style="font-weight:400;color:var(--g400);">— only applies if this doctor's Medicare billing is location-restricted (mainly OTDs/visa or moratorium conditions)</span></div>
+    <div class="fg fg3">
+      <div class="fi"><label>Restricted to a Distribution Priority Area?</label>
+        <select id="c-dparestricted" onchange="toggleDpaFields()"><option value="false">No — not restricted</option><option value="true">Yes — restricted</option></select>
+      </div>
+    </div>
+    <div id="dpa-areas-wrap" class="hidden">
+      <div class="fg fg3">
+        <div class="fi s3"><label>DPA Areas (comma-separated) <span style="font-weight:400;color:var(--g400);">— the specific suburbs/regions they're approved to bill Medicare in, or "Open to all DPA locations"</span></label><input id="c-dpa" placeholder="e.g. Blacktown, Penrith, Liverpool — or Open to all DPA locations"></div>
+      </div>
     </div>
     <!-- LOCUM FIELDS -->
     <div id="locum-sec" class="hidden">
@@ -1178,9 +1188,11 @@ function openCandModal(id){
     ['c-cv-file-status','c-ref1-file-status','c-ref2-file-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
     const sendWrap=document.getElementById('send-to-client-wrap');if(sendWrap)sendWrap.style.display='none';
     const sendEmail=document.getElementById('send-client-email');if(sendEmail)sendEmail.value='';
+    set('c-dparestricted','false');
   }
   const delBtn=document.getElementById('c-delete-btn');if(delBtn)delBtn.style.display=id?'inline-block':'none';
   toggleCandFields();
+  toggleDpaFields();
   document.getElementById('m-cand').classList.remove('hidden');
 }
 
@@ -1198,6 +1210,7 @@ async function editCand(id){
   set('c-spec',p.specialty);set('c-subspec',p.sub_specialty);set('c-yrs',p.years_experience);
   set('c-loc',p.current_location);set('c-state',p.state);set('c-mm',p.mm_level);
   set('c-dpa',(p.dpa_areas||[]).join(', '));set('c-reloc',p.willing_to_relocate?'true':'false');
+  set('c-dparestricted',(p.dpa_areas&&p.dpa_areas.length)?'true':'false');
   set('c-visa',p.visa_type);set('c-reg',p.registration_status);set('c-ahpra',p.ahpra_number);
   set('c-afrom',p.available_from);set('c-ato',p.available_to);
   set('c-dmin',p.daily_rate_min);set('c-dmax',p.daily_rate_max);
@@ -1212,6 +1225,7 @@ async function editCand(id){
   const anyDoc=p.cv_file_url||p.reference1_url||p.reference2_url;
   const sendWrap=document.getElementById('send-to-client-wrap');if(sendWrap)sendWrap.style.display=anyDoc?'block':'none';
   toggleCandFields();
+  toggleDpaFields();
   await loadCandPrefsIntoForm(id);
   document.getElementById('m-cand').classList.remove('hidden');
 }
@@ -1220,6 +1234,12 @@ function toggleCandFields(){
   const t=val('c-type');
   document.getElementById('locum-sec').classList.toggle('hidden',t!=='locum');
   document.getElementById('otd-sec').classList.toggle('hidden',t!=='otd');
+}
+
+function toggleDpaFields(){
+  const restricted=val('c-dparestricted')==='true';
+  const wrap=document.getElementById('dpa-areas-wrap');
+  if(wrap)wrap.classList.toggle('hidden',!restricted);
 }
 
 function parseCV(){
