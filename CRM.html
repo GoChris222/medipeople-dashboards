@@ -342,6 +342,7 @@ tr.clk:hover td{background:var(--g50);cursor:pointer;}
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
       <h2 style="margin:0;font-size:20px">Placements</h2>
       <select id="plac-filter-status" onchange="renderPlacements()" style="padding:5px 8px;border:1px solid #ddd;border-radius:4px"><option value="">All Status</option><option>Active</option><option>Completed</option><option>Cancelled</option></select>
+      <label style="font-size:12px;color:#4b5563;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="plac-filter-showpast" onchange="renderPlacements()"> Show past quarters</label>
       <button onclick="loadPlacements()" style="padding:5px 10px;border:1px solid #ccc;border-radius:4px;cursor:pointer">↻ Refresh</button>
       <button onclick="openPlaceModal()" style="padding:5px 12px;background:#4f46e5;color:#fff;border:none;border-radius:4px;cursor:pointer">+ Add Placement</button>
       <button id="migrate-btn" onclick="migrateLegacyPlacements()" style="padding:5px 10px;border:1px solid #f59e0b;color:#92400e;background:#fffbeb;border-radius:4px;cursor:pointer;font-size:12px;">Migrate legacy placements (one-time)</button>
@@ -2757,8 +2758,19 @@ async function loadPlacements() {
 function renderPlacements() {
   const data = window._placData || [];
   const statusFilter = (document.getElementById('plac-filter-status') || {}).value || '';
+  const showPast = (document.getElementById('plac-filter-showpast') || {}).checked || false;
   const PERMANENT_TYPES=['Permanent OTD','Permanent Specialist AU','Permanent Specialist NZ'];
+  // Current-quarter cutoff: reuses the same quarter boundaries as the goal card/dashboard revenue
+  // stat, so "this quarter" always means the same thing everywhere in the app.
+  const {start: qStart} = quarterDateRange(currentQuarterLabel());
   const rows = data.filter(p => {
+    if (!showPast) {
+      // Hide only placements that wrapped up entirely before this quarter started. A placement
+      // still running into this quarter (end_date in/after qStart) or starting this quarter or
+      // later stays visible. No end_date (permanent placements) falls back to start_date.
+      const cutoff = p.end_date || p.start_date;
+      if (cutoff && cutoff < qStart) return false;
+    }
     if (statusFilter) return p.status === statusFilter;
     // Default view: hide Permanent/OTD placements once the doctor has actually started (Completed) —
     // they're done and don't need ongoing attention. Locum placements always stay visible regardless of
